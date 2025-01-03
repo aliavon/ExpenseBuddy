@@ -1,0 +1,13 @@
+FROM node:18-alpine
+
+WORKDIR /home/app
+
+COPY package.json .
+COPY yarn.lock .
+COPY .eslintrc.json .
+
+RUN yarn config set strict-ssl false
+RUN yarn config set enableStrictSsl false
+RUN yarn
+
+COPY . .

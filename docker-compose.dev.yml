@@ -1,0 +1,48 @@
+version: "3"
+services:
+
+  client:
+    container_name: client
+    build:
+      context: ./packages/client
+      dockerfile: ./Dockerfile.dev
+    expose:
+      - ${APP_CLIENT_PORT}
+    environment:
+      - PORT=${APP_CLIENT_PORT}
+      - REACT_APP_APILAYER_KEY=${REACT_APP_APILAYER_KEY}
+    ports:
+      - "80:80"
+      - ${APP_CLIENT_PORT}:${APP_CLIENT_PORT}
+    volumes:
+      - ./packages/client/src:/home/app/src
+    links:
+      - server
+    command: yarn start
+
+  server:
+    container_name: server
+    build: ./packages/server
+    expose:
+      - ${APP_SERVER_PORT}
+    environment:
+      - API_HOST=${API_HOST}
+      - APP_SERVER_PORT=${APP_SERVER_PORT}
+      - DATABASE_HOST=mongodb://mongo:${DATABASE_PORT}/server
+    ports:
+      - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
+    depends_on:
+      - mongo
+    volumes:
+      - ./packages/server/src:/home/app/src
+
+  mongo:
+    container_name: mongoDB
+    image: mongo:4.0.10-xenial
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    volumes:
+      - mongo:/data/${MONGO_DB:-db}
+
+volumes:
+  mongo:
