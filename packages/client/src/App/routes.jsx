@@ -1,8 +1,9 @@
 import React from 'react';
-// import {Routes, Route, Navigate} from 'react-router-dom';
+import {Routes, Route} from 'react-router-dom';
 import {Block} from 'baseui/block';
 
-
+import AddPurchasesComponent from '../components/AddPurchasesComponent';
+import ViewPurchasesComponent from '../components/ViewPurchasesComponent';
 
 const RootRoutes = () => (
   <Block
@@ -10,23 +11,16 @@ const RootRoutes = () => (
     padding="scale700"
     width="100%"
   >
-    {/* <Routes>
+    <Routes>
       <Route
-        path={routes.root}
-        element={<RegisterForm />}
+        path="/add"
+        element={<AddPurchasesComponent />}
       />
-
       <Route
-        path={routes.capital}
-        element={<MoneyBundles />}
-      >
-        <Route
-          path=":id"
-          element={<MoneyBundles />}
-        />
-      </Route>
-
-    </Routes> */}
+        path="/view"
+        element={<ViewPurchasesComponent />}
+      />
+    </Routes>
   </Block>
 );
 

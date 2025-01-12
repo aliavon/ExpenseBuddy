@@ -1,11 +1,12 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
+import {createUploadLink} from 'apollo-upload-client';
 
 import {ApolloProvider, ApolloClient, InMemoryCache} from '@apollo/client';
 import {BrowserRouter} from 'react-router-dom';
-import {Client as Styletron} from 'styletron-engine-atomic';
+import {Client as Styletron} from 'styletron-engine-monolithic';
 import {Provider as StyletronProvider} from 'styletron-react';
-import {LightTheme, BaseProvider} from 'baseui';
+import {LightTheme, BaseProvider, styled} from 'baseui';
 import {ToasterContainer, PLACEMENT} from 'baseui/toast';
 
 import App from './App';
@@ -16,10 +17,22 @@ import * as serviceWorker from './serviceWorker';
 const cache = new InMemoryCache();
 const client = new ApolloClient({
   cache: cache,
-  uri: `${process.env.REACT_APP_MACHINE_IP || 'http://172.16.11.62'}:${process.env.APP_SERVER_PORT || 8000}`,
+  link: createUploadLink({
+    // uri: `${process.env.REACT_APP_MACHINE_IP || 'http://172.16.11.62'}:${process.env.APP_SERVER_PORT || 8000}`,
+    uri: `${process.env.REACT_APP_MACHINE_IP || 'http://localhost'}:${process.env.APP_SERVER_PORT || 8000}/graphql`,
+    headers: {'Apollo-Require-Preflight': 'true'},
+  }),
 });
 
 const engine = new Styletron();
+
+const Centered = styled('div', {
+  display: 'flex',
+  justifyContent: 'flex-start',
+  alignItems: 'center',
+  height: '100%',
+});
+
 const container = document.getElementById('root');
 const root = createRoot(container);
 
@@ -28,7 +41,9 @@ root.render(
     <BrowserRouter>
       <StyletronProvider value={engine}>
         <BaseProvider theme={LightTheme}>
-          <App />
+          <Centered>
+            <App />
+          </Centered>
           <ToasterContainer
             autoHideDuration={5000}
             placement={PLACEMENT.topRight}
