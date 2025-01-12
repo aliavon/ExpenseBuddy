@@ -14,6 +14,6 @@ module.exports = {
   DATABASE_HOST: process.env.DATABASE_HOST,
   DATABASE_PORT,
   API_HOST: process.env.API_HOST || 'http://localhost:3000',
-  DATABASE_URL: DATABASE_HOST || `mongodb://mongoDB:${DATABASE_PORT}/server`,
+  DATABASE_URL: DATABASE_HOST || `mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server`,
   mongooseConfig,
 };

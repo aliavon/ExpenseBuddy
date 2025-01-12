@@ -1,10 +1,13 @@
-const { GraphQLServer } = require('graphql-yoga')
+const { createSchema, createYoga } = require('graphql-yoga');
 
 const resolvers = require('../graphQL/resolvers');
 const schemas = require('../database/schemas');
+const typeDefs = require('../graphQL/schema');
 
-module.exports = new GraphQLServer({
-  typeDefs: './src/graphQL/schema.graphql',
-  resolvers,
-  context: { schemas },
-});
+module.exports = createYoga({
+  context:{ schemas },
+  schema: createSchema({
+    typeDefs,
+    resolvers
+  })
+})
