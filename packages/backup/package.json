@@ -1,0 +1,17 @@
+{
+  "name": "mongodb-backup",
+  "version": "1.0.0",
+  "description": "Automated MongoDB backups to Google Drive",
+  "main": "backup.js",
+  "scripts": {
+    "start": "node backup.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "googleapis": "^118.0.0",
+    "mongodb": "^5.6.0",
+    "node-cron": "^3.0.3"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

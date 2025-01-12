@@ -22,6 +22,8 @@ cd packages/client
 yarn
 cd ../server
 yarn
+cd ../backup
+yarn
 cd ../..
 ```
 
@@ -37,6 +39,10 @@ APP_CLIENT_PORT=3000
 APP_SERVER_PORT=8000
 DATABASE_PORT=27017
 ```
+
+## Backup service
+
+Add credentials.json file to the packages/backup folder to work with google drive API
 
 ## Running the project
 
