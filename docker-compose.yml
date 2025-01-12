@@ -1,8 +1,8 @@
 version: "3"
 services:
 
-  client:
-    container_name: client
+  expense-buddy-client:
+    container_name: expense-buddy-client
     build: ./packages/client
     expose:
       - ${APP_CLIENT_PORT}
@@ -17,19 +17,19 @@ services:
     volumes:
       - ./packages/client/src:/home/app/src
     links:
-      - server
+      - expense-buddy-server
     networks:
       - app_network
 
   server:
-    container_name: server
+    container_name: expense-buddy-server
     build: ./packages/server
     expose:
       - ${APP_SERVER_PORT}
     environment:
       - API_HOST=${API_HOST}
       - APP_SERVER_PORT=${APP_SERVER_PORT}
-      - DATABASE_HOST=mongodb://mongo:${DATABASE_PORT}/server
+      - DATABASE_HOST=mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server
     ports:
       - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
     depends_on:
@@ -42,7 +42,7 @@ services:
       - app_network
 
   mongo:
-    container_name: mongoDB
+    container_name: expenseBuddyMongoDB
     image: mongo:4.0.10-xenial
     ports:
       - ${DATABASE_PORT}:${DATABASE_PORT}
@@ -50,6 +50,14 @@ services:
       - mongo:/data/db
     networks:
       - app_network
+
+  expense-buddy-backup:
+    container_name: expense-buddy-backup
+    build: ./packages/backup
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server
 
 volumes:
   mongo:
