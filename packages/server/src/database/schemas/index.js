@@ -1,7 +1,5 @@
-
-// const User = require('./User');
+const Purchase = require('./Purchase');
 
 module.exports = {
-
-  // User
+  Purchase
 };
