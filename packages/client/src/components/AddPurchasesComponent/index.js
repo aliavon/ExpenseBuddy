@@ -3,26 +3,24 @@ import {Input, SIZE as INPUT_SIZE} from 'baseui/input';
 import {Select} from 'baseui/select';
 import {Button, SIZE, SHAPE} from 'baseui/button';
 import {FileUploader} from 'baseui/file-uploader';
-import {Table} from 'baseui/table';
 import {Block} from 'baseui/block';
-import {gql, useMutation} from '@apollo/client';
-import {LabelMedium} from 'baseui/typography';
+import {useMutation} from '@apollo/client';
+import {LabelMedium, LabelLarge, ParagraphSmall} from 'baseui/typography';
 
-const ADD_PURCHASES = gql`
-  mutation AddPurchases($purchases: [PurchaseInput!]!) {
-    addPurchases(purchases: $purchases) {
-      id
-      name
-      quantity
-      unit
-      price
-      category
-      discount
-      date
-      note
-    }
-  }
-`;
+import {ADD_PURCHASES_QUERY} from '../../gql';
+
+const fileUploadOptions = [
+  {
+    label: 'CSV',
+    id: 'csv',
+  }, {
+    label: 'Biedronka',
+    id: 'biedronka',
+  }, {
+    label: 'Lidl',
+    id: 'lidl',
+  },
+];
 
 function parseCSV(csvString) {
   const rows = [];
@@ -221,11 +219,19 @@ const emptyItem = {
 
 const AddPurchasesComponent = () => {
   const [purchases, setPurchases] = useState([emptyItem]);
-  const [csvType, setCsvType] = React.useState([]);
-  const [addPurchases] = useMutation(ADD_PURCHASES);
+  const [csvType, setCsvType] = React.useState([fileUploadOptions[0]]);
+  const [addPurchases] = useMutation(ADD_PURCHASES_QUERY);
 
-  const handleAddRow = () => {
-    setPurchases(prev => [...prev, emptyItem]);
+  const getHandleAddRow = (rowData = emptyItem, index) => () => {
+    if (typeof index === 'number') {
+      setPurchases(prev => {
+        let newData = [...prev];
+        newData.splice(index + 1, 0, rowData);
+        return newData;
+      });
+    } else {
+      setPurchases(prev => [...prev, rowData]);
+    }
   };
 
   const getHandleRemoveRow = index => () => {
@@ -275,72 +281,126 @@ const AddPurchasesComponent = () => {
   };
 
   const totalSpending = purchases?.reduce((sum, purchase) => sum + purchase.price, 0) || 0;
-  console.log({purchases});
   return (
-    <div>
-      <h2>Add Purchases</h2>
+    <Block
+      width="100%"
+      display="flex"
+      flexDirection="column"
+      alignItems="stretch"
+    >
+      <LabelLarge>Add Purchases</LabelLarge>
+      <ParagraphSmall>Upload a csv file, or receipt image based on selected type</ParagraphSmall>
+      <Block
+        marginTop="16px"
+        display="flex"
+        justifyContent="space-between"
+      >
+        <Block
+          display="flex"
+          gridColumnGap="14px"
+          alignItems="flex-start"
+        >
+          <Block>
+            <LabelMedium
+              marginBottom="4px"
+              marginTop="2px"
+            >
+              Select a file type
+            </LabelMedium>
+            <Select
+              options={fileUploadOptions}
+              value={csvType}
+              placeholder="Select a file type"
+              onChange={params => setCsvType(params.value)}
+              clearable={false}
+            />
+          </Block>
+          <FileUploader
+            fileRows={[]}
+            processFileOnDrop={handleFileUpload}
+            accept={csvType[0]?.id ? ['.jpg', '.png'] : ['.csv']}
+          />
+        </Block>
+
+        <Button
+          onClick={handleSave}
+          disabled={!totalSpending}
+          size='large'
+        >
+          Save
+          {` ${totalSpending.toFixed(2)} zł`}
+        </Button>
+      </Block>
+
       <Block
         display="grid"
-        gridTemplateColumns="1.5fr 0.5fr 0.5fr 0.5fr 1fr 0.5fr 1fr 1fr 30px"
-        gridColumnGap="2px"
+        gridTemplateColumns="0.3fr 1.5fr 0.5fr 0.5fr 0.7fr 1fr 0.7fr 1fr 1fr 30px"
+        gridColumnGap="4px"
         gridRowGap="2px"
         marginTop="10px"
         marginBottom="10px"
         alignItems="center"
       >
+        <div />
         <LabelMedium>Name*</LabelMedium>
         <LabelMedium>Quantity*</LabelMedium>
         <LabelMedium>Unit*</LabelMedium>
-        <LabelMedium>Price*</LabelMedium>
+        <LabelMedium>Price(zł)*</LabelMedium>
         <LabelMedium>Category</LabelMedium>
-        <LabelMedium>Discount</LabelMedium>
+        <LabelMedium>Discount(%)</LabelMedium>
         <LabelMedium>Date*</LabelMedium>
         <LabelMedium>Note</LabelMedium>
         <div />
-        {purchases.map(({name, quantity, unit, price, category, discount, date, note}, index) => (
+        {purchases.map((p, index) => (
           <React.Fragment key={index}>
+            <Button
+              onClick={getHandleAddRow(p, index)}
+              size={SIZE.compact}
+            >
+              copy
+            </Button>
             <Input
               size={INPUT_SIZE.mini}
-              value={name}
+              value={p.name}
               onChange={e => handleInputChange('name', e.target.value, index)}
             />
             <Input
               size={INPUT_SIZE.mini}
-              value={quantity}
+              value={p.quantity}
               onChange={e => handleInputChange('quantity', parseFloat(e.target.value), index)}
               type="number"
             />
             <Input
               size={INPUT_SIZE.mini}
-              value={unit}
+              value={p.unit}
               onChange={e => handleInputChange('unit', e.target.value, index)}
             />
             <Input
               size={INPUT_SIZE.mini}
-              value={price}
+              value={p.price}
               onChange={e => handleInputChange('price', parseFloat(e.target.value), index)}
               type="number"
             />
             <Input
               size={INPUT_SIZE.mini}
-              value={category}
+              value={p.category}
               onChange={e => handleInputChange('category', e.target.value, index)}
             />
             <Input
               size={INPUT_SIZE.mini}
-              value={discount}
+              value={p.discount}
               onChange={e => handleInputChange('discount', parseFloat(e.target.value), index)}
               type="number"
             />
             <Input
               size={INPUT_SIZE.mini}
-              value={date}
+              value={p.date}
               onChange={e => handleInputChange('date', e.target.value, index)}
               type="date"
             />
             <Input
               size={INPUT_SIZE.mini}
-              value={note}
+              value={p.note}
               onChange={e => handleInputChange('note', e.target.value, index)}
             />
             <Button
@@ -354,49 +414,13 @@ const AddPurchasesComponent = () => {
         )
         )}
         <Button
-          onClick={handleAddRow}
-          size={SIZE.mini}
+          onClick={getHandleAddRow()}
+          size={SIZE.compact}
         >
-          Add next
+          add
         </Button>
       </Block>
-
-      <h3>
-        Upload
-        {csvType[0]?.id ? ' Image' : ' CSV'}
-      </h3>
-      <Block
-        display="inline-flex"
-        gridColumnGap="8px"
-        alignItems="flex-start"
-      >
-        <FileUploader
-          fileRows={[]}
-          processFileOnDrop={handleFileUpload}
-          accept={csvType[0]?.id ? ['.jpg', '.png'] : ['.csv']}
-        />
-
-        <Select
-          options={[
-            {
-              label: 'Biedronka',
-              id: 'biedronka',
-            }, {
-              label: 'Lidl',
-              id: 'lidl',
-            },
-          ]}
-          value={csvType}
-          placeholder="Select csv file type"
-          onChange={params => setCsvType(params.value)}
-        />
-      </Block>
-      <h3>
-        Total:
-        {` ${totalSpending.toFixed(2)} zł`}
-      </h3>
-      <Button onClick={handleSave}>Save Purchases</Button>
-    </div>
+    </Block>
   );
 };
 
