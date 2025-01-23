@@ -112,7 +112,7 @@ const lidlParse = async file => {
     if (row.length === 2) {
       let name, quantity, price, unit = 'pcs', discount = 0;
       [name] = row;
-      if (name === 'Lidl Plus rabat') {
+      if (['950_80085', 'Lidl Plus rabat'].includes(name)) {
         // handle discount calc
         let prevPrice = parsedData.at(-1).price;
         let discountPrice = parseFloat(row[1].replace(',', '.').slice(1));
@@ -120,7 +120,11 @@ const lidlParse = async file => {
         parsedData.at(-1).price = parseFloat((prevPrice - discountPrice).toFixed(2));
         parsedData.at(-1).discount = parseFloat((parsedData.at(-1).discount + discount).toFixed(0));
       } else {
-        [, quantity, , price] = row[1].match(/([0-9]{1,2}|[0-9]{1,2},[0-9]{3}) \* ([0-9]{1,3},[0-9]{1,2}) ([0-9]{1,3},[0-9]{1,2})/);
+        [, quantity, , price] = row[1].match(/([0-9]{1,2}|[0-9]{1,2},[0-9]{3}) .* ([0-9]{1,3},[0-9]{1,2}) ([0-9]{1,3},[0-9]{1,2})/);
+
+        if (name.includes('Luz') || name.includes('luz')){
+          unit = 'g';
+        }
 
         parsedData.push({
           name,
@@ -130,7 +134,7 @@ const lidlParse = async file => {
           category: '',
           discount,
           date,
-          note: '',
+          note: 'Lidl',
         });
       }
     }
@@ -188,7 +192,7 @@ const biedronkaCsvParse = async file => {
         category: '',
         discount,
         date,
-        note: '',
+        note: 'Biedronka',
       });
     }
 
