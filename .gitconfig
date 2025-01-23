@@ -1,0 +1,4 @@
+[alias]
+    cc = "!f() { git commit -m \"[client] $2\"; }; f"
+    cs = "!f() { git commit -m \"[server] $2\"; }; f"
+    cb = "!f() { git commit -m \"[backup] $2\"; }; f"
