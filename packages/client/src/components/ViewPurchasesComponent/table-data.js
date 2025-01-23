@@ -1,20 +1,20 @@
-import React from 'react';
-import {Alert, Check} from 'baseui/icon';
+import React, {useEffect, useState} from 'react';
 import {Block} from 'baseui/block';
-import {gql, useQuery, useMutation} from '@apollo/client';
+import {gql, useMutation} from '@apollo/client';
 import {
   StatefulDataTable,
-  BooleanColumn,
   CategoricalColumn,
   NumericalColumn,
   StringColumn,
   NUMERICAL_FORMATS,
-  BatchAction,
-  RowAction,
   DatetimeColumn,
 } from 'baseui/data-table';
-import {toaster, ToasterContainer} from 'baseui/toast';
+import {toaster} from 'baseui/toast';
 import {Button, SIZE} from 'baseui/button';
+import {Drawer} from 'baseui/drawer';
+
+import {Pencil} from '../../icons';
+import EditPurchase from './edit-purchase';
 
 const columns = [
   StringColumn({
@@ -68,75 +68,23 @@ const handleInitialData = data => data.map(r => ({
   data: r,
 }));
 
-const GET_PURCHASES_BY_DATE = gql`
-  query GetPurchasesByDate($startDate: String!, $endDate: String!) {
-    purchasesByDate: getPurchases(from: $startDate, to: $endDate) {
-      id
-      name
-      quantity
-      unit
-      price
-      category
-      discount
-      date
-      note
-    }
-  }
-`;
-
 const DELETE_PURCHASES = gql`
   mutation DeletePurchases($ids: [ID!]!) {
     deletePurchases(ids: $ids)
   }
 `;
 
-export default function Table({dateRange}) {
-  const [isOpenConfirmDelete, setIsOpenConfirmDelete] = React.useState(false);
-  const [rows, setRows] = React.useState([]);
-  const [deletePurchases] = useMutation(DELETE_PURCHASES, {refetchQueries: ['GetPurchasesByDate'], awaitRefetchQueries: true});
-  const {refetch, loading} = useQuery(GET_PURCHASES_BY_DATE, {
-    variables: {
-      startDate: dateRange[0]?.toISOString() || new Date().toISOString(),
-      endDate: dateRange[1]?.toISOString() || new Date().toISOString(),
-    },
-    onCompleted: ({purchasesByDate}) => {
-      setRows(handleInitialData(purchasesByDate));
-    },
-    notifyOnNetworkStatusChange: true,
-    skip: !dateRange[0] || !dateRange[1],
+export default function Table({data}) {
+  const [editRow, setEditRow] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [deletePurchases] = useMutation(DELETE_PURCHASES, {
+    refetchQueries: ['GetPurchasesByDate'],
+    awaitRefetchQueries: true,
   });
 
-  function flagRows(ids) {
-    const nextRows = rows.map(row => {
-      if (ids.includes(row.id)) {
-        const nextData = [...row.data];
-        nextData[1] = !nextData[1];
-        return {
-          ...row,
-          data: nextData,
-        };
-      }
-
-      return row;
-    });
-    setRows(nextRows);
-  }
-
-  function flagRow(id) {
-    flagRows([id]);
-  }
-
-  function removeRows(ids) {
-    const nextRows = rows.filter(row => !ids.includes(row.id));
-    setRows(nextRows);
-  }
-  function removeRow(id) {
-    removeRows([id]);
-  }
-
-  function toggleModal() {
-    setIsOpenConfirmDelete(prev => !prev);
-  }
+  useEffect(() => {
+    data && setRows(handleInitialData(data));
+  }, [data]);
 
   const batchActions = [
     {
@@ -163,24 +111,47 @@ export default function Table({dateRange}) {
             >
               Okay
             </Button>
-          </Block>, {closeable: true, autoHideDuration: 20000});
+          </Block>, {
+            closeable: true,
+            autoHideDuration: 20000,
+          });
       },
     },
   ];
 
-  const rowActions = [];
+  const rowActions = [
+    {
+      label: 'Edit',
+      onClick: ({row: {data: {__typename, ...data}}}) => setEditRow(data),
+      renderIcon: Pencil,
+    },
+  ];
 
   return (
-    <Block
-      height="100%"
-      width="100%"
-    >
-      <StatefulDataTable
-        batchActions={batchActions}
-        rowActions={rowActions}
-        columns={columns}
-        rows={rows}
-      />
-    </Block>
+    <>
+      <Drawer
+        isOpen={Boolean(editRow)}
+        autoFocus
+        onClose={() => setEditRow(null)}
+      >
+        {Boolean(editRow) && (
+          <EditPurchase
+            initialData={editRow}
+            onClose={() => setEditRow(null)}
+          />
+        )}
+      </Drawer>
+      <Block
+        height="100%"
+        width="100%"
+      >
+        <StatefulDataTable
+          batchActions={batchActions}
+          rowActions={rowActions}
+          columns={columns}
+          rows={rows}
+        />
+      </Block>
+    </>
   );
 }
