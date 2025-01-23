@@ -4,7 +4,7 @@ import {Select} from 'baseui/select';
 
 import {GET_CATEGORIES} from '../../gql';
 
-const CategorySelect = ({value, onChange}) => {
+const CategorySelect = ({value, onChange, ...restProps}) => {
   const [options, setOptions] = useState([]);
   const {loading, error} = useQuery(GET_CATEGORIES, {
     nextFetchPolicy: 'cache-and-network',
@@ -34,6 +34,7 @@ const CategorySelect = ({value, onChange}) => {
       isLoading={loading}
       clearable
       error={!!error}
+      {...restProps}
     />
   );
 };

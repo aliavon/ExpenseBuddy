@@ -7,6 +7,8 @@ import {Block} from 'baseui/block';
 import {useMutation} from '@apollo/client';
 import {LabelMedium, LabelLarge, ParagraphSmall} from 'baseui/typography';
 
+import CategorySelect from '../form/category-select';
+
 import {ADD_PURCHASES_QUERY} from '../../gql';
 
 const fileUploadOptions = [
@@ -385,11 +387,13 @@ const AddPurchasesComponent = () => {
               onChange={e => handleInputChange('price', parseFloat(e.target.value), index)}
               type="number"
             />
-            <Input
+            <CategorySelect
               size={INPUT_SIZE.mini}
+              placeholder=""
               value={p.category}
-              onChange={e => handleInputChange('category', e.target.value, index)}
+              onChange={value => handleInputChange('category', value, index)}
             />
+
             <Input
               size={INPUT_SIZE.mini}
               value={p.discount}
