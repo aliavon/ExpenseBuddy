@@ -6,229 +6,21 @@ import {FileUploader} from 'baseui/file-uploader';
 import {Block} from 'baseui/block';
 import {useMutation} from '@apollo/client';
 import {LabelMedium, LabelLarge, ParagraphSmall} from 'baseui/typography';
-
-import CategorySelect from '../form/category-select';
+import {toaster} from 'baseui/toast';
 
 import {ADD_PURCHASES_QUERY} from '../../gql';
-
-const fileUploadOptions = [
-  {
-    label: 'CSV',
-    id: 'csv',
-  }, {
-    label: 'Biedronka',
-    id: 'biedronka',
-  }, {
-    label: 'Lidl',
-    id: 'lidl',
-  },
-];
-
-function parseCSV(csvString) {
-  const rows = [];
-  const lines = csvString.split(/\r?\n/);
-
-  for (const line of lines) {
-    const regex = /(?:"([^"]*)"|([^",]+)|(?<=,)(?=,)|([^,]*))(,|\r?\n|$)/g;
-    const row = [];
-    let match;
-
-    while ((match = regex.exec(line)) !== null) {
-      const value = match[1] ?? match[2] ?? match[3] ?? ''; // Match quoted or unquoted values
-      row.push(value);
-
-      if (match.index === regex.lastIndex) {
-        regex.lastIndex++; // Avoid infinite loop
-      }
-    }
-
-    if (row.length > 0 && row[row.length - 1] === '') {
-      row.pop();
-    }
-
-    if (row.length > 0) {
-      rows.push(row);
-    } // Add non-empty rows
-  }
-
-  return rows;
-}
-
-const defaultCsvParse = file => {
-  const rows = parseCSV(file);
-  return rows.slice(1).map(row => {
-    const [
-      name,
-      quantity,
-      unit,
-      price,
-      category,
-      discount,
-      date,
-      note,
-    ] = row;
-    return {
-      name,
-      quantity: parseFloat(quantity.replace(',', '.')),
-      unit,
-      price: parseFloat(price.replace(',', '.')),
-      category: category || emptyItem.category,
-      discount: parseFloat(discount.replace(',', '.')) || emptyItem.discount,
-      date: new Date(date).toISOString()
-        .split('T')[0],
-      note: note || emptyItem.note,
-    };
-  });
-};
-
-/* global Tesseract */
-
-const lidlParse = async file => {
-  const worker = await Tesseract.createWorker(Tesseract.languages.POL);
-  await worker.setParameters({preserve_interword_spaces: '1'});
-  const {data: {text}} = await worker.recognize(file);
-  await worker.terminate();
-
-  // parse Date
-  let [date] = new Date().toISOString()
-    .split('T');
-  const match = text.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
-  const [
-    fullMatch,
-    year,
-    month,
-    day,
-  ] = match;
-  date = `${year}-${month}-${day}`;
-
-  const header = fullMatch;
-  const footer = 'PTU';
-  let croppedText = text.slice(text.indexOf(header));
-  croppedText = croppedText.slice(0, croppedText.indexOf(footer));
-  let [, ...rows] = croppedText.split('\n').map(row => row.split(/ {2,}/g));
-
-  let parsedData = [];
-  // collect rows data
-  for (let index = 0; index < rows.length; index++) {
-    const row = rows[index];
-    if (row.length === 2) {
-      let name, quantity, price, unit = 'pcs', discount = 0;
-      [name] = row;
-      if (['950_80085', 'Lidl Plus rabat'].includes(name)) {
-        // handle discount calc
-        let prevPrice = parsedData.at(-1).price;
-        let discountPrice = parseFloat(row[1].replace(',', '.').slice(1));
-        let discount = parseFloat((discountPrice * 100 / prevPrice).toFixed(0));
-        parsedData.at(-1).price = parseFloat((prevPrice - discountPrice).toFixed(2));
-        parsedData.at(-1).discount = parseFloat((parsedData.at(-1).discount + discount).toFixed(0));
-      } else {
-        [, quantity, , price] = row[1].match(/([0-9]{1,2}|[0-9]{1,2},[0-9]{3}) .* ([0-9]{1,3},[0-9]{1,2}) ([0-9]{1,3},[0-9]{1,2})/);
-
-        if (name.includes('Luz') || name.includes('luz')){
-          unit = 'g';
-        }
-
-        parsedData.push({
-          name,
-          quantity: parseFloat(quantity.replace(',', '.')),
-          unit,
-          price: parseFloat(price.replace(',', '.')),
-          category: '',
-          discount,
-          date,
-          note: 'Lidl',
-        });
-      }
-    }
-  }
-
-  return parsedData;
-};
-const biedronkaCsvParse = async file => {
-  const worker = await Tesseract.createWorker(Tesseract.languages.POL);
-  await worker.setParameters({preserve_interword_spaces: '1'});
-  const {data: {text}} = await worker.recognize(file);
-  await worker.terminate();
-
-  // parse Date
-  let [date] = new Date().toISOString()
-    .split('T');
-  const match = text.match(/\b(\d{2})\.(\d{2})\.(\d{4})\b/);
-  if (match) {
-    const [
-      , day,
-      month,
-      year,
-    ] = match;
-    date = `${year}-${month}-${day}`;
-  }
-
-  const header = 'Nazwa';
-  const footer = 'Sprzedaż opodatkowana';
-  let croppedText = text.slice(text.indexOf(header));
-  croppedText = croppedText.slice(0, croppedText.indexOf(footer));
-  let [, ...rows] = croppedText.split('\n').map(row => row.split(/ {2,}/g));
-
-  let parsedData = [];
-
-  // collect rows data
-  for (let index = 0; index < rows.length; index++) {
-    const row = rows[index];
-    if (row.length === 5) {
-      let name, quantity, price, unit = 'pcs', discount = 0;
-      [name, , quantity, , price] = row;
-      // handle luz products
-      if (name.includes('Luz') || name.includes('luz')){
-        unit = 'g';
-      }
-
-      if (name.includes('kg') && !name.match(/[0-9]+/)) {
-        unit = 'kg';
-      }
-
-      parsedData.push({
-        name,
-        quantity: parseFloat(quantity.replace(',', '.')),
-        unit,
-        price: parseFloat(price.replace(',', '.')),
-        category: '',
-        discount,
-        date,
-        note: 'Biedronka',
-      });
-    }
-
-    // handle discount calc
-    if (row.length === 2 && row[0] === 'Rabat') {
-      let prevPrice = parsedData.at(-1).price;
-      let discountPrice = parseFloat(row[1].replace(',', '.'));
-      let discount = parseFloat((-discountPrice * 100 / prevPrice).toFixed(0));
-      parsedData.at(-1).price = parseFloat((prevPrice + discountPrice).toFixed(2));
-      parsedData.at(-1).discount = discount;
-    }
-  }
-
-  return parsedData;
-};
-
-const emptyItem = {
-  name: '',
-  quantity: 0,
-  unit: 'pcs',
-  price: 0,
-  category: '',
-  discount: 0,
-  date: new Date().toISOString()
-    .split('T')[0],
-  note: '',
-};
+import CategorySelect from '../form/category-select';
+import Preloader from './preloader';
+import {lidlParser, biedronkaParser, csvParser} from './utils';
+import {getEmptyPurchase, fileUploadOptions, FILE_UPLOAD_TYPE, FILE_TYPES_TO_UPLOAD} from './constants';
 
 const AddPurchasesComponent = () => {
-  const [purchases, setPurchases] = useState([emptyItem]);
-  const [csvType, setCsvType] = React.useState([fileUploadOptions[0]]);
+  const [purchases, setPurchases] = useState([getEmptyPurchase()]);
+  const [csvType, setCsvType] = useState([fileUploadOptions[0]]);
+  const [isFileParsing, setIsFileParsing] = useState(false);
   const [addPurchases] = useMutation(ADD_PURCHASES_QUERY);
 
-  const getHandleAddRow = (rowData = emptyItem, index) => () => {
+  const getHandleAddRow = (rowData = getEmptyPurchase(), index) => () => {
     if (typeof index === 'number') {
       setPurchases(prev => {
         let newData = [...prev];
@@ -259,20 +51,27 @@ const AddPurchasesComponent = () => {
   };
 
   const handleFileUpload = async file => {
+    let beforeLoadTime = new Date().getTime();
     const csvAlgo = csvType[0]?.id;
     const reader = new FileReader();
     reader.readAsText(file);
-    // reader.readAsArrayBuffer(fi)
     reader.onload = async () => {
-      let parsedPurchases = [emptyItem];
-      if (csvAlgo === 'biedronka') {
-        parsedPurchases = await biedronkaCsvParse(file);
-      } else if (csvAlgo === 'lidl') {
-        parsedPurchases = await lidlParse(file);
-      } else {
-        parsedPurchases = defaultCsvParse(reader.result);
+      setIsFileParsing(true);
+      let parsedPurchases = [getEmptyPurchase()];
+      try {
+        if (csvAlgo === FILE_UPLOAD_TYPE.BIEDRONKA) {
+          parsedPurchases = await biedronkaParser(file);
+        } else if (csvAlgo === FILE_UPLOAD_TYPE.LIDL) {
+          parsedPurchases = await lidlParser(file);
+        } else {
+          parsedPurchases = csvParser(reader.result);
+        }
+        setPurchases(parsedPurchases);
+        toaster.positive(`File loaded and parsed in ${(new Date().getTime() - beforeLoadTime) / 1000} seconds`);
+      } catch (error) {
+        toaster.negative(error.message);
       }
-      setPurchases(parsedPurchases);
+      setIsFileParsing(false);
     };
   };
 
@@ -280,12 +79,11 @@ const AddPurchasesComponent = () => {
     try {
       await addPurchases({variables: {purchases}});
       alert('Purchases saved successfully!');
-      setPurchases([emptyItem]);
+      setPurchases([getEmptyPurchase()]);
     } catch (error) {
       console.error('Error saving purchases:', error);
     }
   };
-
   const totalSpending = purchases?.reduce((sum, purchase) => sum + purchase.price, 0) || 0;
   return (
     <Block
@@ -295,7 +93,7 @@ const AddPurchasesComponent = () => {
       alignItems="stretch"
     >
       <LabelLarge>Add Purchases</LabelLarge>
-      <ParagraphSmall>Upload a csv file, or receipt image based on selected type</ParagraphSmall>
+      <ParagraphSmall>Upload a csv file, or receipt image based on selected type. Uploading a file will override current data</ParagraphSmall>
       <Block
         marginTop="16px"
         display="flex"
@@ -314,6 +112,7 @@ const AddPurchasesComponent = () => {
               Select a file type
             </LabelMedium>
             <Select
+              disabled={isFileParsing}
               options={fileUploadOptions}
               value={csvType}
               placeholder="Select a file type"
@@ -322,15 +121,17 @@ const AddPurchasesComponent = () => {
             />
           </Block>
           <FileUploader
+            disabled={isFileParsing}
             fileRows={[]}
+            maxFiles={1}
             processFileOnDrop={handleFileUpload}
-            accept={csvType[0]?.id ? ['.jpg', '.png'] : ['.csv']}
+            accept={FILE_TYPES_TO_UPLOAD[csvType[0]?.id] || FILE_TYPES_TO_UPLOAD.DEFAULT}
           />
         </Block>
 
         <Button
           onClick={handleSave}
-          disabled={!totalSpending}
+          disabled={!totalSpending || isFileParsing}
           size='large'
         >
           Save
@@ -340,7 +141,7 @@ const AddPurchasesComponent = () => {
 
       <Block
         display="grid"
-        gridTemplateColumns="0.3fr 1.5fr 0.5fr 0.5fr 0.7fr 1fr 0.7fr 1fr 1fr 30px"
+        gridTemplateColumns="0.3fr 1.5fr 0.5fr 0.5fr 0.7fr 1fr 0.7fr 1fr 1fr auto"
         gridColumnGap="4px"
         gridRowGap="2px"
         marginTop="10px"
@@ -357,7 +158,8 @@ const AddPurchasesComponent = () => {
         <LabelMedium>Date*</LabelMedium>
         <LabelMedium>Note</LabelMedium>
         <div />
-        {purchases.map((p, index) => (
+
+        {!isFileParsing && purchases.map((p, index) => (
           <React.Fragment key={index}>
             <Button
               onClick={getHandleAddRow(p, index)}
@@ -420,8 +222,10 @@ const AddPurchasesComponent = () => {
             </Button>
           </React.Fragment>
         )
-        )}
+        ) || null}
+        {isFileParsing && <Preloader rows={10} /> || null}
         <Button
+          disabled={isFileParsing}
           onClick={getHandleAddRow()}
           size={SIZE.compact}
         >
