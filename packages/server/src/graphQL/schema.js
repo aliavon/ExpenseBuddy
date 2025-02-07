@@ -4,6 +4,7 @@ module.exports = `
     getPurchases(from: String!, to: String!): [Purchase!]!
     getCategories: [String!]!
     getUnits: [String!]!
+    countPurchasesWithDifferentCategory(name: String!, category: String!): Int!
   }
 
   type Mutation {
