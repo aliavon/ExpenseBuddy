@@ -10,6 +10,7 @@ module.exports = `
     addPurchases(purchases: [PurchaseInput!]!): [Purchase!]!
     updatePurchases(updates: [UpdatePurchaseInput!]!): [Purchase!]!
     deletePurchases(ids: [ID!]!): [ID!]!
+    updateCategory(id: ID!, newCategory: String!, sync: Boolean!): [Purchase!]!
   }
 
   type Purchase {
