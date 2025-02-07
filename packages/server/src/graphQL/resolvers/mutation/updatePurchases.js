@@ -1,9 +1,18 @@
-module.exports = async (_, { updates }, {schemas: {Purchase}}) => {
-  const updatedPurchases = [];
-  for (const update of updates) {
+module.exports = async (_, { updates }, { schemas: { Purchase } }) => {
+  const bulkOperations = updates.map(update => {
     const { id, ...fields } = update;
-    const updatedPurchase = await Purchase.findByIdAndUpdate(id, fields, { new: true });
-    updatedPurchases.push(updatedPurchase);
-  }
+    return {
+      updateOne: {
+        filter: { _id: id },
+        update: { $set: fields }
+      }
+    };
+  });
+
+  await Purchase.bulkWrite(bulkOperations);
+
+  const updatedIds = updates.map(({ id }) => id);
+  const updatedPurchases = await Purchase.find({ _id: { $in: updatedIds } });
+
   return updatedPurchases;
-}
+};
