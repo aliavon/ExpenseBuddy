@@ -1,4 +1,4 @@
-module.exports = async (_, __, {schemas: {Purchase}}) => {
-  const categories = await Purchase.distinct('category');
+module.exports = async (_, __, { schemas: { Item } }) => {
+  const categories = await Item.distinct('category');
   return categories.filter((category) => category);
 }

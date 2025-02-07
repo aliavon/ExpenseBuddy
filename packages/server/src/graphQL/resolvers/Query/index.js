@@ -1,15 +1,15 @@
 const test = require('./test');
-const getUnits = require('./getUnits');
-const getCategories = require('./getCategories');
 const getPurchases = require('./getPurchases');
-const countPurchasesWithDifferentCategory = require('./countPurchasesWithDifferentCategory');
+const getCategories = require('./getCategories');
+const getUnits = require('./getUnits');
 const getPurchasesCategorySuggestion = require('./getPurchasesCategorySuggestion');
+const getItemsByCategory = require('./getItemsByCategory');
 
 module.exports = {
   test,
   getUnits,
   getCategories,
   getPurchases,
-  countPurchasesWithDifferentCategory,
-  getPurchasesCategorySuggestion
+  getPurchasesCategorySuggestion,
+  getItemsByCategory,
 };

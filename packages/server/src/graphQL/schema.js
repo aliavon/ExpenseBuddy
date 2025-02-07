@@ -4,15 +4,16 @@ module.exports = `
     getPurchases(from: String!, to: String!): [Purchase!]!
     getCategories: [String!]!
     getUnits: [String!]!
-    countPurchasesWithDifferentCategory(name: String!, category: String!): Int!
     getPurchasesCategorySuggestion(names: [String!]!): [PurchaseCategoryInfo!]!
+    getItemsByCategory(category: String!): [Item!]!
   }
 
   type Mutation {
     addPurchases(purchases: [PurchaseInput!]!): [Purchase!]!
     updatePurchases(updates: [UpdatePurchaseInput!]!): [Purchase!]!
     deletePurchases(ids: [ID!]!): [ID!]!
-    updateCategory(id: ID!, newCategory: String!, sync: Boolean!): [Purchase!]!
+    addItem(itemInput: ItemInput!): Item!
+    editItemCategory(name: String!, newCategory: String!): Item!
   }
 
   type PurchaseCategoryInfo {
@@ -20,24 +21,33 @@ module.exports = `
     category: String
   }
 
-  type Purchase {
+  input ItemInput {
+    name: String!
+    category: String
+  }
+
+  type Item {
     id: ID!
     name: String!
+    category: String
+  }
+
+  type Purchase {
+    id: ID!
+    item: Item!
     quantity: Float!
     unit: String!
     price: Float!
-    category: String
     discount: Float
     date: String!
     note: String
   }
 
   input PurchaseInput {
-    name: String!
+    itemId: ID!
     quantity: Float!
     unit: String!
     price: Float!
-    category: String
     discount: Float
     date: String!
     note: String
@@ -45,11 +55,10 @@ module.exports = `
 
   input UpdatePurchaseInput {
     id: ID!
-    name: String
+    itemId: ID
     quantity: Float
     unit: String
     price: Float
-    category: String
     discount: Float
     date: String
     note: String
