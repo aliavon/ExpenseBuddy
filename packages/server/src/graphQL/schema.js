@@ -5,6 +5,7 @@ module.exports = `
     getCategories: [String!]!
     getUnits: [String!]!
     countPurchasesWithDifferentCategory(name: String!, category: String!): Int!
+    getPurchasesCategorySuggestion(names: [String!]!): [PurchaseCategoryInfo!]!
   }
 
   type Mutation {
@@ -12,6 +13,11 @@ module.exports = `
     updatePurchases(updates: [UpdatePurchaseInput!]!): [Purchase!]!
     deletePurchases(ids: [ID!]!): [ID!]!
     updateCategory(id: ID!, newCategory: String!, sync: Boolean!): [Purchase!]!
+  }
+
+  type PurchaseCategoryInfo {
+    name: String!
+    category: String
   }
 
   type Purchase {
