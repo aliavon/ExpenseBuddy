@@ -31,7 +31,7 @@ const lidlParse = async file => {
     if (row.length === 2) {
       let name, quantity, price, unit = 'pcs', discount = 0;
       [name] = row;
-      if (['950_80085', 'Lidl Plus rabat'].includes(name)) {
+      if (['Lidl Plus rabat'].includes(name) || (parseFloat(row[1]) < 0)) {
         // handle discount calc
         let prevPrice = parsedData.at(-1).price;
         let discountPrice = parseFloat(row[1].replace(',', '.').slice(1));

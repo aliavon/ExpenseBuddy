@@ -9,7 +9,6 @@ import {Block} from 'baseui/block';
 import {toaster} from 'baseui/toast';
 
 import {UPDATE_PURCHASE_DATA} from '../../gql';
-import CategorySelect from '../form/category-select';
 
 const EditPurchase = ({initialData, onClose}) => {
   const [formData, setFormData] = useState(initialData);
@@ -93,7 +92,7 @@ const EditPurchase = ({initialData, onClose}) => {
       {/* Date */}
       <DatePicker
         value={new Date(parseInt(formData.date, 10))}
-        onChange={({date}) => handleChange('date', date.getTime())}
+        onChange={({date}) => handleChange('date', date.getTime().toString())}
       />
 
       {/* Note */}
