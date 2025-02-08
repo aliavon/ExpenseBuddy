@@ -5,7 +5,7 @@ module.exports = `
     getCategories: [String!]!
     getUnits: [String!]!
     getPurchasesCategorySuggestion(names: [String!]!): [PurchaseCategoryInfo!]!
-    getItemsByCategory(category: String!): [Item!]!
+    getItems(names: [String!], category: String): [Item!]!
   }
 
   type Mutation {

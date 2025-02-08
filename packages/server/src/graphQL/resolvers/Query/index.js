@@ -3,7 +3,7 @@ const getPurchases = require('./getPurchases');
 const getCategories = require('./getCategories');
 const getUnits = require('./getUnits');
 const getPurchasesCategorySuggestion = require('./getPurchasesCategorySuggestion');
-const getItemsByCategory = require('./getItemsByCategory');
+const getItems = require('./getItems');
 
 module.exports = {
   test,
@@ -11,5 +11,5 @@ module.exports = {
   getCategories,
   getPurchases,
   getPurchasesCategorySuggestion,
-  getItemsByCategory,
+  getItems,
 };
