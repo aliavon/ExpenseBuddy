@@ -4,21 +4,21 @@ import {Select} from 'baseui/select';
 import {Button, SIZE, SHAPE} from 'baseui/button';
 import {FileUploader} from 'baseui/file-uploader';
 import {Block} from 'baseui/block';
-import {useMutation} from '@apollo/client';
 import {LabelMedium, LabelLarge, ParagraphSmall} from 'baseui/typography';
 import {toaster} from 'baseui/toast';
 
-import {ADD_PURCHASES_QUERY} from '../../gql';
 import CategorySelect from '../form/category-select';
+import NameSelect from '../form/name-select';
 import Preloader from './preloader';
 import {lidlParser, biedronkaParser, csvParser} from './utils';
 import {getEmptyPurchase, fileUploadOptions, FILE_UPLOAD_TYPE, FILE_TYPES_TO_UPLOAD} from './constants';
+import {useSavePurchases} from './use-save-purchases';
 
 const AddPurchasesComponent = () => {
   const [purchases, setPurchases] = useState([getEmptyPurchase()]);
   const [csvType, setCsvType] = useState([fileUploadOptions[0]]);
   const [isFileParsing, setIsFileParsing] = useState(false);
-  const [addPurchases] = useMutation(ADD_PURCHASES_QUERY);
+  const [savePurchases, {loading}] = useSavePurchases();
 
   const getHandleAddRow = (rowData = getEmptyPurchase(), index) => () => {
     if (typeof index === 'number') {
@@ -77,8 +77,7 @@ const AddPurchasesComponent = () => {
 
   const handleSave = async () => {
     try {
-      await addPurchases({variables: {purchases}});
-      alert('Purchases saved successfully!');
+      await savePurchases({purchases});
       setPurchases([getEmptyPurchase()]);
     } catch (error) {
       console.error('Error saving purchases:', error);
@@ -131,7 +130,8 @@ const AddPurchasesComponent = () => {
 
         <Button
           onClick={handleSave}
-          disabled={!totalSpending || isFileParsing}
+          disabled={!totalSpending || isFileParsing || loading}
+          isLoading={loading}
           size='large'
         >
           Save
@@ -167,10 +167,12 @@ const AddPurchasesComponent = () => {
             >
               copy
             </Button>
-            <Input
+            <NameSelect
               size={INPUT_SIZE.mini}
+              placeholder=""
               value={p.name}
-              onChange={e => handleInputChange('name', e.target.value, index)}
+              category={p.category}
+              onChange={value => handleInputChange('name', value, index)}
             />
             <Input
               size={INPUT_SIZE.mini}

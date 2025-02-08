@@ -21,14 +21,17 @@ const GET_PURCHASES_BY_DATE = gql`
   query GetPurchasesByDate($startDate: String!, $endDate: String!) {
     purchasesByDate: getPurchases(from: $startDate, to: $endDate) {
       id
-      name
       quantity
       unit
       price
-      category
       discount
       date
       note
+      item {
+        id
+        name
+        category
+      }
     }
   }
 `;
@@ -81,10 +84,12 @@ const ViewPurchasesComponent = () => {
           Sum:
           {` ${totalSpending.toFixed(2)} zł`}
         </LabelMedium>
-        <LabelMedium color="accent600">
-          {'Last: '}
-          {getDate(lastTransactionDate)}
-        </LabelMedium>
+        {lastTransactionDate && (
+          <LabelMedium color="accent600">
+            {'Last: '}
+            {getDate(lastTransactionDate)}
+          </LabelMedium>
+        ) || null}
       </Block>
       <Table data={data?.purchasesByDate} />
     </Block>

@@ -31,11 +31,12 @@ const EditPurchase = ({initialData, onClose}) => {
   };
 
   const handleSave = async () => {
+    const {item, ...form} = formData;
     await updatePurchase({
       variables: {
         purchase: {
           id: formData.id,
-          ...formData,
+          ...form,
         },
       },
     });
@@ -49,14 +50,7 @@ const EditPurchase = ({initialData, onClose}) => {
       gridRowGap="14px"
     >
       <LabelLarge paddingBottom="10px">Edit Purchase</LabelLarge>
-
-      {/* Name */}
-      <Input
-        value={formData.name}
-        onChange={e => handleChange('name', e.target.value)}
-        placeholder="Name"
-        clearable
-      />
+      <LabelLarge paddingBottom="10px">{formData.item.name}</LabelLarge>
 
       {/* Quantity */}
       <Input
@@ -82,9 +76,10 @@ const EditPurchase = ({initialData, onClose}) => {
       />
 
       {/* Category */}
-      <CategorySelect
-        value={formData.category}
-        onChange={value => handleChange('category', value)}
+      <Input
+        value={formData.item.category}
+        placeholder="Update category via update Category func"
+        disabled
       />
 
       {/* Discount */}

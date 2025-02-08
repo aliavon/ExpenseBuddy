@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {Block} from 'baseui/block';
 import {gql, useMutation} from '@apollo/client';
 import {
@@ -12,6 +12,9 @@ import {
 import {toaster} from 'baseui/toast';
 import {Button, SIZE} from 'baseui/button';
 import {Drawer} from 'baseui/drawer';
+import {LabelMedium} from 'baseui/typography';
+// import {TableBuilder, TableBuilderColumn} from 'baseui/table-semantic';
+// todo: refactor to use TableBuilder
 
 import {Pencil} from '../../icons';
 import EditPurchase from './edit-purchase';
@@ -19,7 +22,7 @@ import EditPurchase from './edit-purchase';
 const columns = [
   StringColumn({
     title: 'Name',
-    mapDataToValue: data => data.name,
+    mapDataToValue: data => data.item.name,
   }),
   NumericalColumn({
     title: 'Quantity',
@@ -41,7 +44,7 @@ const columns = [
   CategoricalColumn({
     title: 'Category',
     fillWidth: false,
-    mapDataToValue: data => data.category,
+    mapDataToValue: data => data.item.category,
   }),
   NumericalColumn({
     title: 'Discount',
@@ -75,6 +78,8 @@ const DELETE_PURCHASES = gql`
 `;
 
 export default function Table({data}) {
+  const ref = useRef();
+  const [sum, setSum] = useState(0);
   const [editRow, setEditRow] = useState(null);
   const [rows, setRows] = useState([]);
   const [deletePurchases] = useMutation(DELETE_PURCHASES, {
@@ -85,6 +90,13 @@ export default function Table({data}) {
   useEffect(() => {
     data && setRows(handleInitialData(data));
   }, [data]);
+
+  useEffect(() => {
+    console.log(ref.current?.getRows?.().map(i => i.data.price)
+      .reduce((acc, f) => acc + f, 0));
+    setSum(ref.current?.getRows?.().map(i => i.data.price)
+      .reduce((acc, f) => acc + f, 0));
+  }, [ref.current?.getRows]);
 
   const batchActions = [
     {
@@ -144,8 +156,20 @@ export default function Table({data}) {
       <Block
         height="100%"
         width="100%"
+        display="flex"
+        alignItems="center"
+        gridColumnGap="20px"
+        flexWrap
       >
+        <LabelMedium>
+          Sum:
+          {` ${sum.toFixed(2)} zł`}
+        </LabelMedium>
         <StatefulDataTable
+          onSelectionChange={console.log}
+          initialSortDirection="DESC"
+          initialSortIndex={6} // Date index
+          controlRef={ref}
           batchActions={batchActions}
           rowActions={rowActions}
           columns={columns}
