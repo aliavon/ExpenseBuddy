@@ -1,13 +1,13 @@
 const addPurchases = require('./addPurchases');
 const updatePurchases = require('./updatePurchases');
 const deletePurchases = require('./deletePurchases');
-const addItem = require('./addItem');
+const addItems = require('./addItems');
 const editItemCategory = require('./editItemCategory');
 
 module.exports = {
   addPurchases,
   updatePurchases,
   deletePurchases,
-  addItem,
+  addItems,
   editItemCategory,
 };

@@ -12,7 +12,7 @@ module.exports = `
     addPurchases(purchases: [PurchaseInput!]!): [Purchase!]!
     updatePurchases(updates: [UpdatePurchaseInput!]!): [Purchase!]!
     deletePurchases(ids: [ID!]!): [ID!]!
-    addItem(itemInput: ItemInput!): Item!
+    addItems(items: [ItemInput!]!): [Item!]!
     editItemCategory(name: String!, newCategory: String!): Item!
   }
 
