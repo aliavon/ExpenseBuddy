@@ -13,12 +13,14 @@ import Preloader from './preloader';
 import {lidlParser, biedronkaParser, csvParser} from './utils';
 import {getEmptyPurchase, fileUploadOptions, FILE_UPLOAD_TYPE, FILE_TYPES_TO_UPLOAD} from './constants';
 import {useSavePurchases} from './use-save-purchases';
+import {usePopulateCategories} from './use-populate-categories';
 
 const AddPurchasesComponent = () => {
   const [purchases, setPurchases] = useState([getEmptyPurchase()]);
   const [csvType, setCsvType] = useState([fileUploadOptions[0]]);
   const [isFileParsing, setIsFileParsing] = useState(false);
   const [savePurchases, {loading}] = useSavePurchases();
+  const [populateCategories, {loading: guessing}] = usePopulateCategories();
 
   const getHandleAddRow = (rowData = getEmptyPurchase(), index) => () => {
     if (typeof index === 'number') {
@@ -83,7 +85,16 @@ const AddPurchasesComponent = () => {
       console.error('Error saving purchases:', error);
     }
   };
+
+  const handlePopulateCategories = async () => {
+    populateCategories({
+      purchases,
+      setPurchases,
+    });
+  };
   const totalSpending = purchases?.reduce((sum, purchase) => sum + purchase.price, 0) || 0;
+  const isSomeCategoryEmpty = !!purchases.find(({category}) => !category);
+
   return (
     <Block
       width="100%"
@@ -128,20 +139,35 @@ const AddPurchasesComponent = () => {
           />
         </Block>
 
-        <Button
-          onClick={handleSave}
-          disabled={!totalSpending || isFileParsing || loading}
-          isLoading={loading}
-          size='large'
+        <Block
+          display="flex"
+          gridColumnGap="10px"
         >
-          Save
-          {` ${totalSpending.toFixed(2)} zł`}
-        </Button>
+          <Button
+            disabled={!isSomeCategoryEmpty || guessing}
+            onClick={handlePopulateCategories}
+            isLoading={guessing}
+            kind="secondary"
+            size='large'
+          >
+            Guess Categories
+          </Button>
+
+          <Button
+            onClick={handleSave}
+            disabled={!totalSpending || isFileParsing || loading}
+            isLoading={loading}
+            size='large'
+          >
+            Save
+            {` ${totalSpending.toFixed(2)} zł`}
+          </Button>
+        </Block>
       </Block>
 
       <Block
         display="grid"
-        gridTemplateColumns="0.3fr 1.5fr 0.5fr 0.5fr 0.7fr 1fr 0.7fr 1fr 1fr auto"
+        gridTemplateColumns="0.3fr 1fr 1.5fr 0.5fr 0.5fr 0.7fr 0.7fr 1fr 1fr auto"
         gridColumnGap="4px"
         gridRowGap="2px"
         marginTop="10px"
@@ -149,11 +175,11 @@ const AddPurchasesComponent = () => {
         alignItems="center"
       >
         <div />
+        <LabelMedium>Category</LabelMedium>
         <LabelMedium>Name*</LabelMedium>
         <LabelMedium>Quantity*</LabelMedium>
         <LabelMedium>Unit*</LabelMedium>
         <LabelMedium>Price(zł)*</LabelMedium>
-        <LabelMedium>Category</LabelMedium>
         <LabelMedium>Discount(%)</LabelMedium>
         <LabelMedium>Date*</LabelMedium>
         <LabelMedium>Note</LabelMedium>
@@ -167,6 +193,12 @@ const AddPurchasesComponent = () => {
             >
               copy
             </Button>
+            <CategorySelect
+              size={INPUT_SIZE.mini}
+              placeholder=""
+              value={p.category}
+              onChange={value => handleInputChange('category', value, index)}
+            />
             <NameSelect
               size={INPUT_SIZE.mini}
               placeholder=""
@@ -191,13 +223,6 @@ const AddPurchasesComponent = () => {
               onChange={e => handleInputChange('price', parseFloat(e.target.value), index)}
               type="number"
             />
-            <CategorySelect
-              size={INPUT_SIZE.mini}
-              placeholder=""
-              value={p.category}
-              onChange={value => handleInputChange('category', value, index)}
-            />
-
             <Input
               size={INPUT_SIZE.mini}
               value={p.discount}

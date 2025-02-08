@@ -1,5 +1,6 @@
 import {useCallback, useState} from 'react';
 import {useLazyQuery, useMutation} from '@apollo/client';
+import {toaster} from 'baseui/toast';
 
 import {ADD_PURCHASES_QUERY, GET_ITEMS_BY_NAMES_QUERY, ADD_ITEMS_MUTATION} from '../../gql';
 
@@ -12,7 +13,6 @@ export const useSavePurchases = () => {
   const savePurchases = useCallback(async ({purchases}) => {
     try {
       setLoading(true);
-      console.log({purchases});
 
       const uniqueItemsMap = {};
       purchases.forEach(({name, category}) => {
@@ -27,19 +27,15 @@ export const useSavePurchases = () => {
       const names = Object.keys(uniqueItemsMap);
       const {data} = await getItems({variables: {names}});
       let items = [...(data?.items || [])];
-      console.log({
-        data,
-        items,
-      });
+
       const itemsToCreate = Object.values(uniqueItemsMap).filter(item1 =>
         !data?.items.some(item2 =>
           item2.name === item1.name && item2.category === item1.category
         )
       );
-      console.log({itemsToCreate});
       if (itemsToCreate.length) {
         const res = await addItems({variables: {items: itemsToCreate}});
-        items = [...items, res.data.addItems];
+        items = [...items, ...(res?.data?.addItems || [])];
       }
 
       const itemsMap = items.reduce((map, obj) => ({
@@ -47,16 +43,15 @@ export const useSavePurchases = () => {
         [obj.name]: obj,
       }), {});
 
-      console.log({itemsMap});
       const purchasesToCreate = purchases.map(({name, category: _, ...rest}) => ({
         ...rest,
         itemId: itemsMap[name].id,
       }));
-      console.log({purchasesToCreate});
 
       await addPurchases({variables: {purchases: purchasesToCreate}});
-      alert('Purchases saved successfully!');
+      toaster.positive('Purchases saved successfully!', {autoHideDuration: 3000});
     } catch (error) {
+      toaster.negative(error.message, {autoHideDuration: 3000});
       console.error('Error saving purchases:', error);
     } finally {
       setLoading(false);
