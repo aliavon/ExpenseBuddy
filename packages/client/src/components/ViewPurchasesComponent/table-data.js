@@ -16,8 +16,9 @@ import {LabelMedium} from 'baseui/typography';
 // import {TableBuilder, TableBuilderColumn} from 'baseui/table-semantic';
 // todo: refactor to use TableBuilder
 
-import {Pencil} from '../../icons';
+import {Pencil, Tag} from '../../icons';
 import EditPurchase from './edit-purchase';
+import EditItemCategoryModal from './EditItemCategoryModal';
 
 const columns = [
   StringColumn({
@@ -81,6 +82,7 @@ export default function Table({data}) {
   const ref = useRef();
   const [sum, setSum] = useState(0);
   const [editRow, setEditRow] = useState(null);
+  const [editItem, setEditItem] = useState(null);
   const [rows, setRows] = useState([]);
   const [deletePurchases] = useMutation(DELETE_PURCHASES, {
     refetchQueries: ['GetPurchasesByDate'],
@@ -133,9 +135,23 @@ export default function Table({data}) {
 
   const rowActions = [
     {
-      label: 'Edit',
+      label: 'Edit Purchase',
       onClick: ({row: {data: {__typename, ...data}}}) => setEditRow(data),
-      renderIcon: Pencil,
+      renderIcon: props => (
+        <Pencil
+          title="Edit Purchase"
+          {...props}
+        />
+      ),
+    }, {
+      label: 'Edit Category',
+      onClick: ({row: {data}}) => setEditItem(data.item),
+      renderIcon: props => (
+        <Tag
+          title="Edit Category"
+          {...props}
+        />
+      ),
     },
   ];
 
@@ -153,6 +169,15 @@ export default function Table({data}) {
           />
         )}
       </Drawer>
+
+      {editItem && (
+        <EditItemCategoryModal
+          isOpen={Boolean(editItem)}
+          onClose={() => setEditItem(null)}
+          item={editItem}
+        />
+      )}
+
       <Block
         height="100%"
         width="100%"

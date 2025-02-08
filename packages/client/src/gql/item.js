@@ -28,3 +28,13 @@ export const ADD_ITEMS_MUTATION = gql`
     }
   }
 `;
+
+export const EDIT_ITEM_CATEGORY_MUTATION = gql`
+  mutation EditItemCategory($name: String!, $newCategory: String!) {
+    editItemCategory(name: $name, newCategory: $newCategory) {
+      id
+      name
+      category
+    }
+  }
+`;

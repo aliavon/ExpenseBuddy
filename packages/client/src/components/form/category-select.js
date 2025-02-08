@@ -7,7 +7,7 @@ import {GET_CATEGORIES} from '../../gql';
 const CategorySelect = ({value, onChange, ...restProps}) => {
   const [options, setOptions] = useState([]);
   const {loading, error} = useQuery(GET_CATEGORIES, {
-    nextFetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-and-network',
     onCompleted: data => {
       const categories = data.getCategories || [];
       setOptions(categories.map(category => ({
