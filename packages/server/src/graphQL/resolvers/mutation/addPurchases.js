@@ -1,19 +1,8 @@
 const { GraphQLError } = require('graphql');
 
-const purchaseInputsSchema = require('../../validation/purchaseInputsSchema');
-
 module.exports = async (_, { purchases }, { schemas: { Purchase }, logger }) => {
   try {
-    const { error, value: validatedPurchases } = purchaseInputsSchema.validate(purchases);
-    if (error) {
-      throw new GraphQLError(`Validation error: ${error.message}`, {
-        extensions: {
-          code: 'VALIDATION_ERROR',
-        },
-      });
-    }
-
-    const newPurchases = await Purchase.insertMany(validatedPurchases);
+    const newPurchases = await Purchase.insertMany(purchases);
     logger.info({ count: newPurchases.length }, 'Successfully added purchases');
     return newPurchases;
   } catch (error) {
