@@ -1,5 +1,7 @@
 const Joi = require('joi');
-const purchaseInputsSchema = require('./purchaseInputsSchema');
+const purchaseInputSchema = require('./purchaseInputSchema');
+
+const purchaseInputsSchema = Joi.array().items(purchaseInputSchema).required();
 
 const addPurchasesSchema = Joi.object({
   purchases: purchaseInputsSchema,
