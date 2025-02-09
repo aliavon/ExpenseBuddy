@@ -13,7 +13,7 @@ module.exports = `
     updatePurchases(updates: [UpdatePurchaseInput!]!): [Purchase!]!
     deletePurchases(ids: [ID!]!): [ID!]!
     addItems(items: [ItemInput!]!): [Item!]!
-    editItemCategory(name: String!, newCategory: String!): Item!
+    editItemsCategory(names: [String!]!, newCategory: String!): [Item!]!
   }
 
   type PurchaseCategoryInfo {
