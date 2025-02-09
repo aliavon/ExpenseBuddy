@@ -1,9 +1,9 @@
 const { GraphQLError } = require('graphql');
 
 module.exports = {
-  item: async (parent, args, { schemas: { Item }, logger }) => {
+  item: async (parent, _, { logger, itemLoader }) => {
     try {
-      const item = await Item.findById(parent.itemId);
+      const item = await itemLoader.load(parent.itemId);
 
       if (!item) {
         logger.error({ parentId: parent.itemId }, 'Item not found');
@@ -14,7 +14,6 @@ module.exports = {
         });
       }
 
-      logger.info({ itemId: parent.itemId }, 'Item retrieved successfully');
       return item;
     } catch (error) {
       logger.error({ err: error, parentId: parent.itemId }, 'Error retrieving item');
