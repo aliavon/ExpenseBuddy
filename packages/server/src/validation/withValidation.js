@@ -1,4 +1,4 @@
-const { GraphQLError } = require('graphql');
+const { GraphQLError } = require("graphql");
 
 /**
  * Wrapper for resolvers that performs validation of input arguments.
@@ -12,7 +12,7 @@ const withValidation = (schema, resolver) => {
     const { error, value: validatedArgs } = schema.validate(args);
     if (error) {
       throw new GraphQLError(`Validation error: ${error.message}`, {
-        extensions: { code: 'VALIDATION_ERROR' },
+        extensions: { code: "VALIDATION_ERROR" },
       });
     }
     // If validation passes, call the original resolver with the validated arguments.

@@ -1,4 +1,4 @@
-const { GraphQLError } = require('graphql');
+const { GraphQLError } = require("graphql");
 
 module.exports = async (_, { from, to }, { schemas: { Purchase }, logger }) => {
   try {
@@ -7,15 +7,21 @@ module.exports = async (_, { from, to }, { schemas: { Purchase }, logger }) => {
     const purchases = await Purchase.find({
       date: { $gte: fromDate, $lte: toDate },
     });
-    logger.info({ count: purchases.length }, 'Successfully retrieved purchases');
+    logger.info(
+      { count: purchases.length },
+      "Successfully retrieved purchases"
+    );
     return purchases;
   } catch (error) {
-    logger.error({ err: error }, 'Error retrieving purchases');
-    throw new GraphQLError('Failed to retrieve purchases. Please try again later.', {
-      extensions: {
-        code: 'GET_PURCHASES_ERROR',
-        detailedMessage: error.message,
-      },
-    });
+    logger.error({ err: error }, "Error retrieving purchases");
+    throw new GraphQLError(
+      "Failed to retrieve purchases. Please try again later.",
+      {
+        extensions: {
+          code: "GET_PURCHASES_ERROR",
+          detailedMessage: error.message,
+        },
+      }
+    );
   }
 };

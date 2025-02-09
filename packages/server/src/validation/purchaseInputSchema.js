@@ -1,4 +1,4 @@
-const Joi = require('joi');
+const Joi = require("joi");
 
 const purchaseInputSchema = Joi.object({
   itemId: Joi.string().required(),
@@ -7,7 +7,7 @@ const purchaseInputSchema = Joi.object({
   price: Joi.number().positive().required(),
   discount: Joi.number().min(0).default(0),
   date: Joi.string().isoDate().required(),
-  note: Joi.string().allow('').optional(),
+  note: Joi.string().allow("").optional(),
 });
 
 module.exports = purchaseInputSchema;

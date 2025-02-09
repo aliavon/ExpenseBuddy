@@ -1,10 +1,17 @@
-const { addItemsSchema, addPurchasesSchema, deletePurchasesSchema, editItemsCategorySchema, updatePurchasesSchema, withValidation} = require('../../../validation');
+const {
+  addItemsSchema,
+  addPurchasesSchema,
+  deletePurchasesSchema,
+  editItemsCategorySchema,
+  updatePurchasesSchema,
+  withValidation,
+} = require("../../../validation");
 
-const addPurchases = require('./addPurchases');
-const updatePurchases = require('./updatePurchases');
-const deletePurchases = require('./deletePurchases');
-const addItems = require('./addItems');
-const editItemsCategory = require('./editItemsCategory');
+const addPurchases = require("./addPurchases");
+const updatePurchases = require("./updatePurchases");
+const deletePurchases = require("./deletePurchases");
+const addItems = require("./addItems");
+const editItemsCategory = require("./editItemsCategory");
 
 module.exports = {
   addPurchases: withValidation(addPurchasesSchema, addPurchases),

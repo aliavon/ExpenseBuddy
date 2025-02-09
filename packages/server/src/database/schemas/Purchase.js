@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const purchaseSchema = new mongoose.Schema({
   itemId: { type: String, required: true },
@@ -10,4 +10,4 @@ const purchaseSchema = new mongoose.Schema({
   note: { type: String, default: "" },
 });
 
-module.exports = mongoose.model('Purchase', purchaseSchema);;
+module.exports = mongoose.model("Purchase", purchaseSchema);

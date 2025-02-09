@@ -62,4 +62,4 @@ module.exports = `
     date: String
     note: String
   }
-`
+`;

@@ -1,5 +1,5 @@
-const Joi = require('joi');
-const itemInputSchema = require('./itemInputSchema');
+const Joi = require("joi");
+const itemInputSchema = require("./itemInputSchema");
 
 const itemInputsSchema = Joi.array().items(itemInputSchema).required();
 

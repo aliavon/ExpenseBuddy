@@ -6,14 +6,15 @@ const mongooseConfig = {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
-}
+};
 
 module.exports = {
   APP_CLIENT_PORT: process.env.APP_CLIENT_PORT,
   APP_SERVER_PORT: process.env.APP_SERVER_PORT || 8000,
   DATABASE_HOST: process.env.DATABASE_HOST,
   DATABASE_PORT,
-  API_HOST: process.env.API_HOST || 'http://localhost:3000',
-  DATABASE_URL: DATABASE_HOST || `mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server`,
+  API_HOST: process.env.API_HOST || "http://localhost:3000",
+  DATABASE_URL:
+    DATABASE_HOST || `mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server`,
   mongooseConfig,
 };

@@ -1,14 +1,14 @@
-const addItemsSchema = require('./addItemsSchema');
-const addPurchasesSchema = require('./addPurchasesSchema');
-const deletePurchasesSchema = require('./deletePurchasesSchema');
-const editItemsCategorySchema = require('./editItemsCategorySchema');
-const updatePurchasesSchema = require('./updatePurchasesSchema');
+const addItemsSchema = require("./addItemsSchema");
+const addPurchasesSchema = require("./addPurchasesSchema");
+const deletePurchasesSchema = require("./deletePurchasesSchema");
+const editItemsCategorySchema = require("./editItemsCategorySchema");
+const updatePurchasesSchema = require("./updatePurchasesSchema");
 
-const getItemsSchema = require('./getItemsSchema');
-const getPurchasesSchema = require('./getPurchasesSchema');
-const getPurchasesCategorySuggestionSchema = require('./getPurchasesCategorySuggestionSchema');
+const getItemsSchema = require("./getItemsSchema");
+const getPurchasesSchema = require("./getPurchasesSchema");
+const getPurchasesCategorySuggestionSchema = require("./getPurchasesCategorySuggestionSchema");
 
-const withValidation = require('./withValidation');
+const withValidation = require("./withValidation");
 
 module.exports = {
   getItemsSchema,
