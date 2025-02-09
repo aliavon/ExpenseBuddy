@@ -1,6 +1,5 @@
 module.exports = `
   type Query {
-    test: String
     getPurchases(from: String!, to: String!): [Purchase!]!
     getCategories: [String!]!
     getUnits: [String!]!
