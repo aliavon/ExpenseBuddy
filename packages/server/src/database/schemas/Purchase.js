@@ -10,4 +10,6 @@ const purchaseSchema = new mongoose.Schema({
   note: { type: String, default: "" },
 });
 
+purchaseSchema.index({ date: 1 });
+
 module.exports = mongoose.model("Purchase", purchaseSchema);
