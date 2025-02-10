@@ -17,4 +17,5 @@ async function batchItems(ids) {
   return ids.map((id) => itemMap[id.toString()]);
 }
 
-module.exports = () => new DataLoader(batchItems, { maxBatchSize: 1000 });
+module.exports = () =>
+  new DataLoader(batchItems, { maxBatchSize: 1000, cache: false });
