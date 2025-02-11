@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
+const modelNames = require("../modelNames");
 
 const purchaseSchema = new mongoose.Schema({
   itemId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Item",
+    ref: modelNames.Item,
     required: true,
   },
   quantity: { type: Number, required: true },
@@ -16,4 +17,4 @@ const purchaseSchema = new mongoose.Schema({
 
 purchaseSchema.index({ date: 1 });
 
-module.exports = mongoose.model("Purchase", purchaseSchema);
+module.exports = mongoose.model(modelNames.Purchase, purchaseSchema);
