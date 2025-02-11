@@ -1,35 +1,61 @@
 import React, {useState, useEffect} from 'react';
-import {Modal, ModalHeader, ModalBody, ModalFooter, ModalButton} from 'baseui/modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalButton,
+} from 'baseui/modal';
 import {useMutation} from '@apollo/client';
 import {toaster} from 'baseui/toast';
 
-import {EDIT_ITEM_CATEGORY_MUTATION} from '../../gql';
+import {EDIT_ITEMS_CATEGORY_MUTATION} from '../../gql';
 import CategorySelect from '../form/category-select';
 
-const EditItemCategoryModal = ({isOpen, onClose, item}) => {
-  const [newCategory, setNewCategory] = useState(item?.category || '');
+const EditItemCategoryModal = ({isOpen, onClose, items, clearSelection}) => {
+  const [newCategory, setNewCategory] = useState(() => items && items.length === 1 ? items[0].category : '');
 
   useEffect(() => {
-    setNewCategory(item?.category || '');
-  }, [item]);
+    if (items && items.length === 1) {
+      setNewCategory(items[0].category || '');
+    } else {
+      setNewCategory('');
+    }
+  }, [items]);
 
-  const [editItemCategory, {loading}] = useMutation(EDIT_ITEM_CATEGORY_MUTATION, {
-    onCompleted: data => {
-      toaster.positive(`Category updated to ${data.editItemCategory.category}`, {autoHideDuration: 3000});
-      onClose();
-    },
-    onError: error => {
-      toaster.negative(error.message);
-    },
-  });
+  const getHandleClose = cancel => () => {
+    onClose();
+    items.length > 1 && !cancel && clearSelection();
+  };
+
+  const [editItemsCategory, {loading}] = useMutation(
+    EDIT_ITEMS_CATEGORY_MUTATION,
+    {
+      onCompleted: data => {
+        const updatedCategory =
+          data.editItemsCategory && data.editItemsCategory[0]
+            ? data.editItemsCategory[0].category
+            : '';
+        toaster.positive(
+          `Category updated to ${updatedCategory}`,
+          {autoHideDuration: 3000}
+        );
+        getHandleClose(false)();
+      },
+      onError: error => {
+        toaster.negative(error.message);
+      },
+    }
+  );
 
   const handleSave = () => {
-    if (!item || !item.name) {
+    if (!items || items.length === 0) {
       return;
     }
-    editItemCategory({
+    const names = [...new Set(items.map(item => item.name))];
+    editItemsCategory({
       variables: {
-        name: item.name,
+        names,
         newCategory,
       },
     });
@@ -38,17 +64,16 @@ const EditItemCategoryModal = ({isOpen, onClose, item}) => {
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={getHandleClose(true)}
     >
-      <ModalHeader>Edit Category</ModalHeader>
+      <ModalHeader>
+        {items && items.length === 1
+          ? `Edit Category for ${items[0].name}`
+          : `Edit Category for ${items.length} items`}
+      </ModalHeader>
       <ModalBody>
-        <div>
-          <strong>Item:</strong>
-          {' '}
-          {item?.name}
-        </div>
         <CategorySelect
-          placeholder=""
+          placeholder="Select or create a category"
           value={newCategory}
           onChange={value => setNewCategory(value)}
         />
@@ -56,7 +81,7 @@ const EditItemCategoryModal = ({isOpen, onClose, item}) => {
       <ModalFooter>
         <ModalButton
           kind="tertiary"
-          onClick={onClose}
+          onClick={getHandleClose(true)}
         >
           Cancel
         </ModalButton>

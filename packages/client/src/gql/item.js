@@ -29,9 +29,9 @@ export const ADD_ITEMS_MUTATION = gql`
   }
 `;
 
-export const EDIT_ITEM_CATEGORY_MUTATION = gql`
-  mutation EditItemCategory($name: String!, $newCategory: String!) {
-    editItemCategory(name: $name, newCategory: $newCategory) {
+export const EDIT_ITEMS_CATEGORY_MUTATION = gql`
+  mutation EditItemsCategory($names: [String!]!, $newCategory: String!) {
+    editItemsCategory(names: $names, newCategory: $newCategory) {
       id
       name
       category

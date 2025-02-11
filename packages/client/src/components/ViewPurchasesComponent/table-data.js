@@ -82,7 +82,7 @@ export default function Table({data}) {
   const ref = useRef();
   const [sum, setSum] = useState(0);
   const [editRow, setEditRow] = useState(null);
-  const [editItem, setEditItem] = useState(null);
+  const [editItems, setEditItems] = useState(null);
   const [rows, setRows] = useState([]);
   const [deletePurchases] = useMutation(DELETE_PURCHASES, {
     refetchQueries: ['GetPurchasesByDate'],
@@ -94,11 +94,16 @@ export default function Table({data}) {
   }, [data]);
 
   useEffect(() => {
-    console.log(ref.current?.getRows?.().map(i => i.data.price)
-      .reduce((acc, f) => acc + f, 0));
-    setSum(ref.current?.getRows?.().map(i => i.data.price)
-      .reduce((acc, f) => acc + f, 0));
-  }, [ref.current?.getRows]);
+    const calculateSum = () => {
+      const rows = ref.current?.getRows ? ref.current.getRows() : [];
+      const total = rows.reduce((acc, row) => acc + (row.data.price || 0), 0);
+      setSum(total);
+    };
+
+    const intervalId = setInterval(calculateSum, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const batchActions = [
     {
@@ -130,6 +135,11 @@ export default function Table({data}) {
             autoHideDuration: 20000,
           });
       },
+    }, {
+      label: 'Edit Category',
+      onClick: async ({selection}) => {
+        setEditItems(selection.map(i => i.data.item));
+      },
     },
   ];
 
@@ -145,7 +155,7 @@ export default function Table({data}) {
       ),
     }, {
       label: 'Edit Category',
-      onClick: ({row: {data}}) => setEditItem(data.item),
+      onClick: ({row: {data}}) => setEditItems([data.item]),
       renderIcon: props => (
         <Tag
           title="Edit Category"
@@ -170,11 +180,12 @@ export default function Table({data}) {
         )}
       </Drawer>
 
-      {editItem && (
+      {editItems && (
         <EditItemCategoryModal
-          isOpen={Boolean(editItem)}
-          onClose={() => setEditItem(null)}
-          item={editItem}
+          isOpen={Boolean(editItems)}
+          clearSelection={() => ref.current.clearSelection()}
+          onClose={() => setEditItems(null)}
+          items={editItems}
         />
       )}
 
