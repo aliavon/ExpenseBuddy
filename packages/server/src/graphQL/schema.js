@@ -5,6 +5,7 @@ module.exports = `
     getUnits: [String!]!
     getPurchasesCategorySuggestion(names: [String!]!): [PurchaseCategoryInfo!]!
     getItems(names: [String!], category: String): [Item!]!
+    getFamilyIncomePeriodicityOptions: [Option!]!
   }
 
   type Mutation {
@@ -61,5 +62,10 @@ module.exports = `
     discount: Float
     date: String
     note: String
+  }
+
+  type Option {
+    value: String!
+    label: String!
   }
 `;
