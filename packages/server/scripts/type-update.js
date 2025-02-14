@@ -3,15 +3,12 @@
 const mongoose = require("mongoose");
 const Purchase = require("../src/database/schemas/Purchase");
 const DATABASE_URL = "mongodb://localhost:27017/server";
+const { mongooseConfig } = require("../src/config");
 
 async function runMigration() {
   try {
     console.log("Connecting to database...");
-    await mongoose.connect(DATABASE_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      autoIndex: false,
-    });
+    await mongoose.connect(DATABASE_URL, mongooseConfig);
     console.log("Connected to database");
 
     const purchases = await Purchase.find({ itemId: { $type: "string" } });

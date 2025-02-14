@@ -4,8 +4,7 @@ const DATABASE_HOST = process.env.DATABASE_HOST;
 const mongooseConfig = {
   autoIndex: false,
   useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
+  useUnifiedTopology: true,
 };
 
 module.exports = {

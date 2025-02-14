@@ -9,6 +9,8 @@ const {
   mongooseConfig,
 } = require("./src/config");
 
+mongoose.set("strictQuery", true);
+
 mongoose.connect(DATABASE_URL, mongooseConfig).catch((e) => console.error(e));
 
 const server = createServer(yoga);
