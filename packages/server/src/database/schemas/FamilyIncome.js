@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { PERIODICITY } = require("../constants/familyIncomeEnums");
+const { PERIODICITY } = require("../../constants/familyIncomeEnums");
 const modelNames = require("../modelNames");
 
 const familyIncomeSchema = new mongoose.Schema({

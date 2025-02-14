@@ -1,3 +1,5 @@
+const { SORT_ORDER_VALUES } = require("../constants/sortOrder");
+
 module.exports = `
   type Query {
     getPurchases(from: String!, to: String!): [Purchase!]!
@@ -5,7 +7,9 @@ module.exports = `
     getUnits: [String!]!
     getPurchasesCategorySuggestion(names: [String!]!): [PurchaseCategoryInfo!]!
     getItems(names: [String!], category: String): [Item!]!
+
     getFamilyIncomePeriodicityOptions: [Option!]!
+    getFamilyIncomeRecords(filters: FamilyIncomeFiltersInput, pagination: PaginationInput!, sort: SortInput): FamilyIncomeRecordsResponse!
   }
 
   type Mutation {
@@ -14,6 +18,59 @@ module.exports = `
     deletePurchases(ids: [ID!]!): [ID!]!
     addItems(items: [ItemInput!]!): [Item!]!
     editItemsCategory(names: [String!]!, newCategory: String!): [Item!]!
+  }
+
+  type FamilyIncomeRecordsResponse {
+    items: [FamilyIncome!]!
+    pagination: PaginationMetadata!
+  }
+
+  type FamilyIncome {
+    id: ID!
+    date: String!
+    amount: Float!
+    note: String
+    periodicity: String!
+    type: IncomeType
+    contributor: User
+  }
+
+  type IncomeType {
+    id: ID!
+    name: String!
+    description: String
+  }
+
+  type User {
+    id: ID!
+    name: String!
+    isVerified: Boolean!
+  }
+
+  input SortInput {
+    sortBy: String
+    sortOrder: SortOrder
+  }
+
+  enum SortOrder { ${SORT_ORDER_VALUES.join(", ")} }
+
+  input PaginationInput {
+    page: Int!
+    limit: Int!
+  }
+
+  input FamilyIncomeFiltersInput {
+    dateFrom: String
+    dateTo: String
+    contributorId: ID
+    typeId: ID
+  }
+
+  type PaginationMetadata {
+    currentPage: Int!
+    nextPage: Int
+    totalPages: Int!
+    totalCount: Int!
   }
 
   type PurchaseCategoryInfo {
