@@ -1,15 +1,20 @@
-const mongoose = require('mongoose');
-const { createServer } = require('node:http');
+const mongoose = require("mongoose");
+const { createServer } = require("node:http");
 
-const yoga = require('./src/server');
+const yoga = require("./src/server");
 
-const {APP_SERVER_PORT, DATABASE_URL, mongooseConfig} = require('./src/config');
+const {
+  APP_SERVER_PORT,
+  DATABASE_URL,
+  mongooseConfig,
+} = require("./src/config");
 
-mongoose.connect(DATABASE_URL, mongooseConfig)
-  .catch(e => console.error(e));
+mongoose.connect(DATABASE_URL, mongooseConfig).catch((e) => console.error(e));
 
-const server = createServer(yoga)
+const server = createServer(yoga);
 
 server.listen(APP_SERVER_PORT, () => {
-  console.info(`Server is running on http://localhost:${APP_SERVER_PORT}/graphql`)
+  console.info(
+    `Server is running on http://localhost:${APP_SERVER_PORT}/graphql`
+  );
 });
