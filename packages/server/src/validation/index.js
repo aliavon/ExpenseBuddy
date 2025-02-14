@@ -8,6 +8,8 @@ const getItemsSchema = require("./getItemsSchema");
 const getPurchasesSchema = require("./getPurchasesSchema");
 const getPurchasesCategorySuggestionSchema = require("./getPurchasesCategorySuggestionSchema");
 
+const getFamilyIncomeRecordsSchema = require("./getFamilyIncomeRecordsSchema");
+
 const withValidation = require("./withValidation");
 
 module.exports = {
@@ -20,6 +22,8 @@ module.exports = {
   deletePurchasesSchema,
   editItemsCategorySchema,
   updatePurchasesSchema,
+
+  getFamilyIncomeRecordsSchema,
 
   withValidation,
 };

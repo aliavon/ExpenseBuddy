@@ -2,6 +2,7 @@ const {
   getItemsSchema,
   getPurchasesSchema,
   getPurchasesCategorySuggestionSchema,
+  getFamilyIncomeRecordsSchema,
   withValidation,
 } = require("../../../validation");
 
@@ -17,7 +18,10 @@ module.exports = {
   getUnits,
   getCategories,
   getFamilyIncomePeriodicityOptions,
-  getFamilyIncomeRecords,
+  getFamilyIncomeRecords: withValidation(
+    getFamilyIncomeRecordsSchema,
+    getFamilyIncomeRecords
+  ),
   getPurchases: withValidation(getPurchasesSchema, getPurchases),
   getPurchasesCategorySuggestion: withValidation(
     getPurchasesCategorySuggestionSchema,
