@@ -1,7 +1,7 @@
 const { GraphQLError } = require("graphql");
 
 module.exports = {
-  item: async (parent, _, { logger, itemLoader }) => {
+  item: async (parent, _, { logger, loaders: { itemLoader } }) => {
     try {
       const item = await itemLoader.load(parent.itemId);
 
@@ -24,7 +24,7 @@ module.exports = {
         "Failed to retrieve item. Please try again later.",
         {
           extensions: {
-            code: "GET_ITEM_ERROR",
+            code: error.extensions?.code || "GET_ITEM_ERROR",
             detailedMessage: error.message,
           },
         }
