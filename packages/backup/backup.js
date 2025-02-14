@@ -30,7 +30,7 @@ const getMongoData = async () => {
   } finally {
     await client.close();
   }
-  return JSON.stringify(backupData, null, 2);
+  return JSON.stringify(backupData);
 };
 
 const getJsonHash = (data) => {
@@ -44,7 +44,7 @@ async function createBackupFile(backupData) {
   const fileName = 'tmp.json';
   const filePath = path.join(fileName);
 
-  fs.writeFileSync(filePath, JSON.stringify(backupData, null, 2));
+  fs.writeFileSync(filePath, backupData);
   console.log('Database export completed to tmp file!');
 
   return {
