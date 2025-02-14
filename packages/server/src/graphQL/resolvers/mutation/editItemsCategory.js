@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (
   _,
@@ -22,7 +23,7 @@ module.exports = async (
       "Failed to update items category. Please try again later.",
       {
         extensions: {
-          code: "EDIT_ITEMS_CATEGORY_ERROR",
+          code: ERROR_CODES.EDIT_ITEMS_CATEGORY_ERROR,
           detailedMessage: error.message,
         },
       }

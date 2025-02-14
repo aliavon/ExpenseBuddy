@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (_, __, { schemas: { Item }, logger }) => {
   try {
@@ -17,7 +18,7 @@ module.exports = async (_, __, { schemas: { Item }, logger }) => {
       "Failed to retrieve categories. Please try again later.",
       {
         extensions: {
-          code: "GET_CATEGORIES_ERROR",
+          code: ERROR_CODES.GET_CATEGORIES_ERROR,
           detailedMessage: error.message,
         },
       }

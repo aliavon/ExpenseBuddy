@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (_, { from, to }, { schemas: { Purchase }, logger }) => {
   try {
@@ -18,7 +19,7 @@ module.exports = async (_, { from, to }, { schemas: { Purchase }, logger }) => {
       "Failed to retrieve purchases. Please try again later.",
       {
         extensions: {
-          code: "GET_PURCHASES_ERROR",
+          code: ERROR_CODES.GET_PURCHASES_ERROR,
           detailedMessage: error.message,
         },
       }

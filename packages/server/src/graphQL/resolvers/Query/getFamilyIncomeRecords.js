@@ -1,5 +1,6 @@
 const { GraphQLError } = require("graphql");
 const { SORT_ORDER } = require("../../../constants/sortOrder");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (
   _,
@@ -67,7 +68,7 @@ module.exports = async (
       "Failed to retrieve FamilyIncome records. Please try again later.",
       {
         extensions: {
-          code: "GET_FAMILY_INCOME_ERROR",
+          code: ERROR_CODES.GET_FAMILY_INCOME_ERROR,
           detailedMessage: error.message,
         },
       }

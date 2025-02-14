@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (_, { names }, { schemas: { Item }, logger }) => {
   try {
@@ -25,7 +26,7 @@ module.exports = async (_, { names }, { schemas: { Item }, logger }) => {
       "Failed to retrieve purchases category suggestion. Please try again later.",
       {
         extensions: {
-          code: "GET_PURCHASES_CATEGORY_SUGGESTION_ERROR",
+          code: ERROR_CODES.GET_PURCHASES_CATEGORY_SUGGESTION_ERROR,
           detailedMessage: error.message,
         },
       }

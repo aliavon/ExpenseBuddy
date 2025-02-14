@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (_, __, { schemas: { Purchase }, logger }) => {
   try {
@@ -15,7 +16,7 @@ module.exports = async (_, __, { schemas: { Purchase }, logger }) => {
       "Failed to retrieve units. Please try again later.",
       {
         extensions: {
-          code: "GET_UNITS_ERROR",
+          code: ERROR_CODES.GET_UNITS_ERROR,
           detailedMessage: error.message,
         },
       }

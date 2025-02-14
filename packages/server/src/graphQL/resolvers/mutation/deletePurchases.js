@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (_, { ids }, { schemas: { Purchase }, logger }) => {
   try {
@@ -11,7 +12,7 @@ module.exports = async (_, { ids }, { schemas: { Purchase }, logger }) => {
       "Failed to delete purchases. Please try again later.",
       {
         extensions: {
-          code: "DELETE_PURCHASES_ERROR",
+          code: ERROR_CODES.DELETE_PURCHASES_ERROR,
           detailedMessage: error.message,
         },
       }

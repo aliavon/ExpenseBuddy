@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../constants/errorCodes");
 
 module.exports = {
   type: async (parent, _, { logger, loaders: { incomeTypeLoader } }) => {
@@ -7,7 +8,7 @@ module.exports = {
       if (!incomeType) {
         logger.error({ parentId: parent.typeId }, "IncomeType not found");
         throw new GraphQLError(`IncomeType not found for id ${parent.typeId}`, {
-          extensions: { code: "INCOME_TYPE_NOT_FOUND" },
+          extensions: { code: ERROR_CODES.INCOME_TYPE_NOT_FOUND },
         });
       }
       return incomeType;
@@ -20,7 +21,7 @@ module.exports = {
         "Failed to retrieve IncomeType. Please try again later.",
         {
           extensions: {
-            code: error.extensions?.code || "GET_INCOME_TYPE_ERROR",
+            code: error.extensions?.code || ERROR_CODES.GET_INCOME_TYPE_ERROR,
             detailedMessage: error.message,
           },
         }
@@ -35,7 +36,7 @@ module.exports = {
         logger.error({ parentId: parent.contributorId }, "User not found");
         throw new GraphQLError(
           `User not found for id ${parent.contributorId}`,
-          { extensions: { code: "USER_NOT_FOUND" } }
+          { extensions: { code: ERROR_CODES.USER_NOT_FOUND } }
         );
       }
       return user;
@@ -48,7 +49,7 @@ module.exports = {
         "Failed to retrieve user. Please try again later.",
         {
           extensions: {
-            code: error.extensions?.code || "GET_USER_ERROR",
+            code: error.extensions?.code || ERROR_CODES.GET_USER_ERROR,
             detailedMessage: error.message,
           },
         }

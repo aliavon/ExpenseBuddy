@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (
   _,
@@ -15,7 +16,7 @@ module.exports = async (
       error.message || "Failed to add purchases. Please try again later.",
       {
         extensions: {
-          code: error.extensions?.code || "ADD_PURCHASES_ERROR",
+          code: error.extensions?.code || ERROR_CODES.ADD_PURCHASES_ERROR,
           detailedMessage: error.message,
         },
       }

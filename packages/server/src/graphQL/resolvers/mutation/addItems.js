@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (_, { items }, { schemas: { Item }, logger }) => {
   try {
@@ -9,7 +10,7 @@ module.exports = async (_, { items }, { schemas: { Item }, logger }) => {
     logger.error({ err: error }, "Error adding items");
     throw new GraphQLError("Failed to add items. Please try again later.", {
       extensions: {
-        code: "ADD_ITEMS_ERROR",
+        code: ERROR_CODES.ADD_ITEMS_ERROR,
         detailedMessage: error.message,
       },
     });

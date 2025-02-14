@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 module.exports = async (
   _,
@@ -22,7 +23,7 @@ module.exports = async (
       "Failed to retrieve items. Please try again later.",
       {
         extensions: {
-          code: "GET_ITEMS_ERROR",
+          code: ERROR_CODES.GET_ITEMS_ERROR,
           detailedMessage: error.message,
         },
       }
