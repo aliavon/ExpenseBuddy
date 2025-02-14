@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
-const { PERIODICITY } = require("../../constants/familyIncomeEnums");
+const {
+  PERIODICITY,
+  PERIODICITY_VALUES,
+} = require("../../constants/familyIncomeEnums");
 const modelNames = require("../modelNames");
 
 const familyIncomeSchema = new mongoose.Schema({
@@ -29,7 +32,7 @@ const familyIncomeSchema = new mongoose.Schema({
   },
   periodicity: {
     type: String,
-    enum: Object.values(PERIODICITY),
+    enum: PERIODICITY_VALUES,
     default: PERIODICITY.ONE_TIME,
   },
 });

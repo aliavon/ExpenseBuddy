@@ -1,4 +1,5 @@
 const { SORT_ORDER_VALUES } = require("../constants/sortOrder");
+const { PERIODICITY_VALUES } = require("../constants/familyIncomeEnums");
 
 module.exports = `
   type Query {
@@ -30,7 +31,7 @@ module.exports = `
     date: String!
     amount: Float!
     note: String
-    periodicity: String!
+    periodicity: Periodicity!
     type: IncomeType
     contributor: User
   }
@@ -53,6 +54,8 @@ module.exports = `
   }
 
   enum SortOrder { ${SORT_ORDER_VALUES.join(", ")} }
+
+  enum Periodicity {${PERIODICITY_VALUES.join(", ")}}
 
   input PaginationInput {
     page: Int!

@@ -1,9 +1,12 @@
-const { PERIODICITY } = require("../../../constants/familyIncomeEnums");
+const { PERIODICITY_VALUES } = require("../../../constants/familyIncomeEnums");
 
 module.exports = async () => {
-  const options = Object.entries(PERIODICITY).map(([key, value]) => ({
+  const options = PERIODICITY_VALUES.map((value) => ({
     value,
-    label: key.replace("_", " ").toLowerCase(), // "ONE_TIME" -> "one time"
+    label: value
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" "),
   }));
   return options;
 };
