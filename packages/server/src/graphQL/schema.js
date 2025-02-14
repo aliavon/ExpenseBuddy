@@ -55,7 +55,7 @@ module.exports = `
 
   enum SortOrder { ${SORT_ORDER_VALUES.join(", ")} }
 
-  enum Periodicity {${PERIODICITY_VALUES.join(", ")}}
+  enum Periodicity { ${PERIODICITY_VALUES.join(", ")} }
 
   input PaginationInput {
     page: Int!

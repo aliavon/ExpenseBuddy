@@ -1,9 +1,9 @@
 const PERIODICITY = {
-  ONE_TIME: "one-time",
-  DAILY: "daily",
-  WEEKLY: "weekly",
-  MONTHLY: "monthly",
-  YEARLY: "yearly",
+  ONE_TIME: "ONE_TIME",
+  DAILY: "DAILY",
+  WEEKLY: "WEEKLY",
+  MONTHLY: "MONTHLY",
+  YEARLY: "YEARLY",
 };
 
 module.exports = {

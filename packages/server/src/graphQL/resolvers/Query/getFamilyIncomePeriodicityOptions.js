@@ -4,8 +4,8 @@ module.exports = async () => {
   const options = PERIODICITY_VALUES.map((value) => ({
     value,
     label: value
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" "),
   }));
   return options;
