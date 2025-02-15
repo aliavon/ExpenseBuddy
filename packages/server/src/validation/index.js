@@ -10,6 +10,11 @@ const getPurchasesCategorySuggestionSchema = require("./getPurchasesCategorySugg
 
 const getFamilyIncomeRecordsSchema = require("./getFamilyIncomeRecordsSchema");
 
+// Currency
+const createCurrenciesSchema = require("./createCurrenciesSchema");
+const updateCurrenciesSchema = require("./updateCurrenciesSchema");
+const deleteCurrenciesSchema = require("./deleteCurrenciesSchema");
+
 const withValidation = require("./withValidation");
 
 module.exports = {
@@ -24,6 +29,10 @@ module.exports = {
   updatePurchasesSchema,
 
   getFamilyIncomeRecordsSchema,
+
+  createCurrenciesSchema,
+  updateCurrenciesSchema,
+  deleteCurrenciesSchema,
 
   withValidation,
 };

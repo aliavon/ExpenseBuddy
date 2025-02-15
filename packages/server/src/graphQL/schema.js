@@ -20,6 +20,23 @@ module.exports = `
     deletePurchases(ids: [ID!]!): [ID!]!
     addItems(items: [ItemInput!]!): [Item!]!
     editItemsCategory(names: [String!]!, newCategory: String!): [Item!]!
+
+    createCurrencies(currencies: [CurrencyInput!]!): [Currency!]!
+    updateCurrencies(updates: [UpdateCurrencyInput!]!): [Currency!]!
+    deleteCurrencies(ids: [ID!]!): [ID!]!
+  }
+
+  input CurrencyInput {
+    name: String!
+    code: String!
+    symbol: String
+  }
+
+  input UpdateCurrencyInput {
+    id: ID!
+    name: String
+    code: String
+    symbol: String
   }
 
   type FamilyIncomeRecordsResponse {
