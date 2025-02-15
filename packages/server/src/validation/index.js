@@ -21,6 +21,7 @@ const updateIncomeTypesSchema = require("./updateIncomeTypesSchema");
 const deleteIncomeTypesSchema = require("./deleteIncomeTypesSchema");
 
 const withValidation = require("./withValidation");
+const withValidationCurried = require("./withValidationCurried");
 
 module.exports = {
   getItemsSchema,
@@ -44,4 +45,5 @@ module.exports = {
   deleteIncomeTypesSchema,
 
   withValidation,
+  withValidationCurried,
 };

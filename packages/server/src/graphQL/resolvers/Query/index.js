@@ -1,10 +1,18 @@
+const composeResolvers = require("../composeResolvers");
+
 const {
   getItemsSchema,
   getPurchasesSchema,
   getPurchasesCategorySuggestionSchema,
   getFamilyIncomeRecordsSchema,
   withValidation,
+  withValidationCurried,
 } = require("../../../validation");
+
+const {
+  withErrorHandlingCurried,
+  defaultHandlerArgs,
+} = require("../error-handling");
 
 const getPurchases = require("./getPurchases");
 const getCategories = require("./getCategories");
@@ -18,13 +26,18 @@ const getIncomeTypes = require("./getIncomeTypes");
 
 module.exports = {
   getUnits,
-  getCategories,
+  getCategories: composeResolvers(
+    withErrorHandlingCurried(defaultHandlerArgs.getCategories)
+  )(getCategories),
   getFamilyIncomePeriodicityOptions,
   getFamilyIncomeRecords: withValidation(
     getFamilyIncomeRecordsSchema,
     getFamilyIncomeRecords
   ),
-  getPurchases: withValidation(getPurchasesSchema, getPurchases),
+  getPurchases: composeResolvers(
+    withErrorHandlingCurried(defaultHandlerArgs.getPurchases),
+    withValidationCurried(getPurchasesSchema)
+  )(getPurchases),
   getPurchasesCategorySuggestion: withValidation(
     getPurchasesCategorySuggestionSchema,
     getPurchasesCategorySuggestion
