@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const { SORT_ORDER_VALUES } = require("../constants/sortOrder");
+const { MONGO_ID_REGEXP } = require("../constants");
 
 const familyIncomeFiltersSchema = Joi.object({
   dateFrom: Joi.string().isoDate().optional().messages({
@@ -10,18 +11,12 @@ const familyIncomeFiltersSchema = Joi.object({
     "string.isoDate": '"dateTo" must be a valid ISO date',
     "string.empty": '"dateTo" cannot be empty',
   }),
-  contributorId: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .optional()
-    .messages({
-      "string.pattern.base": '"contributorId" must be a valid ObjectId',
-    }),
-  typeId: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .optional()
-    .messages({
-      "string.pattern.base": '"typeId" must be a valid ObjectId',
-    }),
+  contributorId: Joi.string().pattern(MONGO_ID_REGEXP).optional().messages({
+    "string.pattern.base": '"contributorId" must be a valid ObjectId',
+  }),
+  typeId: Joi.string().pattern(MONGO_ID_REGEXP).optional().messages({
+    "string.pattern.base": '"typeId" must be a valid ObjectId',
+  }),
 }).optional();
 
 const paginationSchema = Joi.object({

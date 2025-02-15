@@ -1,8 +1,9 @@
 const Joi = require("joi");
+const { MONGO_ID_REGEXP } = require("../constants");
 
 const deleteCurrenciesSchema = Joi.object({
   ids: Joi.array()
-    .items(Joi.string().regex(/^[0-9a-fA-F]{24}$/))
+    .items(Joi.string().regex(MONGO_ID_REGEXP))
     .min(1)
     .required()
     .messages({
