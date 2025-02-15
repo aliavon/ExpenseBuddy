@@ -1,5 +1,5 @@
 const { GraphQLError } = require("graphql");
-const ERROR_CODES = require("../constants/errorCodes");
+const ERROR_CODES = require("../../../constants/errorCodes");
 
 /**
  * Wrapper for resolvers that performs validation of input arguments.

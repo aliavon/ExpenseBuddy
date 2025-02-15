@@ -11,7 +11,7 @@ const {
   updateIncomeTypesSchema,
   deleteIncomeTypesSchema,
   withValidation,
-} = require("../../../validation");
+} = require("../validation");
 
 const addPurchases = require("./addPurchases");
 const updatePurchases = require("./updatePurchases");

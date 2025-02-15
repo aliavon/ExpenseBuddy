@@ -1,6 +1,6 @@
 const Joi = require("joi");
-const { SORT_ORDER_VALUES } = require("../constants/sortOrder");
-const { MONGO_ID_REGEXP } = require("../constants");
+const { SORT_ORDER_VALUES } = require("../../../constants/sortOrder");
+const { MONGO_ID_REGEXP } = require("../../../constants");
 
 const familyIncomeFiltersSchema = Joi.object({
   dateFrom: Joi.string().isoDate().optional().messages({

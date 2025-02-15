@@ -7,7 +7,7 @@ const {
   getFamilyIncomeRecordsSchema,
   withValidation,
   withValidationCurried,
-} = require("../../../validation");
+} = require("../validation");
 
 const {
   withErrorHandlingCurried,

@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { MONGO_ID_REGEXP } = require("../constants");
+const { MONGO_ID_REGEXP } = require("../../../constants");
 
 const updateCurrencyInputSchema = Joi.object({
   id: Joi.string().regex(MONGO_ID_REGEXP).required().messages({
