@@ -1,3 +1,4 @@
 const withErrorHandling = require("./withErrorHandling");
+const withErrorHandlingCurried = require("./withErrorHandlingCurried");
 
-module.exports = { withErrorHandling };
+module.exports = { withErrorHandling, withErrorHandlingCurried };
