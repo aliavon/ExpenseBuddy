@@ -9,6 +9,7 @@ module.exports = `
     getPurchasesCategorySuggestion(names: [String!]!): [PurchaseCategoryInfo!]!
     getItems(names: [String!], category: String): [Item!]!
     getCurrencies: [Currency!]!
+    getIncomeTypes: [IncomeType!]!
 
     getFamilyIncomePeriodicityOptions: [Option!]!
     getFamilyIncomeRecords(filters: FamilyIncomeFiltersInput, pagination: PaginationInput!, sort: SortInput): FamilyIncomeRecordsResponse!
@@ -24,6 +25,21 @@ module.exports = `
     createCurrencies(currencies: [CurrencyInput!]!): [Currency!]!
     updateCurrencies(updates: [UpdateCurrencyInput!]!): [Currency!]!
     deleteCurrencies(ids: [ID!]!): [ID!]!
+
+    createIncomeTypes(incomeTypes: [IncomeTypeInput!]!): [IncomeType!]!
+    updateIncomeTypes(updates: [UpdateIncomeTypeInput!]!): [IncomeType!]!
+    deleteIncomeTypes(ids: [ID!]!): [ID!]!
+  }
+
+  input IncomeTypeInput {
+    name: String!
+    description: String
+  }
+
+  input UpdateIncomeTypeInput {
+    id: ID!
+    name: String
+    description: String
   }
 
   input CurrencyInput {

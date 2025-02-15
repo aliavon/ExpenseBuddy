@@ -15,6 +15,11 @@ const createCurrenciesSchema = require("./createCurrenciesSchema");
 const updateCurrenciesSchema = require("./updateCurrenciesSchema");
 const deleteCurrenciesSchema = require("./deleteCurrenciesSchema");
 
+//IncomeType
+const createIncomeTypesSchema = require("./createIncomeTypesSchema");
+const updateIncomeTypesSchema = require("./updateIncomeTypesSchema");
+const deleteIncomeTypesSchema = require("./deleteIncomeTypesSchema");
+
 const withValidation = require("./withValidation");
 
 module.exports = {
@@ -33,6 +38,10 @@ module.exports = {
   createCurrenciesSchema,
   updateCurrenciesSchema,
   deleteCurrenciesSchema,
+
+  createIncomeTypesSchema,
+  updateIncomeTypesSchema,
+  deleteIncomeTypesSchema,
 
   withValidation,
 };

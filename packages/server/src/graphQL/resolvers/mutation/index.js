@@ -7,6 +7,9 @@ const {
   createCurrenciesSchema,
   updateCurrenciesSchema,
   deleteCurrenciesSchema,
+  createIncomeTypesSchema,
+  updateIncomeTypesSchema,
+  deleteIncomeTypesSchema,
   withValidation,
 } = require("../../../validation");
 
@@ -18,6 +21,9 @@ const editItemsCategory = require("./editItemsCategory");
 const createCurrencies = require("./createCurrencies");
 const updateCurrencies = require("./updateCurrencies");
 const deleteCurrencies = require("./deleteCurrencies");
+const createIncomeTypes = require("./createIncomeTypes");
+const updateIncomeTypes = require("./updateIncomeTypes");
+const deleteIncomeTypes = require("./deleteIncomeTypes");
 
 module.exports = {
   addPurchases: withValidation(addPurchasesSchema, addPurchases),
@@ -29,4 +35,8 @@ module.exports = {
   createCurrencies: withValidation(createCurrenciesSchema, createCurrencies),
   updateCurrencies: withValidation(updateCurrenciesSchema, updateCurrencies),
   deleteCurrencies: withValidation(deleteCurrenciesSchema, deleteCurrencies),
+
+  createIncomeTypes: withValidation(createIncomeTypesSchema, createIncomeTypes),
+  updateIncomeTypes: withValidation(updateIncomeTypesSchema, updateIncomeTypes),
+  deleteIncomeTypes: withValidation(deleteIncomeTypesSchema, deleteIncomeTypes),
 };

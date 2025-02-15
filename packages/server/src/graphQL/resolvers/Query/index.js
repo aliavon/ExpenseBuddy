@@ -14,6 +14,7 @@ const getItems = require("./getItems");
 const getFamilyIncomePeriodicityOptions = require("./getFamilyIncomePeriodicityOptions");
 const getFamilyIncomeRecords = require("./getFamilyIncomeRecords");
 const getCurrencies = require("./getCurrencies");
+const getIncomeTypes = require("./getIncomeTypes");
 
 module.exports = {
   getUnits,
@@ -30,4 +31,5 @@ module.exports = {
   ),
   getItems: withValidation(getItemsSchema, getItems),
   getCurrencies,
+  getIncomeTypes,
 };
