@@ -4,4 +4,5 @@ module.exports = {
   Item: "Item",
   Purchase: "Purchase",
   User: "User",
+  Currency: "Currency",
 };

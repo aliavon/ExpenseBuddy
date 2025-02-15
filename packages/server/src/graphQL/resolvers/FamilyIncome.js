@@ -56,4 +56,33 @@ module.exports = {
       );
     }
   },
+  currency: async (parent, _, { logger, loaders: { currencyLoader } }) => {
+    try {
+      const currency = await currencyLoader.load(parent.currencyId.toString());
+      if (!currency) {
+        logger.error({ parentId: parent.currencyId }, "Currency not found");
+        throw new GraphQLError(
+          `Currency not found for id ${parent.currencyId}`,
+          {
+            extensions: { code: ERROR_CODES.CURRENCY_NOT_FOUND },
+          }
+        );
+      }
+      return currency;
+    } catch (error) {
+      logger.error(
+        { err: error, parentId: parent.currencyId },
+        "Error retrieving Currency"
+      );
+      throw new GraphQLError(
+        "Failed to retrieve Currency. Please try again later.",
+        {
+          extensions: {
+            code: error.extensions?.code || ERROR_CODES.GET_CURRENCY_ERROR,
+            detailedMessage: error.message,
+          },
+        }
+      );
+    }
+  },
 };

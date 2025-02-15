@@ -3,6 +3,7 @@ const { createSchema, createYoga } = require("graphql-yoga");
 const createItemLoader = require("../loaders/itemLoader");
 const createIncomeTypeLoader = require("../loaders/incomeTypeLoader");
 const createUserLoader = require("../loaders/userLoader");
+const createCurrencyLoader = require("../loaders/currencyLoader");
 
 const schemas = require("../database/schemas");
 const resolvers = require("../graphQL/resolvers");
@@ -17,6 +18,7 @@ module.exports = createYoga({
       itemLoader: createItemLoader(),
       incomeTypeLoader: createIncomeTypeLoader(),
       userLoader: createUserLoader(),
+      currencyLoader: createCurrencyLoader(),
     },
   },
   schema: createSchema({

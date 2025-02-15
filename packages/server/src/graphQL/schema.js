@@ -8,6 +8,7 @@ module.exports = `
     getUnits: [String!]!
     getPurchasesCategorySuggestion(names: [String!]!): [PurchaseCategoryInfo!]!
     getItems(names: [String!], category: String): [Item!]!
+    getCurrencies: [Currency!]!
 
     getFamilyIncomePeriodicityOptions: [Option!]!
     getFamilyIncomeRecords(filters: FamilyIncomeFiltersInput, pagination: PaginationInput!, sort: SortInput): FamilyIncomeRecordsResponse!
@@ -34,6 +35,14 @@ module.exports = `
     periodicity: Periodicity!
     type: IncomeType
     contributor: User
+    currency: Currency
+  }
+
+  type Currency {
+    id: ID!
+    name: String!
+    code: String!
+    symbol: String
   }
 
   type IncomeType {

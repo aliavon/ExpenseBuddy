@@ -35,6 +35,11 @@ const familyIncomeSchema = new mongoose.Schema({
     enum: PERIODICITY_VALUES,
     default: PERIODICITY.ONE_TIME,
   },
+  currencyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: modelNames.Currency,
+    required: true,
+  },
 });
 
 familyIncomeSchema.index({ date: 1 });
