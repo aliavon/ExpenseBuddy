@@ -86,4 +86,8 @@ module.exports = {
     defaultErrorMessage:
       "Failed to update items category. Please try again later.",
   },
+  getUsers: {
+    defaultErrorCode: ERROR_CODES.GET_USERS_ERROR,
+    defaultErrorMessage: "Failed to retrieve users. Please try again later.",
+  },
 };

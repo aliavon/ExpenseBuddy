@@ -5,6 +5,7 @@ const {
   getPurchasesSchema,
   getPurchasesCategorySuggestionSchema,
   getFamilyIncomeRecordsSchema,
+  getUsersSchema,
   withValidationCurried,
 } = require("../validation");
 
@@ -23,6 +24,7 @@ const getFamilyIncomePeriodicityOptions = require("./getFamilyIncomePeriodicityO
 const getFamilyIncomeRecords = require("./getFamilyIncomeRecords");
 const getCurrencies = require("./getCurrencies");
 const getIncomeTypes = require("./getIncomeTypes");
+const getUsers = require("./getUsers");
 
 const withCompose = (errorHandleArg, validationArg, resolver) =>
   composeResolvers(
@@ -61,4 +63,5 @@ module.exports = {
     getIncomeTypes,
     defaultHandlerArgs.getIncomeTypes
   ),
+  getUsers: withCompose(defaultHandlerArgs.getUsers, getUsersSchema, getUsers),
 };

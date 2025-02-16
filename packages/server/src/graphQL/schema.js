@@ -10,6 +10,7 @@ module.exports = `
     getItems(names: [String!], category: String): [Item!]!
     getCurrencies: [Currency!]!
     getIncomeTypes: [IncomeType!]!
+    getUsers(search: String): [User!]!
 
     getFamilyIncomePeriodicityOptions: [Option!]!
     getFamilyIncomeRecords(filters: FamilyIncomeFiltersInput, pagination: PaginationInput!, sort: SortInput): FamilyIncomeRecordsResponse!
@@ -86,7 +87,10 @@ module.exports = `
 
   type User {
     id: ID!
-    name: String!
+    firstName: String!
+    lastName: String!
+    fullName: String!
+    middleName: String
     isVerified: Boolean!
   }
 

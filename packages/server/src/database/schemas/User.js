@@ -3,7 +3,15 @@ const modelNames = require("../modelNames");
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    middleName: {
+      type: String,
+      default: "",
+    },
+    lastName: {
       type: String,
       required: true,
     },
