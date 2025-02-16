@@ -20,6 +20,10 @@ const createIncomeTypesSchema = require("./createIncomeTypesSchema");
 const updateIncomeTypesSchema = require("./updateIncomeTypesSchema");
 const deleteIncomeTypesSchema = require("./deleteIncomeTypesSchema");
 
+// User
+const createUserSchema = require("./createUserSchema");
+const updateUserSchema = require("./updateUserSchema");
+const deleteUserSchema = require("./deleteUserSchema");
 const getUsersSchema = require("./getUsersSchema");
 
 const withValidation = require("./withValidation");
@@ -46,6 +50,9 @@ module.exports = {
   updateIncomeTypesSchema,
   deleteIncomeTypesSchema,
 
+  createUserSchema,
+  updateUserSchema,
+  deleteUserSchema,
   getUsersSchema,
 
   withValidation,

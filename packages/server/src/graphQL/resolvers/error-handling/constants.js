@@ -90,4 +90,16 @@ module.exports = {
     defaultErrorCode: ERROR_CODES.GET_USERS_ERROR,
     defaultErrorMessage: "Failed to retrieve users. Please try again later.",
   },
+  createUser: {
+    defaultErrorCode: ERROR_CODES.ADD_USER_ERROR,
+    defaultErrorMessage: "Failed to create user. Please try again later.",
+  },
+  updateUser: {
+    defaultErrorCode: ERROR_CODES.UPDATE_USER_ERROR,
+    defaultErrorMessage: "Failed to update user. Please try again later.",
+  },
+  deleteUser: {
+    defaultErrorCode: ERROR_CODES.DELETE_USER_ERROR,
+    defaultErrorMessage: "Failed to delete user. Please try again later.",
+  },
 };

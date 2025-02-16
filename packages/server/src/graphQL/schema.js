@@ -58,6 +58,11 @@ module.exports = `
     createIncomeTypes(incomeTypes: [IncomeTypeInput!]!): [IncomeType!]!
     updateIncomeTypes(updates: [UpdateIncomeTypeInput!]!): [IncomeType!]!
     deleteIncomeTypes(ids: [ID!]!): [ID!]!
+
+    # Mutations for User-related operations
+    createUser(user: UserInput!): User!
+    updateUser(user: UpdateUserInput!): User!
+    deleteUser(id: ID!): ID!
   }
 
   # ----- IncomeType-related inputs and types -----
@@ -168,7 +173,6 @@ module.exports = `
     firstName: String!
     middleName: String
     lastName: String!
-    isVerified: Boolean
   }
 
   input UpdateUserInput {
