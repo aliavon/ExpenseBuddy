@@ -65,4 +65,25 @@ module.exports = {
     defaultErrorCode: ERROR_CODES.GET_UNITS_ERROR,
     defaultErrorMessage: "Failed to retrieve units. Please try again later.",
   },
+  addPurchases: {
+    defaultErrorCode: ERROR_CODES.ADD_PURCHASES_ERROR,
+    defaultErrorMessage: "Failed to add purchases. Please try again later.",
+  },
+  updatePurchases: {
+    defaultErrorCode: ERROR_CODES.UPDATE_PURCHASES_ERROR,
+    defaultErrorMessage: "Failed to update purchases. Please try again later.",
+  },
+  deletePurchases: {
+    defaultErrorCode: ERROR_CODES.DELETE_PURCHASES_ERROR,
+    defaultErrorMessage: "Failed to delete purchases. Please try again later.",
+  },
+  addItems: {
+    defaultErrorCode: ERROR_CODES.ADD_ITEMS_ERROR,
+    defaultErrorMessage: "Failed to add items. Please try again later.",
+  },
+  editItemsCategory: {
+    defaultErrorCode: ERROR_CODES.EDIT_ITEMS_CATEGORY_ERROR,
+    defaultErrorMessage:
+      "Failed to update items category. Please try again later.",
+  },
 };

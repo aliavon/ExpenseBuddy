@@ -1,3 +1,5 @@
+const composeResolvers = require("../composeResolvers");
+
 const {
   addItemsSchema,
   addPurchasesSchema,
@@ -10,8 +12,13 @@ const {
   createIncomeTypesSchema,
   updateIncomeTypesSchema,
   deleteIncomeTypesSchema,
-  withValidation,
+  withValidationCurried,
 } = require("../validation");
+
+const {
+  withErrorHandlingCurried,
+  defaultHandlerArgs,
+} = require("../error-handling");
 
 const addPurchases = require("./addPurchases");
 const updatePurchases = require("./updatePurchases");
@@ -25,18 +32,64 @@ const createIncomeTypes = require("./createIncomeTypes");
 const updateIncomeTypes = require("./updateIncomeTypes");
 const deleteIncomeTypes = require("./deleteIncomeTypes");
 
+const withCompose = (errorHandleArg, validationArg, resolver) =>
+  composeResolvers(
+    withErrorHandlingCurried(errorHandleArg),
+    withValidationCurried(validationArg)
+  )(resolver);
+
 module.exports = {
-  addPurchases: withValidation(addPurchasesSchema, addPurchases),
-  updatePurchases: withValidation(updatePurchasesSchema, updatePurchases),
-  deletePurchases: withValidation(deletePurchasesSchema, deletePurchases),
-  addItems: withValidation(addItemsSchema, addItems),
-  editItemsCategory: withValidation(editItemsCategorySchema, editItemsCategory),
+  addPurchases: withCompose(
+    defaultHandlerArgs.addPurchases,
+    addPurchasesSchema,
+    addPurchases
+  ),
+  updatePurchases: withCompose(
+    defaultHandlerArgs.updatePurchases,
+    updatePurchasesSchema,
+    updatePurchases
+  ),
+  deletePurchases: withCompose(
+    defaultHandlerArgs.deletePurchases,
+    deletePurchasesSchema,
+    deletePurchases
+  ),
+  addItems: withCompose(defaultHandlerArgs.addItems, addItemsSchema, addItems),
+  editItemsCategory: withCompose(
+    defaultHandlerArgs.editItemsCategory,
+    editItemsCategorySchema,
+    editItemsCategory
+  ),
 
-  createCurrencies: withValidation(createCurrenciesSchema, createCurrencies),
-  updateCurrencies: withValidation(updateCurrenciesSchema, updateCurrencies),
-  deleteCurrencies: withValidation(deleteCurrenciesSchema, deleteCurrencies),
+  createCurrencies: withCompose(
+    defaultHandlerArgs.createCurrencies,
+    createCurrenciesSchema,
+    createCurrencies
+  ),
+  updateCurrencies: withCompose(
+    defaultHandlerArgs.updateCurrencies,
+    updateCurrenciesSchema,
+    updateCurrencies
+  ),
+  deleteCurrencies: withCompose(
+    defaultHandlerArgs.deleteCurrencies,
+    deleteCurrenciesSchema,
+    deleteCurrencies
+  ),
 
-  createIncomeTypes: withValidation(createIncomeTypesSchema, createIncomeTypes),
-  updateIncomeTypes: withValidation(updateIncomeTypesSchema, updateIncomeTypes),
-  deleteIncomeTypes: withValidation(deleteIncomeTypesSchema, deleteIncomeTypes),
+  createIncomeTypes: withCompose(
+    defaultHandlerArgs.createIncomeTypes,
+    createIncomeTypesSchema,
+    createIncomeTypes
+  ),
+  updateIncomeTypes: withCompose(
+    defaultHandlerArgs.updateIncomeTypes,
+    updateIncomeTypesSchema,
+    updateIncomeTypes
+  ),
+  deleteIncomeTypes: withCompose(
+    defaultHandlerArgs.deleteIncomeTypes,
+    deleteIncomeTypesSchema,
+    deleteIncomeTypes
+  ),
 };
