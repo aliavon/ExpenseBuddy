@@ -32,13 +32,17 @@ const createIncomeTypes = require("./createIncomeTypes");
 const updateIncomeTypes = require("./updateIncomeTypes");
 const deleteIncomeTypes = require("./deleteIncomeTypes");
 
+// Helper function to compose wrappers.
+// Applies withValidationCurried first, then withErrorHandlingCurried.
 const withCompose = (errorHandleArg, validationArg, resolver) =>
   composeResolvers(
     withErrorHandlingCurried(errorHandleArg),
     withValidationCurried(validationArg)
   )(resolver);
 
+// Export mutation resolvers with validation and error handling wrappers applied
 module.exports = {
+  // Purchase mutations
   addPurchases: withCompose(
     defaultHandlerArgs.addPurchases,
     addPurchasesSchema,
@@ -54,6 +58,8 @@ module.exports = {
     deletePurchasesSchema,
     deletePurchases
   ),
+
+  // Item mutations
   addItems: withCompose(defaultHandlerArgs.addItems, addItemsSchema, addItems),
   editItemsCategory: withCompose(
     defaultHandlerArgs.editItemsCategory,
@@ -61,6 +67,7 @@ module.exports = {
     editItemsCategory
   ),
 
+  // Currency mutations
   createCurrencies: withCompose(
     defaultHandlerArgs.createCurrencies,
     createCurrenciesSchema,
@@ -77,6 +84,7 @@ module.exports = {
     deleteCurrencies
   ),
 
+  // IncomeType mutations
   createIncomeTypes: withCompose(
     defaultHandlerArgs.createIncomeTypes,
     createIncomeTypesSchema,

@@ -26,24 +26,16 @@ const getCurrencies = require("./getCurrencies");
 const getIncomeTypes = require("./getIncomeTypes");
 const getUsers = require("./getUsers");
 
+// Helper function to compose both validation and error handling wrappers.
+// It applies withValidationCurried first, then withErrorHandlingCurried.
 const withCompose = (errorHandleArg, validationArg, resolver) =>
   composeResolvers(
     withErrorHandlingCurried(errorHandleArg),
     withValidationCurried(validationArg)
   )(resolver);
 
-module.exports = {
-  getUnits: withErrorHandling(getUnits, defaultHandlerArgs.getUnits),
-  getCategories: withErrorHandling(
-    getCategories,
-    defaultHandlerArgs.getCategories
-  ),
-  getFamilyIncomePeriodicityOptions: getFamilyIncomePeriodicityOptions,
-  getFamilyIncomeRecords: withCompose(
-    defaultHandlerArgs.getFamilyIncomeRecords,
-    getFamilyIncomeRecordsSchema,
-    getFamilyIncomeRecords
-  ),
+// Purchase-related queries
+const purchasesResolvers = {
   getPurchases: withCompose(
     defaultHandlerArgs.getPurchases,
     getPurchasesSchema,
@@ -54,14 +46,55 @@ module.exports = {
     getPurchasesCategorySuggestionSchema,
     getPurchasesCategorySuggestion
   ),
+};
+
+// Item-related queries
+const itemsResolvers = {
   getItems: withCompose(defaultHandlerArgs.getItems, getItemsSchema, getItems),
+  getCategories: withErrorHandling(
+    getCategories,
+    defaultHandlerArgs.getCategories
+  ),
+  getUnits: withErrorHandling(getUnits, defaultHandlerArgs.getUnits),
+};
+
+// FamilyIncome-related queries
+const familyIncomeResolvers = {
+  getFamilyIncomePeriodicityOptions: getFamilyIncomePeriodicityOptions, // No validation/error handling needed
+  getFamilyIncomeRecords: withCompose(
+    defaultHandlerArgs.getFamilyIncomeRecords,
+    getFamilyIncomeRecordsSchema,
+    getFamilyIncomeRecords
+  ),
+};
+
+// Currency-related queries
+const currencyResolvers = {
   getCurrencies: withErrorHandling(
     getCurrencies,
     defaultHandlerArgs.getCurrencies
   ),
+};
+
+// IncomeType-related queries
+const incomeTypeResolvers = {
   getIncomeTypes: withErrorHandling(
     getIncomeTypes,
     defaultHandlerArgs.getIncomeTypes
   ),
+};
+
+// User-related queries
+const userResolvers = {
   getUsers: withCompose(defaultHandlerArgs.getUsers, getUsersSchema, getUsers),
+};
+
+// Export all grouped Query resolvers
+module.exports = {
+  ...purchasesResolvers,
+  ...itemsResolvers,
+  ...familyIncomeResolvers,
+  ...currencyResolvers,
+  ...incomeTypeResolvers,
+  ...userResolvers,
 };
