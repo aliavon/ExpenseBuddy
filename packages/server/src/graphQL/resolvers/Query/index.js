@@ -5,7 +5,6 @@ const {
   getPurchasesSchema,
   getPurchasesCategorySuggestionSchema,
   getFamilyIncomeRecordsSchema,
-  withValidation,
   withValidationCurried,
 } = require("../validation");
 
@@ -25,24 +24,35 @@ const getCurrencies = require("./getCurrencies");
 const getIncomeTypes = require("./getIncomeTypes");
 
 module.exports = {
-  getUnits,
+  getUnits: composeResolvers(
+    withErrorHandlingCurried(defaultHandlerArgs.getUnits)
+  )(getUnits),
   getCategories: composeResolvers(
     withErrorHandlingCurried(defaultHandlerArgs.getCategories)
   )(getCategories),
-  getFamilyIncomePeriodicityOptions,
-  getFamilyIncomeRecords: withValidation(
-    getFamilyIncomeRecordsSchema,
-    getFamilyIncomeRecords
+  getFamilyIncomePeriodicityOptions: composeResolvers()(
+    getFamilyIncomePeriodicityOptions
   ),
+  getFamilyIncomeRecords: composeResolvers(
+    withErrorHandlingCurried(defaultHandlerArgs.getFamilyIncomeRecords),
+    withValidationCurried(getFamilyIncomeRecordsSchema)
+  )(getFamilyIncomeRecords),
   getPurchases: composeResolvers(
     withErrorHandlingCurried(defaultHandlerArgs.getPurchases),
     withValidationCurried(getPurchasesSchema)
   )(getPurchases),
-  getPurchasesCategorySuggestion: withValidation(
-    getPurchasesCategorySuggestionSchema,
-    getPurchasesCategorySuggestion
-  ),
-  getItems: withValidation(getItemsSchema, getItems),
-  getCurrencies,
-  getIncomeTypes,
+  getPurchasesCategorySuggestion: composeResolvers(
+    withErrorHandlingCurried(defaultHandlerArgs.getPurchasesCategorySuggestion),
+    withValidationCurried(getPurchasesCategorySuggestionSchema)
+  )(getPurchasesCategorySuggestion),
+  getItems: composeResolvers(
+    withErrorHandlingCurried(defaultHandlerArgs.getItems),
+    withValidationCurried(getItemsSchema)
+  )(getItems),
+  getCurrencies: composeResolvers(
+    withErrorHandlingCurried(defaultHandlerArgs.getCurrencies)
+  )(getCurrencies),
+  getIncomeTypes: composeResolvers(
+    withErrorHandlingCurried(defaultHandlerArgs.getIncomeTypes)
+  )(getIncomeTypes),
 };

@@ -11,4 +11,58 @@ module.exports = {
     defaultErrorMessage:
       "Failed to retrieve categories. Please try again later.",
   },
+  getCurrencies: {
+    defaultErrorCode: ERROR_CODES.GET_CURRENCIES_ERROR,
+    defaultErrorMessage:
+      "Failed to retrieve currencies. Please try again later.",
+  },
+  getFamilyIncomeRecords: {
+    defaultErrorCode: ERROR_CODES.GET_FAMILY_INCOME_ERROR,
+    defaultErrorMessage:
+      "Failed to retrieve family income records. Please try again later.",
+  },
+  getIncomeTypes: {
+    defaultErrorCode: ERROR_CODES.GET_INCOME_TYPES_ERROR,
+    defaultErrorMessage:
+      "Failed to retrieve income types. Please try again later.",
+  },
+  createCurrencies: {
+    defaultErrorCode: ERROR_CODES.ADD_CURRENCIES_ERROR,
+    defaultErrorMessage: "Failed to add currencies. Please try again later.",
+  },
+  updateCurrencies: {
+    defaultErrorCode: ERROR_CODES.UPDATE_CURRENCIES_ERROR,
+    defaultErrorMessage: "Failed to update currencies. Please try again later.",
+  },
+  deleteCurrencies: {
+    defaultErrorCode: ERROR_CODES.DELETE_CURRENCIES_ERROR,
+    defaultErrorMessage: "Failed to delete currencies. Please try again later.",
+  },
+  createIncomeTypes: {
+    defaultErrorCode: ERROR_CODES.ADD_INCOME_TYPE_ERROR,
+    defaultErrorMessage: "Failed to add income types. Please try again later.",
+  },
+  updateIncomeTypes: {
+    defaultErrorCode: ERROR_CODES.UPDATE_INCOME_TYPE_ERROR,
+    defaultErrorMessage:
+      "Failed to update income types. Please try again later.",
+  },
+  deleteIncomeTypes: {
+    defaultErrorCode: ERROR_CODES.DELETE_INCOME_TYPE_ERROR,
+    defaultErrorMessage:
+      "Failed to delete income types. Please try again later.",
+  },
+  getPurchasesCategorySuggestion: {
+    defaultErrorCode: ERROR_CODES.GET_PURCHASES_CATEGORY_SUGGESTION_ERROR,
+    defaultErrorMessage:
+      "Failed to retrieve purchases category suggestion. Please try again later.",
+  },
+  getItems: {
+    defaultErrorCode: ERROR_CODES.GET_ITEMS_ERROR,
+    defaultErrorMessage: "Failed to retrieve items. Please try again later.",
+  },
+  getUnits: {
+    defaultErrorCode: ERROR_CODES.GET_UNITS_ERROR,
+    defaultErrorMessage: "Failed to retrieve units. Please try again later.",
+  },
 };
