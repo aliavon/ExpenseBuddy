@@ -9,6 +9,7 @@ const {
 } = require("../validation");
 
 const {
+  withErrorHandling,
   withErrorHandlingCurried,
   defaultHandlerArgs,
 } = require("../error-handling");
@@ -23,36 +24,41 @@ const getFamilyIncomeRecords = require("./getFamilyIncomeRecords");
 const getCurrencies = require("./getCurrencies");
 const getIncomeTypes = require("./getIncomeTypes");
 
+const withCompose = (errorHandleArg, validationArg, resolver) =>
+  composeResolvers(
+    withErrorHandlingCurried(errorHandleArg),
+    withValidationCurried(validationArg)
+  )(resolver);
+
 module.exports = {
-  getUnits: composeResolvers(
-    withErrorHandlingCurried(defaultHandlerArgs.getUnits)
-  )(getUnits),
-  getCategories: composeResolvers(
-    withErrorHandlingCurried(defaultHandlerArgs.getCategories)
-  )(getCategories),
-  getFamilyIncomePeriodicityOptions: composeResolvers()(
-    getFamilyIncomePeriodicityOptions
+  getUnits: withErrorHandling(getUnits, defaultHandlerArgs.getUnits),
+  getCategories: withErrorHandling(
+    getCategories,
+    defaultHandlerArgs.getCategories
   ),
-  getFamilyIncomeRecords: composeResolvers(
-    withErrorHandlingCurried(defaultHandlerArgs.getFamilyIncomeRecords),
-    withValidationCurried(getFamilyIncomeRecordsSchema)
-  )(getFamilyIncomeRecords),
-  getPurchases: composeResolvers(
-    withErrorHandlingCurried(defaultHandlerArgs.getPurchases),
-    withValidationCurried(getPurchasesSchema)
-  )(getPurchases),
-  getPurchasesCategorySuggestion: composeResolvers(
-    withErrorHandlingCurried(defaultHandlerArgs.getPurchasesCategorySuggestion),
-    withValidationCurried(getPurchasesCategorySuggestionSchema)
-  )(getPurchasesCategorySuggestion),
-  getItems: composeResolvers(
-    withErrorHandlingCurried(defaultHandlerArgs.getItems),
-    withValidationCurried(getItemsSchema)
-  )(getItems),
-  getCurrencies: composeResolvers(
-    withErrorHandlingCurried(defaultHandlerArgs.getCurrencies)
-  )(getCurrencies),
-  getIncomeTypes: composeResolvers(
-    withErrorHandlingCurried(defaultHandlerArgs.getIncomeTypes)
-  )(getIncomeTypes),
+  getFamilyIncomePeriodicityOptions: getFamilyIncomePeriodicityOptions,
+  getFamilyIncomeRecords: withCompose(
+    defaultHandlerArgs.getFamilyIncomeRecords,
+    getFamilyIncomeRecordsSchema,
+    getFamilyIncomeRecords
+  ),
+  getPurchases: withCompose(
+    defaultHandlerArgs.getPurchases,
+    getPurchasesSchema,
+    getPurchases
+  ),
+  getPurchasesCategorySuggestion: withCompose(
+    defaultHandlerArgs.getPurchasesCategorySuggestion,
+    getPurchasesCategorySuggestionSchema,
+    getPurchasesCategorySuggestion
+  ),
+  getItems: withCompose(defaultHandlerArgs.getItems, getItemsSchema, getItems),
+  getCurrencies: withErrorHandling(
+    getCurrencies,
+    defaultHandlerArgs.getCurrencies
+  ),
+  getIncomeTypes: withErrorHandling(
+    getIncomeTypes,
+    defaultHandlerArgs.getIncomeTypes
+  ),
 };
