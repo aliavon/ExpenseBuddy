@@ -15,6 +15,9 @@ const {
   createUserSchema,
   updateUserSchema,
   deleteUserSchema,
+  createFamilyIncomesSchema,
+  updateFamilyIncomesSchema,
+  deleteFamilyIncomesSchema,
   withValidationCurried,
 } = require("../validation");
 
@@ -37,6 +40,9 @@ const deleteIncomeTypes = require("./deleteIncomeTypes");
 const createUser = require("./createUser");
 const updateUser = require("./updateUser");
 const deleteUser = require("./deleteUser");
+const createFamilyIncomes = require("./createFamilyIncomes");
+const updateFamilyIncomes = require("./updateFamilyIncomes");
+const deleteFamilyIncomes = require("./deleteFamilyIncomes");
 
 // Helper function to compose wrappers.
 // Applies withValidationCurried first, then withErrorHandlingCurried.
@@ -122,5 +128,22 @@ module.exports = {
     defaultHandlerArgs.deleteUser,
     deleteUserSchema,
     deleteUser
+  ),
+
+  // FamilyIncome mutations
+  createFamilyIncomes: withCompose(
+    defaultHandlerArgs.createFamilyIncomes,
+    createFamilyIncomesSchema,
+    createFamilyIncomes
+  ),
+  updateFamilyIncomes: withCompose(
+    defaultHandlerArgs.updateFamilyIncomes,
+    updateFamilyIncomesSchema,
+    updateFamilyIncomes
+  ),
+  deleteFamilyIncomes: withCompose(
+    defaultHandlerArgs.deleteFamilyIncomes,
+    deleteFamilyIncomesSchema,
+    deleteFamilyIncomes
   ),
 };

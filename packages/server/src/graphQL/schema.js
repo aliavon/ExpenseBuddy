@@ -63,6 +63,11 @@ module.exports = `
     createUser(user: UserInput!): User!
     updateUser(user: UpdateUserInput!): User!
     deleteUser(id: ID!): ID!
+
+    # Mutations for FamilyIncome-related operations
+    createFamilyIncomes(familyIncomes: [FamilyIncomeInput!]!): [FamilyIncome!]!
+    updateFamilyIncomes(updates: [UpdateFamilyIncomeInput!]!): [FamilyIncome!]!
+    deleteFamilyIncomes(ids: [ID!]!): [ID!]!
   }
 
   # ----- IncomeType-related inputs and types -----
@@ -155,6 +160,29 @@ module.exports = `
     nextPage: Int          # Null if there is no next page.
     totalPages: Int!
     totalCount: Int!
+  }
+
+  # Input type for creating a FamilyIncome record.
+  input FamilyIncomeInput {
+    date: String!              # ISO date string
+    amount: Float!
+    note: String
+    periodicity: Periodicity!  # Must be one of the defined enum values
+    typeId: ID!
+    contributorId: ID!
+    currencyId: ID!
+  }
+
+  # Input type for updating a FamilyIncome record.
+  input UpdateFamilyIncomeInput {
+    id: ID!
+    date: String
+    amount: Float
+    note: String
+    periodicity: Periodicity
+    typeId: ID
+    contributorId: ID
+    currencyId: ID
   }
 
   # ----- User-related types and inputs -----

@@ -8,7 +8,11 @@ const getItemsSchema = require("./getItemsSchema");
 const getPurchasesSchema = require("./getPurchasesSchema");
 const getPurchasesCategorySuggestionSchema = require("./getPurchasesCategorySuggestionSchema");
 
+// FamilyIncomes
 const getFamilyIncomeRecordsSchema = require("./getFamilyIncomeRecordsSchema");
+const createFamilyIncomesSchema = require("./createFamilyIncomesSchema");
+const updateFamilyIncomesSchema = require("./updateFamilyIncomesSchema");
+const deleteFamilyIncomesSchema = require("./deleteFamilyIncomesSchema");
 
 // Currency
 const createCurrenciesSchema = require("./createCurrenciesSchema");
@@ -41,6 +45,9 @@ module.exports = {
   updatePurchasesSchema,
 
   getFamilyIncomeRecordsSchema,
+  createFamilyIncomesSchema,
+  updateFamilyIncomesSchema,
+  deleteFamilyIncomesSchema,
 
   createCurrenciesSchema,
   updateCurrenciesSchema,

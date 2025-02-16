@@ -102,4 +102,19 @@ module.exports = {
     defaultErrorCode: ERROR_CODES.DELETE_USER_ERROR,
     defaultErrorMessage: "Failed to delete user. Please try again later.",
   },
+  createFamilyIncomes: {
+    defaultErrorCode: ERROR_CODES.ADD_FAMILY_INCOME_ERROR,
+    defaultErrorMessage:
+      "Failed to add family income records. Please try again later.",
+  },
+  updateFamilyIncomes: {
+    defaultErrorCode: ERROR_CODES.UPDATE_FAMILY_INCOME_ERROR,
+    defaultErrorMessage:
+      "Failed to update family income records. Please try again later.",
+  },
+  deleteFamilyIncomes: {
+    defaultErrorCode: ERROR_CODES.DELETE_FAMILY_INCOME_ERROR,
+    defaultErrorMessage:
+      "Failed to delete family income records. Please try again later.",
+  },
 };
