@@ -26,4 +26,6 @@ const useDeleteMoneyBundle = ({onCompleted}) => {
     error,
   };
 };
+
+export { DELETE_MONEY_BUNDLE_MUTATION };
 export default useDeleteMoneyBundle;
