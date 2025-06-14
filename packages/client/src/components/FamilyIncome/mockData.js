@@ -5,126 +5,126 @@ export const mockFamilyIncomeData = {
         id: '1',
         date: '2024-01-15',
         amount: 75000,
-        note: 'Основная зарплата',
+        note: 'Main salary',
         periodicity: 'monthly',
         type: {
           id: '1',
-          name: 'Зарплата',
-          description: 'Основной доход от работы',
+          name: 'Salary',
+          description: 'Primary income from work',
         },
         contributor: {
           id: '1',
-          fullName: 'Иван Петров',
+          fullName: 'Ivan Petrov',
         },
         currency: {
           id: '1',
           code: 'RUB',
-          name: 'Российский рубль',
+          name: 'Russian Ruble',
         },
       },
       {
         id: '2',
         date: '2024-01-20',
         amount: 25000,
-        note: 'Фриланс проект',
+        note: 'Freelance project',
         periodicity: 'once',
         type: {
           id: '2',
-          name: 'Фриланс',
-          description: 'Дополнительный доход от фриланса',
+          name: 'Freelance',
+          description: 'Additional income from freelancing',
         },
         contributor: {
           id: '1',
-          fullName: 'Иван Петров',
+          fullName: 'Ivan Petrov',
         },
         currency: {
           id: '1',
           code: 'RUB',
-          name: 'Российский рубль',
+          name: 'Russian Ruble',
         },
       },
       {
         id: '3',
         date: '2024-01-10',
         amount: 45000,
-        note: 'Зарплата жены',
+        note: 'Wife\'s salary',
         periodicity: 'monthly',
         type: {
           id: '1',
-          name: 'Зарплата',
-          description: 'Основной доход от работы',
+          name: 'Salary',
+          description: 'Primary income from work',
         },
         contributor: {
           id: '2',
-          fullName: 'Мария Петрова',
+          fullName: 'Maria Petrova',
         },
         currency: {
           id: '1',
           code: 'RUB',
-          name: 'Российский рубль',
+          name: 'Russian Ruble',
         },
       },
       {
         id: '4',
         date: '2024-01-05',
         amount: 12000,
-        note: 'Доход от инвестиций',
+        note: 'Investment income',
         periodicity: 'monthly',
         type: {
           id: '3',
-          name: 'Инвестиции',
-          description: 'Пассивный доход от инвестиций',
+          name: 'Investments',
+          description: 'Passive income from investments',
         },
         contributor: {
           id: '1',
-          fullName: 'Иван Петров',
+          fullName: 'Ivan Petrov',
         },
         currency: {
           id: '1',
           code: 'RUB',
-          name: 'Российский рубль',
+          name: 'Russian Ruble',
         },
       },
       {
         id: '5',
         date: '2024-01-25',
         amount: 8000,
-        note: 'Продажа вещей',
+        note: 'Sale of items',
         periodicity: 'once',
         type: {
           id: '4',
-          name: 'Разное',
-          description: 'Прочие доходы',
+          name: 'Miscellaneous',
+          description: 'Other income',
         },
         contributor: {
           id: '2',
-          fullName: 'Мария Петрова',
+          fullName: 'Maria Petrova',
         },
         currency: {
           id: '1',
           code: 'RUB',
-          name: 'Российский рубль',
+          name: 'Russian Ruble',
         },
       },
       {
         id: '6',
         date: '2024-02-01',
         amount: 3500,
-        note: 'Кэшбек от банка',
+        note: 'Bank cashback',
         periodicity: 'monthly',
         type: {
           id: '4',
-          name: 'Разное',
-          description: 'Прочие доходы',
+          name: 'Miscellaneous',
+          description: 'Other income',
         },
         contributor: {
           id: '1',
-          fullName: 'Иван Петров',
+          fullName: 'Ivan Petrov',
         },
         currency: {
           id: '1',
           code: 'RUB',
-          name: 'Российский рубль',
+          name: 'Russian Ruble',
         },
       },
     ],
@@ -137,7 +137,7 @@ export const mockFamilyIncomeData = {
   },
 };
 
-// Функция для фильтрации и сортировки данных
+// Function for filtering and sorting data
 export const filterAndSortMockData = (filters = {}, pagination = {
   page: 1,
   limit: 10,
@@ -147,7 +147,7 @@ export const filterAndSortMockData = (filters = {}, pagination = {
 }) => {
   let filteredItems = [...mockFamilyIncomeData.getFamilyIncomeRecords.items];
 
-  // Применяем фильтры
+  // Apply filters
   if (filters.startDate) {
     filteredItems = filteredItems.filter(item => new Date(item.date) >= new Date(filters.startDate));
   }
@@ -164,7 +164,7 @@ export const filterAndSortMockData = (filters = {}, pagination = {
     filteredItems = filteredItems.filter(item => item.periodicity === filters.periodicity);
   }
 
-  // Применяем сортировку
+  // Apply sorting
   filteredItems.sort((a, b) => {
     let aValue = a[sort.sortBy];
     let bValue = b[sort.sortBy];
@@ -181,7 +181,7 @@ export const filterAndSortMockData = (filters = {}, pagination = {
     }
   });
 
-  // Применяем пагинацию
+  // Apply pagination
   const startIndex = (pagination.page - 1) * pagination.limit;
   const endIndex = startIndex + pagination.limit;
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
