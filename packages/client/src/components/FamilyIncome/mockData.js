@@ -140,28 +140,7 @@ export const mockFamilyIncomeData = {
 // Function for filtering and sorting data
 export const filterAndSortMockData = (filters = {}, pagination = {}, sort = {}) => ({
   getFamilyIncomeRecords: {
-    items: [
-      {
-        id: '1',
-        date: '2023-01-01',
-        amount: 1000,
-        note: 'Test income',
-        periodicity: 'monthly',
-        type: {
-          id: '1',
-          name: 'Salary',
-        },
-        contributor: {
-          id: '1',
-          fullName: 'John Doe',
-        },
-        currency: {
-          id: '1',
-          code: 'USD',
-          name: 'US Dollar',
-        },
-      },
-    ],
+    ...mockFamilyIncomeData.getFamilyIncomeRecords,
     pagination: {
       currentPage: pagination.page || 1,
       nextPage: 2,

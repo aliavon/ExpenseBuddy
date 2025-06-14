@@ -11,7 +11,7 @@ services:
     environment:
       - PORT=${APP_CLIENT_PORT}
       - REACT_APP_MACHINE_IP=http://${MACHINE_IP}
-      - REACT_APP_SERVER_PORT=${APP_SERVER_PORT}
+      - REACT_APP_SERVER_PORT=8080
       - REACT_APP_APILAYER_KEY=${REACT_APP_APILAYER_KEY}
     ports:
       - "80:80"
@@ -53,6 +53,19 @@ services:
       - mongo
     environment:
       - MONGO_URI=mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server
+
+  nginx-proxy:
+    container_name: expense-buddy-proxy
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - expense-buddy-client
+      - expense-buddy-server
+    networks:
+      - default
 
 volumes:
   mongo:
