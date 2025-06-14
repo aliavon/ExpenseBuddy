@@ -2,9 +2,9 @@
   "name": "mongodb-backup",
   "version": "1.0.0",
   "description": "Automated MongoDB backups to Google Drive",
-  "main": "backup.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node backup.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "dotenv": "^16.3.1",
