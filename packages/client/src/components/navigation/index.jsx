@@ -10,6 +10,9 @@ const navItems = [
   }, {
     title: 'View Purchases',
     itemId: '/view',
+  }, {
+    title: 'Family Income',
+    itemId: '/income',
   },
 ];
 
