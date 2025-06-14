@@ -15,6 +15,7 @@ export const FILE_UPLOAD_TYPE = {
   CSV: 'csv',
   BIEDRONKA: 'biedronka',
   LIDL: 'lidl',
+  AUCHAN: 'auchan',
 };
 
 export const FILE_TYPES_TO_UPLOAD = {
@@ -22,6 +23,7 @@ export const FILE_TYPES_TO_UPLOAD = {
   [FILE_UPLOAD_TYPE.CSV]: ['.csv'],
   [FILE_UPLOAD_TYPE.BIEDRONKA]: ['.jpg', '.png', '.tiff'],
   [FILE_UPLOAD_TYPE.LIDL]: ['.jpg', '.png', '.tiff'],
+  [FILE_UPLOAD_TYPE.AUCHAN]: ['.jpg', '.png', '.tiff'],
 
 };
 
@@ -29,11 +31,17 @@ export const fileUploadOptions = [
   {
     label: 'CSV',
     id: FILE_UPLOAD_TYPE.CSV,
-  }, {
+  },
+  {
     label: 'Biedronka',
     id: FILE_UPLOAD_TYPE.BIEDRONKA,
-  }, {
+  },
+  {
     label: 'Lidl',
     id: FILE_UPLOAD_TYPE.LIDL,
+  },
+  {
+    label: 'Auchan',
+    id: FILE_UPLOAD_TYPE.AUCHAN,
   },
 ];
