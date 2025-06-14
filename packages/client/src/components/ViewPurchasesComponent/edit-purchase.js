@@ -30,6 +30,7 @@ const EditPurchase = ({initialData, onClose}) => {
   };
 
   const handleSave = async () => {
+    // eslint-disable-next-line no-unused-vars
     const {item, ...form} = formData;
     await updatePurchase({
       variables: {

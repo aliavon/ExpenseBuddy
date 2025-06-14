@@ -10,7 +10,7 @@ import {toaster} from 'baseui/toast';
 import CategorySelect from '../form/category-select';
 import NameSelect from '../form/name-select';
 import Preloader from './preloader';
-import {lidlParser, biedronkaParser, csvParser} from './utils';
+import {lidlParser, biedronkaParser, csvParser, auchanParser} from './utils';
 import {getEmptyPurchase, fileUploadOptions, FILE_UPLOAD_TYPE, FILE_TYPES_TO_UPLOAD} from './constants';
 import {useSavePurchases} from './use-save-purchases';
 import {usePopulateCategories} from './use-populate-categories';
@@ -65,6 +65,8 @@ const AddPurchasesComponent = () => {
           parsedPurchases = await biedronkaParser(file);
         } else if (csvAlgo === FILE_UPLOAD_TYPE.LIDL) {
           parsedPurchases = await lidlParser(file);
+        } else if (csvAlgo === FILE_UPLOAD_TYPE.AUCHAN) {
+          parsedPurchases = await auchanParser(file);
         } else {
           parsedPurchases = csvParser(reader.result);
         }
