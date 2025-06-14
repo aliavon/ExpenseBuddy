@@ -12,7 +12,7 @@ async function batchUsers(ids) {
   users.forEach((user) => {
     userMap[user._id.toString()] = user;
   });
-  return ids.map((id) => userMap[id.toString()]);
+  return ids.map((id) => userMap[id.toString()] || null);
 }
 
 module.exports = () =>

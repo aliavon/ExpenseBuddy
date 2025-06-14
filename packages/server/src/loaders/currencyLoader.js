@@ -12,7 +12,7 @@ async function batchCurrencies(ids) {
   currencies.forEach((currency) => {
     currencyMap[currency._id.toString()] = currency;
   });
-  return ids.map((id) => currencyMap[id.toString()]);
+  return ids.map((id) => currencyMap[id.toString()] || null);
 }
 
 module.exports = () =>
