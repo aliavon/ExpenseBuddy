@@ -2,7 +2,7 @@
 import {useMemo} from 'react';
 import {useQuery, gql} from '@apollo/client';
 
-const QUERY_TYPES = gql`
+export const QUERY_TYPES = gql`
   query Types {
     types {
       id

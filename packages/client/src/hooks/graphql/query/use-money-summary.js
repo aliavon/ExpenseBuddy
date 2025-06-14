@@ -2,7 +2,7 @@
 import {useMemo} from 'react';
 import {useQuery, gql} from '@apollo/client';
 
-const QUERY_MONEY_SUMMARY = gql`
+export const QUERY_MONEY_SUMMARY = gql`
   query MoneySummary {
     summary: moneySummary {
       amount

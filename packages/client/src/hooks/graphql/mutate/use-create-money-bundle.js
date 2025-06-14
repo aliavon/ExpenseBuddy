@@ -36,4 +36,6 @@ const useCreateMoneyBundle = ({onCompleted}) => {
     error,
   };
 };
+
+export { CREATE_MONEY_BUNDLE_MUTATION };
 export default useCreateMoneyBundle;

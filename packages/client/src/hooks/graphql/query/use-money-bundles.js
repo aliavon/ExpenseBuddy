@@ -1,7 +1,7 @@
 import {useMemo} from 'react';
 import {useQuery, gql} from '@apollo/client';
 
-const QUERY_MONEY_BUNDLES = gql`
+export const QUERY_MONEY_BUNDLES = gql`
   query MoneyBundles {
     moneyBundles {
       id

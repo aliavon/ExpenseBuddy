@@ -1,7 +1,7 @@
 import React from 'react';
 import {useQuery, gql} from '@apollo/client';
 
-const QUERY_FEED = gql`
+export const QUERY_FEED = gql`
   query Feed($page: Int!, $perPage: Int!) {
     feed(page: $page, perPage: $perPage) {
       page

@@ -45,7 +45,7 @@ const auchanParse = async file => {
           parsedDataMap[realName].discount = parseFloat((parsedDataMap[realName].discount + discount).toFixed(0));
         }
       } else {
-        const [, quantity, , price] = row[1].match(/^([\d,]+) x([\d,]+) ([\d,]+)[ABC]$/) || [
+        [, quantity, , price] = row[1].match(/^([\d,]+) x([\d,]+) ([\d,]+)[ABC]$/) || [
           undefined,
           '0',
           undefined,
