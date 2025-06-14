@@ -40,5 +40,5 @@ const useUpdateMoneyBundle = ({onCompleted}) => {
   };
 };
 
-export { UPDATE_MONEY_BUNDLE_MUTATION };
+export {UPDATE_MONEY_BUNDLE_MUTATION};
 export default useUpdateMoneyBundle;

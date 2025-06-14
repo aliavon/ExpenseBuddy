@@ -138,66 +138,35 @@ export const mockFamilyIncomeData = {
 };
 
 // Function for filtering and sorting data
-export const filterAndSortMockData = (filters = {}, pagination = {
-  page: 1,
-  limit: 10,
-}, sort = {
-  sortBy: 'date',
-  sortOrder: 'desc',
-}) => {
-  let filteredItems = [...mockFamilyIncomeData.getFamilyIncomeRecords.items];
-
-  // Apply filters
-  if (filters.startDate) {
-    filteredItems = filteredItems.filter(item => new Date(item.date) >= new Date(filters.startDate));
-  }
-  if (filters.endDate) {
-    filteredItems = filteredItems.filter(item => new Date(item.date) <= new Date(filters.endDate));
-  }
-  if (filters.contributorId) {
-    filteredItems = filteredItems.filter(item => item.contributor.id === filters.contributorId);
-  }
-  if (filters.typeId) {
-    filteredItems = filteredItems.filter(item => item.type.id === filters.typeId);
-  }
-  if (filters.periodicity) {
-    filteredItems = filteredItems.filter(item => item.periodicity === filters.periodicity);
-  }
-
-  // Apply sorting
-  filteredItems.sort((a, b) => {
-    let aValue = a[sort.sortBy];
-    let bValue = b[sort.sortBy];
-
-    if (sort.sortBy === 'date') {
-      aValue = new Date(aValue);
-      bValue = new Date(bValue);
-    }
-
-    if (sort.sortOrder === 'asc') {
-      return aValue > bValue ? 1 : -1;
-    } else {
-      return aValue < bValue ? 1 : -1;
-    }
-  });
-
-  // Apply pagination
-  const startIndex = (pagination.page - 1) * pagination.limit;
-  const endIndex = startIndex + pagination.limit;
-  const paginatedItems = filteredItems.slice(startIndex, endIndex);
-
-  const totalCount = filteredItems.length;
-  const totalPages = Math.ceil(totalCount / pagination.limit);
-
-  return {
-    getFamilyIncomeRecords: {
-      items: paginatedItems,
-      pagination: {
-        currentPage: pagination.page,
-        nextPage: pagination.page < totalPages ? pagination.page + 1 : null,
-        totalPages,
-        totalCount,
+export const filterAndSortMockData = jest.fn((filters = {}, pagination = {}, sort = {}) => ({
+  getFamilyIncomeRecords: {
+    items: [
+      {
+        id: '1',
+        date: '2023-01-01',
+        amount: 1000,
+        note: 'Test income',
+        periodicity: 'monthly',
+        type: {
+          id: '1',
+          name: 'Salary',
+        },
+        contributor: {
+          id: '1',
+          fullName: 'John Doe',
+        },
+        currency: {
+          id: '1',
+          code: 'USD',
+          name: 'US Dollar',
+        },
       },
+    ],
+    pagination: {
+      currentPage: pagination.page || 1,
+      nextPage: 2,
+      totalPages: 5,
+      totalCount: 50,
     },
-  };
-};
+  },
+}));
