@@ -4,6 +4,7 @@ import {Block} from 'baseui/block';
 
 import AddPurchasesComponent from '../components/AddPurchasesComponent';
 import ViewPurchasesComponent from '../components/ViewPurchasesComponent';
+import FamilyIncome from '../components/FamilyIncome';
 
 const RootRoutes = () => (
   <Block
@@ -19,6 +20,10 @@ const RootRoutes = () => (
       <Route
         path="/view"
         element={<ViewPurchasesComponent />}
+      />
+      <Route
+        path="/income"
+        element={<FamilyIncome />}
       />
     </Routes>
   </Block>
