@@ -10,6 +10,8 @@ services:
       - ${APP_CLIENT_PORT}
     environment:
       - PORT=${APP_CLIENT_PORT}
+      - REACT_APP_MACHINE_IP=http://${MACHINE_IP}
+      - REACT_APP_SERVER_PORT=${APP_SERVER_PORT}
       - REACT_APP_APILAYER_KEY=${REACT_APP_APILAYER_KEY}
     ports:
       - "80:80"
