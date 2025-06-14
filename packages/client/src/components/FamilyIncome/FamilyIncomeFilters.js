@@ -9,7 +9,7 @@ const FamilyIncomeFilters = ({onFilterChange}) => {
   const [incomeType, setIncomeType] = useState('');
   const [periodicity, setPeriodicity] = useState('');
 
-  // Извлекаем уникальных contributors из mockData
+  // Extract unique contributors from mockData
   const contributors = useMemo(() => {
     const contributorMap = new Map();
     mockFamilyIncomeData.getFamilyIncomeRecords.items.forEach(item => {
@@ -20,7 +20,7 @@ const FamilyIncomeFilters = ({onFilterChange}) => {
     return Array.from(contributorMap.values());
   }, []);
 
-  // Извлекаем уникальные типы доходов из mockData
+  // Extract unique income types from mockData
   const incomeTypes = useMemo(() => {
     const typeMap = new Map();
     mockFamilyIncomeData.getFamilyIncomeRecords.items.forEach(item => {
@@ -31,7 +31,7 @@ const FamilyIncomeFilters = ({onFilterChange}) => {
     return Array.from(typeMap.values());
   }, []);
 
-  // Извлекаем уникальные периодичности из mockData
+  // Extract unique periodicities from mockData
   const periodicities = useMemo(() => {
     const uniquePeriodicities = [
       ...new Set(
@@ -40,7 +40,7 @@ const FamilyIncomeFilters = ({onFilterChange}) => {
     ];
     return uniquePeriodicities.map(p => ({
       value: p,
-      label: p === 'once' ? 'Разовый' : p === 'monthly' ? 'Ежемесячно' : p,
+      label: p === 'once' ? 'One-time' : p === 'monthly' ? 'Monthly' : p,
     }));
   }, []);
 
