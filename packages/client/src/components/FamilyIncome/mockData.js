@@ -138,7 +138,7 @@ export const mockFamilyIncomeData = {
 };
 
 // Function for filtering and sorting data
-export const filterAndSortMockData = jest.fn((filters = {}, pagination = {}, sort = {}) => ({
+export const filterAndSortMockData = (filters = {}, pagination = {}, sort = {}) => ({
   getFamilyIncomeRecords: {
     items: [
       {
@@ -169,4 +169,4 @@ export const filterAndSortMockData = jest.fn((filters = {}, pagination = {}, sor
       totalCount: 50,
     },
   },
-}));
+});

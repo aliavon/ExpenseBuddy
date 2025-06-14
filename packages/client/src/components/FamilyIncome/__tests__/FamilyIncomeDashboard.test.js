@@ -39,6 +39,7 @@ jest.mock('../FamilyIncomeTable', () => {
 
 // Mock the mock data module
 jest.mock('../mockData', () => ({
+  ...jest.requireActual('../mockData'),
   filterAndSortMockData: jest.fn(() => ({
     getFamilyIncomeRecords: {
       items: [
