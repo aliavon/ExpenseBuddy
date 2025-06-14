@@ -37,5 +37,5 @@ const useCreateMoneyBundle = ({onCompleted}) => {
   };
 };
 
-export { CREATE_MONEY_BUNDLE_MUTATION };
+export {CREATE_MONEY_BUNDLE_MUTATION};
 export default useCreateMoneyBundle;
