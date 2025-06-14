@@ -3,6 +3,7 @@ const IncomeType = require("./IncomeType");
 const Item = require("./Item");
 const Purchase = require("./Purchase");
 const User = require("./User");
+const Currency = require("./Currency");
 
 module.exports = {
   FamilyIncome,
@@ -10,4 +11,5 @@ module.exports = {
   Item,
   Purchase,
   User,
+  Currency,
 };

@@ -3,16 +3,16 @@ const { IncomeType } = require("../database/schemas");
 const logger = require("../logger");
 
 async function batchIncomeTypes(ids) {
-  const types = await IncomeType.find({ _id: { $in: ids } });
+  const incomeTypes = await IncomeType.find({ _id: { $in: ids } });
   logger.debug(
-    { batchSize: ids.length, loadedCount: types.length },
+    { batchSize: ids.length, loadedCount: incomeTypes.length },
     "Batch loaded income types"
   );
-  const typeMap = {};
-  types.forEach((type) => {
-    typeMap[type._id.toString()] = type;
+  const incomeTypeMap = {};
+  incomeTypes.forEach((incomeType) => {
+    incomeTypeMap[incomeType._id.toString()] = incomeType;
   });
-  return ids.map((id) => typeMap[id.toString()]);
+  return ids.map((id) => incomeTypeMap[id.toString()] || null);
 }
 
 module.exports = () =>

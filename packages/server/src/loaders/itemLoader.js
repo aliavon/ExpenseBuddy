@@ -14,7 +14,7 @@ async function batchItems(ids) {
   items.forEach((item) => {
     itemMap[item._id.toString()] = item;
   });
-  return ids.map((id) => itemMap[id.toString()]);
+  return ids.map((id) => itemMap[id.toString()] || null);
 }
 
 module.exports = () =>
