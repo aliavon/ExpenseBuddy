@@ -31,9 +31,15 @@ describe("addPurchases mutation", () => {
     expect(result[0].unit).toBe(purchaseData.unit);
     expect(result[0].price).toBe(purchaseData.price);
     expect(result[0]).toHaveProperty("_id");
+    expect(result[0].familyId.toString()).toBe(context.auth.user.familyId);
+    expect(result[0].createdByUserId.toString()).toBe(context.auth.user.id);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully added purchases"
+      {
+        count: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully added purchases for family"
     );
   });
 
@@ -51,9 +57,17 @@ describe("addPurchases mutation", () => {
     expect(result[0].quantity).toBe(1);
     expect(result[1].quantity).toBe(3);
     expect(result[2].quantity).toBe(2);
+    result.forEach((purchase) => {
+      expect(purchase.familyId.toString()).toBe(context.auth.user.familyId);
+      expect(purchase.createdByUserId.toString()).toBe(context.auth.user.id);
+    });
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully added purchases"
+      {
+        count: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully added purchases for family"
     );
   });
 
@@ -64,8 +78,12 @@ describe("addPurchases mutation", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully added purchases"
+      {
+        count: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully added purchases for family"
     );
   });
 
@@ -172,9 +190,17 @@ describe("addPurchases mutation", () => {
     expect(result).toHaveLength(50);
     expect(result[0].quantity).toBe(1);
     expect(result[49].quantity).toBe(50);
+    result.forEach((purchase) => {
+      expect(purchase.familyId.toString()).toBe(context.auth.user.familyId);
+      expect(purchase.createdByUserId.toString()).toBe(context.auth.user.id);
+    });
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 50 },
-      "Successfully added purchases"
+      {
+        count: 50,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully added purchases for family"
     );
   });
 

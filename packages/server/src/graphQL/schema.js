@@ -87,6 +87,7 @@ module.exports = `
     id: ID!
     name: String!
     description: String
+    familyId: ID            # Reference to family (temporarily nullable)
   }
 
   # ----- Currency-related inputs and types -----
@@ -129,6 +130,7 @@ module.exports = `
     type: IncomeType        # The type of income (via ref to IncomeType).
     contributor: User       # The user who contributed this income.
     currency: Currency      # The currency in which the income is recorded.
+    familyId: ID            # Reference to family (temporarily nullable)
   }
 
   # Enum for periodicity values, generated from constants.
@@ -187,14 +189,22 @@ module.exports = `
 
   # ----- User-related types and inputs -----
 
-  # The User type now uses separate fields for first, middle, and last names.
+  # The User type with authentication and family management fields.
   type User {
     id: ID!
     firstName: String!
     lastName: String!
     fullName: String!       # Usually computed by concatenating first, middle, and last names.
     middleName: String      # Optional middle name.
-    isVerified: Boolean!
+    email: String!          # User's email address
+    isEmailVerified: Boolean! # Whether email is verified
+    isVerified: Boolean!    # Legacy field - kept for compatibility
+    isActive: Boolean!      # Whether user account is active
+    familyId: ID            # Reference to family (nullable during registration)
+    roleInFamily: String    # Role in family: OWNER, ADMIN, MEMBER
+    lastLoginAt: String     # Last login timestamp
+    createdAt: String!      # Account creation timestamp
+    updatedAt: String!      # Last update timestamp
   }
 
   input UserInput {
@@ -211,6 +221,22 @@ module.exports = `
     # Additional fields can be added in the future.
   }
 
+  # ----- Family-related types and inputs -----
+
+  # Family represents a household or family unit for expense tracking
+  type Family {
+    id: ID!
+    name: String!
+    description: String
+    ownerId: ID!              # Reference to owner User
+    currency: Currency        # Family's default currency
+    timezone: String!
+    inviteCode: String        # Code for joining family
+    isActive: Boolean!
+    createdAt: String!
+    updatedAt: String!
+  }
+
   # ----- Purchase-related types and inputs -----
 
   type Purchase {
@@ -222,6 +248,8 @@ module.exports = `
     discount: Float
     date: String!
     note: String
+    familyId: ID            # Reference to family (temporarily nullable)
+    createdByUserId: ID     # Reference to user who created purchase (temporarily nullable)
   }
 
   input PurchaseInput {
@@ -251,6 +279,7 @@ module.exports = `
     id: ID!
     name: String!
     category: String
+    familyId: ID            # Reference to family (temporarily nullable)
   }
 
   input ItemInput {

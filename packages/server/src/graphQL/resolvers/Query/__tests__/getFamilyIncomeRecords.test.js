@@ -6,24 +6,33 @@ describe("getFamilyIncomeRecords resolver", () => {
     await FamilyIncome.deleteMany({});
   });
 
-  const createFamilyIncomeRecord = (overrides = {}) => ({
+  const createFamilyIncomeRecord = (familyId, overrides = {}) => ({
     contributorId: global.createMockId(),
     typeId: global.createMockId(),
     currencyId: global.createMockId(),
     amount: 1000,
     date: new Date("2024-01-15"),
     periodicity: "MONTHLY",
+    familyId,
     ...overrides,
   });
 
   it("should return paginated family income records with default sorting", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 1000, date: new Date("2024-01-15") }),
-      createFamilyIncomeRecord({ amount: 2000, date: new Date("2024-01-20") }),
-      createFamilyIncomeRecord({ amount: 1500, date: new Date("2024-01-10") }),
-    ]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 1000,
+        date: new Date("2024-01-15"),
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 2000,
+        date: new Date("2024-01-20"),
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 1500,
+        date: new Date("2024-01-10"),
+      }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -44,19 +53,31 @@ describe("getFamilyIncomeRecords resolver", () => {
       result.items[1].date.getTime()
     );
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully retrieved FamilyIncome records"
+      {
+        count: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully retrieved FamilyIncome records for family"
     );
   });
 
   it("should filter by date range", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 1000, date: new Date("2024-01-15") }),
-      createFamilyIncomeRecord({ amount: 2000, date: new Date("2024-02-15") }),
-      createFamilyIncomeRecord({ amount: 1500, date: new Date("2024-03-15") }),
-    ]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 1000,
+        date: new Date("2024-01-15"),
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 2000,
+        date: new Date("2024-02-15"),
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 1500,
+        date: new Date("2024-03-15"),
+      }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -82,14 +103,22 @@ describe("getFamilyIncomeRecords resolver", () => {
   it("should filter by contributorId", async () => {
     const contributorId1 = global.createMockId();
     const contributorId2 = global.createMockId();
+    const context = global.createMockContext();
 
     await FamilyIncome.create([
-      createFamilyIncomeRecord({ contributorId: contributorId1, amount: 1000 }),
-      createFamilyIncomeRecord({ contributorId: contributorId2, amount: 2000 }),
-      createFamilyIncomeRecord({ contributorId: contributorId1, amount: 1500 }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        contributorId: contributorId1,
+        amount: 1000,
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        contributorId: contributorId2,
+        amount: 2000,
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        contributorId: contributorId1,
+        amount: 1500,
+      }),
     ]);
-
-    const context = global.createMockContext();
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -110,14 +139,22 @@ describe("getFamilyIncomeRecords resolver", () => {
   it("should filter by typeId", async () => {
     const typeId1 = global.createMockId();
     const typeId2 = global.createMockId();
+    const context = global.createMockContext();
 
     await FamilyIncome.create([
-      createFamilyIncomeRecord({ typeId: typeId1, amount: 1000 }),
-      createFamilyIncomeRecord({ typeId: typeId2, amount: 2000 }),
-      createFamilyIncomeRecord({ typeId: typeId1, amount: 1500 }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        typeId: typeId1,
+        amount: 1000,
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        typeId: typeId2,
+        amount: 2000,
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        typeId: typeId1,
+        amount: 1500,
+      }),
     ]);
-
-    const context = global.createMockContext();
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -134,19 +171,18 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should handle pagination correctly", async () => {
+    const context = global.createMockContext();
     // Create 15 records
     const records = [];
     for (let i = 1; i <= 15; i++) {
       records.push(
-        createFamilyIncomeRecord({
+        createFamilyIncomeRecord(context.auth.user.familyId, {
           amount: i * 100,
           date: new Date(`2024-01-${String(i).padStart(2, "0")}`),
         })
       );
     }
     await FamilyIncome.create(records);
-
-    const context = global.createMockContext();
 
     // Test first page
     const result1 = await getFamilyIncomeRecords(
@@ -201,13 +237,12 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should sort by amount ascending", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 3000 }),
-      createFamilyIncomeRecord({ amount: 1000 }),
-      createFamilyIncomeRecord({ amount: 2000 }),
-    ]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 3000 }),
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 1000 }),
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 2000 }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -224,13 +259,12 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should sort by amount descending", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 1000 }),
-      createFamilyIncomeRecord({ amount: 3000 }),
-      createFamilyIncomeRecord({ amount: 2000 }),
-    ]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 1000 }),
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 3000 }),
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 2000 }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -266,9 +300,10 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should handle filters with no matches", async () => {
-    await FamilyIncome.create([createFamilyIncomeRecord({ amount: 1000 })]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 1000 }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -283,12 +318,17 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should handle date filter with only dateFrom", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 1000, date: new Date("2024-01-15") }),
-      createFamilyIncomeRecord({ amount: 2000, date: new Date("2024-02-15") }),
-    ]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 1000,
+        date: new Date("2024-01-15"),
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 2000,
+        date: new Date("2024-02-15"),
+      }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -303,12 +343,17 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should handle date filter with only dateTo", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 1000, date: new Date("2024-01-15") }),
-      createFamilyIncomeRecord({ amount: 2000, date: new Date("2024-02-15") }),
-    ]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 1000,
+        date: new Date("2024-01-15"),
+      }),
+      createFamilyIncomeRecord(context.auth.user.familyId, {
+        amount: 2000,
+        date: new Date("2024-02-15"),
+      }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -327,35 +372,34 @@ describe("getFamilyIncomeRecords resolver", () => {
     const contributorId2 = global.createMockId();
     const typeId1 = global.createMockId();
     const typeId2 = global.createMockId();
+    const context = global.createMockContext();
 
     await FamilyIncome.create([
-      createFamilyIncomeRecord({
+      createFamilyIncomeRecord(context.auth.user.familyId, {
         contributorId: contributorId1,
         typeId: typeId1,
         amount: 1000,
         date: new Date("2024-01-15"),
       }),
-      createFamilyIncomeRecord({
+      createFamilyIncomeRecord(context.auth.user.familyId, {
         contributorId: contributorId1,
         typeId: typeId2,
         amount: 2000,
         date: new Date("2024-01-15"),
       }),
-      createFamilyIncomeRecord({
+      createFamilyIncomeRecord(context.auth.user.familyId, {
         contributorId: contributorId2,
         typeId: typeId1,
         amount: 1500,
         date: new Date("2024-01-15"),
       }),
-      createFamilyIncomeRecord({
+      createFamilyIncomeRecord(context.auth.user.familyId, {
         contributorId: contributorId1,
         typeId: typeId1,
         amount: 3000,
         date: new Date("2024-02-15"),
       }),
     ]);
-
-    const context = global.createMockContext();
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -398,9 +442,10 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should handle invalid sort order gracefully", async () => {
-    await FamilyIncome.create([createFamilyIncomeRecord({ amount: 1000 })]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 1000 }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {
@@ -415,9 +460,10 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should handle page beyond available data", async () => {
-    await FamilyIncome.create([createFamilyIncomeRecord({ amount: 1000 })]);
-
     const context = global.createMockContext();
+    await FamilyIncome.create([
+      createFamilyIncomeRecord(context.auth.user.familyId, { amount: 1000 }),
+    ]);
     const result = await getFamilyIncomeRecords(
       null,
       {

@@ -15,8 +15,12 @@ describe("getPurchases resolver", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully retrieved purchases"
+      {
+        count: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully retrieved purchases for family"
     );
   });
 
@@ -24,6 +28,7 @@ describe("getPurchases resolver", () => {
     const itemId = global.createMockId();
     const from = "2024-01-01T00:00:00.000Z";
     const to = "2024-01-31T23:59:59.999Z";
+    const context = global.createMockContext();
 
     await Purchase.create([
       {
@@ -32,6 +37,8 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 10,
         date: new Date("2024-01-15T12:00:00.000Z"), // within range
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
       {
         itemId,
@@ -39,6 +46,8 @@ describe("getPurchases resolver", () => {
         unit: "lbs",
         price: 15,
         date: new Date("2024-01-20T12:00:00.000Z"), // within range
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
       {
         itemId,
@@ -46,6 +55,8 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 20,
         date: new Date("2023-12-31T12:00:00.000Z"), // before range
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
       {
         itemId,
@@ -53,18 +64,23 @@ describe("getPurchases resolver", () => {
         unit: "lbs",
         price: 25,
         date: new Date("2024-02-01T12:00:00.000Z"), // after range
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchases(null, { from, to }, context);
 
     expect(result).toHaveLength(2);
     expect(result[0].quantity).toBe(1);
     expect(result[1].quantity).toBe(2);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 2 },
-      "Successfully retrieved purchases"
+      {
+        count: 2,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully retrieved purchases for family"
     );
   });
 
@@ -72,6 +88,7 @@ describe("getPurchases resolver", () => {
     const itemId = global.createMockId();
     const from = "2024-01-01T00:00:00.000Z";
     const to = "2024-01-31T23:59:59.999Z";
+    const context = global.createMockContext();
 
     await Purchase.create([
       {
@@ -80,6 +97,8 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 10,
         date: new Date("2024-01-01T00:00:00.000Z"), // exactly at start
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
       {
         itemId,
@@ -87,10 +106,11 @@ describe("getPurchases resolver", () => {
         unit: "lbs",
         price: 15,
         date: new Date("2024-01-31T23:59:59.999Z"), // exactly at end
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchases(null, { from, to }, context);
 
     expect(result).toHaveLength(2);
@@ -100,6 +120,7 @@ describe("getPurchases resolver", () => {
     const itemId = global.createMockId();
     const from = "2024-01-15T00:00:00.000Z";
     const to = "2024-01-15T23:59:59.999Z";
+    const context = global.createMockContext();
 
     await Purchase.create([
       {
@@ -108,6 +129,8 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 10,
         date: new Date("2024-01-15T12:00:00.000Z"), // within single day
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
       {
         itemId,
@@ -115,6 +138,8 @@ describe("getPurchases resolver", () => {
         unit: "lbs",
         price: 15,
         date: new Date("2024-01-14T12:00:00.000Z"), // day before
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
       {
         itemId,
@@ -122,10 +147,11 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 20,
         date: new Date("2024-01-16T12:00:00.000Z"), // day after
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchases(null, { from, to }, context);
 
     expect(result).toHaveLength(1);
@@ -134,6 +160,7 @@ describe("getPurchases resolver", () => {
 
   it("should handle different date formats", async () => {
     const itemId = global.createMockId();
+    const context = global.createMockContext();
 
     await Purchase.create([
       {
@@ -142,10 +169,10 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 10,
         date: new Date("2024-01-15T12:00:00.000Z"),
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
     ]);
-
-    const context = global.createMockContext();
 
     // Test with different date string formats
     const result1 = await getPurchases(
@@ -172,6 +199,7 @@ describe("getPurchases resolver", () => {
 
   it("should handle large number of purchases", async () => {
     const itemId = global.createMockId();
+    const context = global.createMockContext();
     const purchases = [];
 
     for (let i = 1; i <= 100; i++) {
@@ -183,12 +211,12 @@ describe("getPurchases resolver", () => {
         date: new Date(
           `2024-01-${String((i % 28) + 1).padStart(2, "0")}T12:00:00.000Z`
         ),
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       });
     }
 
     await Purchase.create(purchases);
-
-    const context = global.createMockContext();
     const result = await getPurchases(
       null,
       {
@@ -200,8 +228,12 @@ describe("getPurchases resolver", () => {
 
     expect(result).toHaveLength(100);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 100 },
-      "Successfully retrieved purchases"
+      {
+        count: 100,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully retrieved purchases for family"
     );
   });
 
@@ -249,6 +281,7 @@ describe("getPurchases resolver", () => {
 
   it("should return purchases with all fields", async () => {
     const itemId = global.createMockId();
+    const context = global.createMockContext();
 
     await Purchase.create([
       {
@@ -258,10 +291,10 @@ describe("getPurchases resolver", () => {
         price: 15.99,
         discount: 1.5,
         date: new Date("2024-01-15T12:00:00.000Z"),
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
     ]);
-
-    const context = global.createMockContext();
     const result = await getPurchases(
       null,
       {
@@ -306,6 +339,7 @@ describe("getPurchases resolver", () => {
 
   it("should handle timezone differences", async () => {
     const itemId = global.createMockId();
+    const context = global.createMockContext();
 
     await Purchase.create([
       {
@@ -314,10 +348,10 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 10,
         date: new Date("2024-01-01T23:30:00.000Z"), // Late UTC time
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
     ]);
-
-    const context = global.createMockContext();
     const result = await getPurchases(
       null,
       {
@@ -332,6 +366,7 @@ describe("getPurchases resolver", () => {
 
   it("should maintain date order in results", async () => {
     const itemId = global.createMockId();
+    const context = global.createMockContext();
 
     await Purchase.create([
       {
@@ -340,6 +375,8 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 30,
         date: new Date("2024-01-20T12:00:00.000Z"),
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
       {
         itemId,
@@ -347,6 +384,8 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 10,
         date: new Date("2024-01-10T12:00:00.000Z"),
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
       {
         itemId,
@@ -354,10 +393,10 @@ describe("getPurchases resolver", () => {
         unit: "kg",
         price: 20,
         date: new Date("2024-01-15T12:00:00.000Z"),
+        familyId: context.auth.user.familyId,
+        createdByUserId: context.auth.user.id,
       },
     ]);
-
-    const context = global.createMockContext();
     const result = await getPurchases(
       null,
       {

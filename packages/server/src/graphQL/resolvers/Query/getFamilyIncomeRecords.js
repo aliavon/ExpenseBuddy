@@ -1,15 +1,28 @@
 const { SORT_ORDER } = require("../../../constants/sortOrder");
+const { requireFamily } = require("../../../auth");
 
 module.exports = async (
   _,
   { filters = {}, pagination, sort = {} },
-  { schemas: { FamilyIncome }, logger }
+  context
 ) => {
+  const {
+    schemas: { FamilyIncome },
+    logger,
+  } = context;
+
+  // Require authentication and family membership
+  const auth = requireFamily(context);
+
   const { dateFrom, dateTo, contributorId, typeId } = filters;
   const { page, limit } = pagination;
   const { sortBy, sortOrder } = sort;
 
-  const queryFilter = {};
+  const queryFilter = {
+    // Always filter by family
+    familyId: auth.user.familyId,
+  };
+
   if (dateFrom || dateTo) {
     queryFilter.date = {};
     if (dateFrom) {
@@ -46,8 +59,12 @@ module.exports = async (
     .limit(limit);
 
   logger.info(
-    { count: incomes.length },
-    "Successfully retrieved FamilyIncome records"
+    {
+      count: incomes.length,
+      userId: auth.user.id,
+      familyId: auth.user.familyId,
+    },
+    "Successfully retrieved FamilyIncome records for family"
   );
 
   return {

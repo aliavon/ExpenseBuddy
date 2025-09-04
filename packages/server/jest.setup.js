@@ -62,6 +62,30 @@ global.mockLogger = mockLogger;
 // Test utilities
 global.createMockId = () => new mongoose.Types.ObjectId().toString();
 
+// Create mock user for testing
+global.createMockUser = (overrides = {}) => ({
+  id: new mongoose.Types.ObjectId().toString(),
+  email: "test@example.com",
+  firstName: "Test",
+  lastName: "User",
+  familyId: new mongoose.Types.ObjectId().toString(),
+  roleInFamily: "OWNER",
+  isActive: true,
+  isEmailVerified: true,
+  ...overrides,
+});
+
+// Create mock family for testing
+global.createMockFamily = (overrides = {}) => ({
+  id: new mongoose.Types.ObjectId().toString(),
+  name: "Test Family",
+  ownerId: new mongoose.Types.ObjectId().toString(),
+  currency: new mongoose.Types.ObjectId().toString(),
+  timezone: "UTC",
+  isActive: true,
+  ...overrides,
+});
+
 global.createMockContext = (overrides = {}) => ({
   schemas: require("./src/database/schemas"),
   logger: mockLogger,
@@ -70,6 +94,19 @@ global.createMockContext = (overrides = {}) => ({
     incomeTypeLoader: { load: jest.fn() },
     userLoader: { load: jest.fn() },
     currencyLoader: { load: jest.fn() },
+  },
+  // Mock auth context - can be overridden for specific tests
+  auth: {
+    isAuthenticated: true,
+    user: global.createMockUser(),
+    family: global.createMockFamily(),
+    permissions: {
+      canViewFamilyData: true,
+      canModifyFamilyData: true,
+      canManageFamily: true,
+      canInviteMembers: true,
+      canManageMembers: true,
+    },
   },
   ...overrides,
 }); 
