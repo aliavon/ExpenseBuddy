@@ -6,7 +6,8 @@ const purchaseSchema = new mongoose.Schema({
   familyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: modelNames.Family,
-    required: true,
+    required: false, // TODO: make required after auth implementation
+    default: null,
     index: true,
   },
 
@@ -14,7 +15,8 @@ const purchaseSchema = new mongoose.Schema({
   createdByUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: modelNames.User,
-    required: true,
+    required: false, // TODO: make required after auth implementation
+    default: null,
   },
 
   // Existing fields

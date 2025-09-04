@@ -149,11 +149,11 @@ describe("Family Schema", () => {
 
   it("should enforce unique invite codes", async () => {
     // First create a family with an invite code
-     await Family.create({
-      name: "Family 1", 
+    await Family.create({
+      name: "Family 1",
       ownerId: testUser._id,
       currency: testCurrency._id,
-      inviteCode: "TESTCODE123"
+      inviteCode: "TESTCODE123",
     });
 
     const anotherUser = await User.create({

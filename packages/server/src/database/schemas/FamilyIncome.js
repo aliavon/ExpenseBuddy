@@ -10,7 +10,8 @@ const familyIncomeSchema = new mongoose.Schema({
   familyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: modelNames.Family,
-    required: true,
+    required: false, // TODO: make required after auth implementation
+    default: null,
     index: true,
   },
 
