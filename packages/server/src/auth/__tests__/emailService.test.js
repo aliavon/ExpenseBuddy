@@ -19,7 +19,7 @@ jest.mock("nodemailer", () => ({
   createTransporter: jest.fn(() => mockTransporter),
 }));
 
-const nodemailer = require("nodemailer");
+// nodemailer is mocked above
 
 describe("Email Service", () => {
   beforeEach(() => {

@@ -377,7 +377,7 @@ describe("Redis Client", () => {
     it("should handle redis connection with retry configured", async () => {
       // Test that Redis connection works with retry strategy
       const client = await connectRedis();
-      
+
       expect(client).toBeTruthy();
       expect(typeof client.connect).toBe("function");
     });
