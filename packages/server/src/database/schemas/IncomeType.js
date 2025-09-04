@@ -2,15 +2,25 @@ const mongoose = require("mongoose");
 const modelNames = require("../modelNames");
 
 const incomeTypeSchema = new mongoose.Schema({
+  // Family context for multi-family support
+  familyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: modelNames.Family,
+    required: true,
+    index: true,
+  },
+
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   description: {
     type: String,
     default: "",
   },
 });
+
+// Compound index to prevent duplicate income types per family
+incomeTypeSchema.index({ familyId: 1, name: 1 }, { unique: true });
 
 module.exports = mongoose.model(modelNames.IncomeType, incomeTypeSchema);

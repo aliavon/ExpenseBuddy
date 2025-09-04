@@ -23,9 +23,15 @@ describe("FamilyIncome resolvers", () => {
         description: "Monthly salary income",
       };
 
-      mockContext.loaders.incomeTypeLoader.load.mockResolvedValue(mockIncomeType);
+      mockContext.loaders.incomeTypeLoader.load.mockResolvedValue(
+        mockIncomeType
+      );
 
-      const result = await FamilyIncomeResolvers.type(mockParent, {}, mockContext);
+      const result = await FamilyIncomeResolvers.type(
+        mockParent,
+        {},
+        mockContext
+      );
 
       expect(result).toEqual(mockIncomeType);
       expect(mockContext.loaders.incomeTypeLoader.load).toHaveBeenCalledWith(
@@ -38,7 +44,9 @@ describe("FamilyIncome resolvers", () => {
 
       await expect(
         FamilyIncomeResolvers.type(mockParent, {}, mockContext)
-      ).rejects.toThrow("Failed to retrieve IncomeType. Please try again later.");
+      ).rejects.toThrow(
+        "Failed to retrieve IncomeType. Please try again later."
+      );
 
       expect(mockContext.logger.error).toHaveBeenCalledWith(
         { parentId: mockParent.typeId },
@@ -53,12 +61,15 @@ describe("FamilyIncome resolvers", () => {
       await expect(
         FamilyIncomeResolvers.type(mockParent, {}, mockContext)
       ).rejects.toThrow(
-        new GraphQLError("Failed to retrieve IncomeType. Please try again later.", {
-          extensions: {
-            code: ERROR_CODES.GET_INCOME_TYPE_ERROR,
-            detailedMessage: loaderError.message,
-          },
-        })
+        new GraphQLError(
+          "Failed to retrieve IncomeType. Please try again later.",
+          {
+            extensions: {
+              code: ERROR_CODES.GET_INCOME_TYPE_ERROR,
+              detailedMessage: loaderError.message,
+            },
+          }
+        )
       );
 
       expect(mockContext.logger.error).toHaveBeenCalledWith(
@@ -76,12 +87,15 @@ describe("FamilyIncome resolvers", () => {
       await expect(
         FamilyIncomeResolvers.type(mockParent, {}, mockContext)
       ).rejects.toThrow(
-        new GraphQLError("Failed to retrieve IncomeType. Please try again later.", {
-          extensions: {
-            code: "CUSTOM_ERROR_CODE",
-            detailedMessage: loaderError.message,
-          },
-        })
+        new GraphQLError(
+          "Failed to retrieve IncomeType. Please try again later.",
+          {
+            extensions: {
+              code: "CUSTOM_ERROR_CODE",
+              detailedMessage: loaderError.message,
+            },
+          }
+        )
       );
     });
   });
@@ -96,7 +110,11 @@ describe("FamilyIncome resolvers", () => {
 
       mockContext.loaders.userLoader.load.mockResolvedValue(mockUser);
 
-      const result = await FamilyIncomeResolvers.contributor(mockParent, {}, mockContext);
+      const result = await FamilyIncomeResolvers.contributor(
+        mockParent,
+        {},
+        mockContext
+      );
 
       expect(result).toEqual(mockUser);
       expect(mockContext.loaders.userLoader.load).toHaveBeenCalledWith(
@@ -168,7 +186,11 @@ describe("FamilyIncome resolvers", () => {
 
       mockContext.loaders.currencyLoader.load.mockResolvedValue(mockCurrency);
 
-      const result = await FamilyIncomeResolvers.currency(mockParent, {}, mockContext);
+      const result = await FamilyIncomeResolvers.currency(
+        mockParent,
+        {},
+        mockContext
+      );
 
       expect(result).toEqual(mockCurrency);
       expect(mockContext.loaders.currencyLoader.load).toHaveBeenCalledWith(
@@ -196,12 +218,15 @@ describe("FamilyIncome resolvers", () => {
       await expect(
         FamilyIncomeResolvers.currency(mockParent, {}, mockContext)
       ).rejects.toThrow(
-        new GraphQLError("Failed to retrieve Currency. Please try again later.", {
-          extensions: {
-            code: ERROR_CODES.GET_CURRENCY_ERROR,
-            detailedMessage: loaderError.message,
-          },
-        })
+        new GraphQLError(
+          "Failed to retrieve Currency. Please try again later.",
+          {
+            extensions: {
+              code: ERROR_CODES.GET_CURRENCY_ERROR,
+              detailedMessage: loaderError.message,
+            },
+          }
+        )
       );
 
       expect(mockContext.logger.error).toHaveBeenCalledWith(
@@ -219,13 +244,16 @@ describe("FamilyIncome resolvers", () => {
       await expect(
         FamilyIncomeResolvers.currency(mockParent, {}, mockContext)
       ).rejects.toThrow(
-        new GraphQLError("Failed to retrieve Currency. Please try again later.", {
-          extensions: {
-            code: "CUSTOM_ERROR_CODE",
-            detailedMessage: loaderError.message,
-          },
-        })
+        new GraphQLError(
+          "Failed to retrieve Currency. Please try again later.",
+          {
+            extensions: {
+              code: "CUSTOM_ERROR_CODE",
+              detailedMessage: loaderError.message,
+            },
+          }
+        )
       );
     });
   });
-}); 
+});

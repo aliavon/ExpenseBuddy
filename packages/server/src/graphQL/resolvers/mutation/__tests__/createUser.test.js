@@ -16,11 +16,7 @@ describe("createUser mutation", () => {
     const userData = createUserData();
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.firstName).toBe("John");
     expect(result.lastName).toBe("Doe");
@@ -44,11 +40,7 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.firstName).toBe("Jane");
     expect(result.middleName).toBe("Marie");
@@ -62,11 +54,7 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.middleName).toBe("");
   });
@@ -79,11 +67,7 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.firstName).toBe("José");
     expect(result.middleName).toBe("María");
@@ -98,11 +82,7 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.firstName).toBe(longName);
     expect(result.lastName).toBe(longName);
@@ -115,11 +95,7 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.firstName).toBe("Mary Jane");
     expect(result.lastName).toBe("Watson Parker");
@@ -132,11 +108,7 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.firstName).toBe("John2");
     expect(result.lastName).toBe("Doe3rd");
@@ -167,34 +139,38 @@ describe("createUser mutation", () => {
     const context = global.createMockContext();
     const beforeCreate = new Date();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     const afterCreate = new Date();
 
     expect(result.createdAt).toBeInstanceOf(Date);
     expect(result.updatedAt).toBeInstanceOf(Date);
-    expect(result.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
-    expect(result.createdAt.getTime()).toBeLessThanOrEqual(afterCreate.getTime());
-    expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
-    expect(result.updatedAt.getTime()).toBeLessThanOrEqual(afterCreate.getTime());
+    expect(result.createdAt.getTime()).toBeGreaterThanOrEqual(
+      beforeCreate.getTime()
+    );
+    expect(result.createdAt.getTime()).toBeLessThanOrEqual(
+      afterCreate.getTime()
+    );
+    expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(
+      beforeCreate.getTime()
+    );
+    expect(result.updatedAt.getTime()).toBeLessThanOrEqual(
+      afterCreate.getTime()
+    );
   });
 
   it("should handle database errors gracefully", async () => {
     const context = global.createMockContext();
-    
+
     // Mock User.create to throw an error
     const originalCreate = User.create;
-    User.create = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    User.create = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(createUser(
-      null,
-      { user: createUserData() },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      createUser(null, { user: createUserData() }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     User.create = originalCreate;
@@ -204,29 +180,21 @@ describe("createUser mutation", () => {
     const context = global.createMockContext();
 
     // Test missing firstName
-    await expect(createUser(
-      null,
-      { user: { lastName: "Doe" } },
-      context
-    )).rejects.toThrow();
+    await expect(
+      createUser(null, { user: { lastName: "Doe" } }, context)
+    ).rejects.toThrow();
 
     // Test missing lastName
-    await expect(createUser(
-      null,
-      { user: { firstName: "John" } },
-      context
-    )).rejects.toThrow();
+    await expect(
+      createUser(null, { user: { firstName: "John" } }, context)
+    ).rejects.toThrow();
   });
 
   it("should persist user in database", async () => {
     const userData = createUserData();
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     // Verify user was actually saved to database
     const savedUser = await User.findById(result._id);
@@ -241,11 +209,7 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     // Mongoose preserves null values when explicitly set
     expect(result.middleName).toBeNull();
@@ -279,11 +243,7 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.firstName).toBe("李");
     expect(result.middleName).toBe("小");
@@ -297,13 +257,9 @@ describe("createUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await createUser(
-      null,
-      { user: userData },
-      context
-    );
+    const result = await createUser(null, { user: userData }, context);
 
     expect(result.firstName).toBe("John 😊");
     expect(result.lastName).toBe("Doe 🎉");
   });
-}); 
+});

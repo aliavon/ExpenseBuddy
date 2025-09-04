@@ -49,7 +49,7 @@ describe("deleteIncomeTypes mutation", () => {
     );
 
     expect(result).toEqual([incomeType._id]);
-    
+
     // Verify deletion
     const deletedIncomeType = await IncomeType.findById(incomeType._id);
     expect(deletedIncomeType).toBeNull();
@@ -68,14 +68,10 @@ describe("deleteIncomeTypes mutation", () => {
 
     const ids = [incomeType1._id, incomeType2._id, incomeType3._id];
 
-    const result = await deleteIncomeTypes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteIncomeTypes(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    
+
     // Verify all were deleted
     const remainingIncomeTypes = await IncomeType.find({ _id: { $in: ids } });
     expect(remainingIncomeTypes).toHaveLength(0);
@@ -89,11 +85,7 @@ describe("deleteIncomeTypes mutation", () => {
   it("should handle empty ids array", async () => {
     const context = global.createMockContext();
 
-    const result = await deleteIncomeTypes(
-      null,
-      { ids: [] },
-      context
-    );
+    const result = await deleteIncomeTypes(null, { ids: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -107,11 +99,9 @@ describe("deleteIncomeTypes mutation", () => {
     await createFamilyIncomeInDB(incomeType._id);
     const context = global.createMockContext();
 
-    await expect(deleteIncomeTypes(
-      null,
-      { ids: [incomeType._id] },
-      context
-    )).rejects.toThrow(GraphQLError);
+    await expect(
+      deleteIncomeTypes(null, { ids: [incomeType._id] }, context)
+    ).rejects.toThrow(GraphQLError);
 
     // Verify income type still exists
     const existingIncomeType = await IncomeType.findById(incomeType._id);
@@ -124,15 +114,13 @@ describe("deleteIncomeTypes mutation", () => {
     const context = global.createMockContext();
 
     try {
-      await deleteIncomeTypes(
-        null,
-        { ids: [incomeType._id] },
-        context
-      );
+      await deleteIncomeTypes(null, { ids: [incomeType._id] }, context);
     } catch (error) {
       expect(error).toBeInstanceOf(GraphQLError);
       expect(error.extensions.code).toBe(ERROR_CODES.INCOME_TYPE_IN_USE);
-      expect(error.message).toBe("One or more IncomeTypes are in use and cannot be deleted.");
+      expect(error.message).toBe(
+        "One or more IncomeTypes are in use and cannot be deleted."
+      );
     }
   });
 
@@ -148,9 +136,9 @@ describe("deleteIncomeTypes mutation", () => {
     );
 
     expect(result).toEqual([incomeType1._id, incomeType2._id]);
-    
-    const remainingIncomeTypes = await IncomeType.find({ 
-      _id: { $in: [incomeType1._id, incomeType2._id] } 
+
+    const remainingIncomeTypes = await IncomeType.find({
+      _id: { $in: [incomeType1._id, incomeType2._id] },
     });
     expect(remainingIncomeTypes).toHaveLength(0);
   });
@@ -162,11 +150,9 @@ describe("deleteIncomeTypes mutation", () => {
     await createFamilyIncomeInDB(incomeType._id, { amount: 3000 });
     const context = global.createMockContext();
 
-    await expect(deleteIncomeTypes(
-      null,
-      { ids: [incomeType._id] },
-      context
-    )).rejects.toThrow(GraphQLError);
+    await expect(
+      deleteIncomeTypes(null, { ids: [incomeType._id] }, context)
+    ).rejects.toThrow(GraphQLError);
 
     // Verify income type still exists
     const existingIncomeType = await IncomeType.findById(incomeType._id);
@@ -179,11 +165,13 @@ describe("deleteIncomeTypes mutation", () => {
     await createFamilyIncomeInDB(incomeType1._id);
     const context = global.createMockContext();
 
-    await expect(deleteIncomeTypes(
-      null,
-      { ids: [incomeType1._id, incomeType2._id] },
-      context
-    )).rejects.toThrow(GraphQLError);
+    await expect(
+      deleteIncomeTypes(
+        null,
+        { ids: [incomeType1._id, incomeType2._id] },
+        context
+      )
+    ).rejects.toThrow(GraphQLError);
 
     // Verify both income types still exist (transaction-like behavior)
     const existingIncomeType1 = await IncomeType.findById(incomeType1._id);
@@ -221,7 +209,7 @@ describe("deleteIncomeTypes mutation", () => {
     );
 
     expect(result).toEqual([existingIncomeType._id, nonExistentId]);
-    
+
     // Verify existing income type was deleted
     const deletedIncomeType = await IncomeType.findById(existingIncomeType._id);
     expect(deletedIncomeType).toBeNull();
@@ -240,11 +228,7 @@ describe("deleteIncomeTypes mutation", () => {
 
     const ids = [incomeType3._id, incomeType1._id, incomeType2._id];
 
-    const result = await deleteIncomeTypes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteIncomeTypes(null, { ids }, context);
 
     expect(result).toEqual(ids); // Same order as input
   });
@@ -255,17 +239,13 @@ describe("deleteIncomeTypes mutation", () => {
       incomeTypes.push(await createIncomeTypeInDB({ name: `Type ${i}` }));
     }
 
-    const ids = incomeTypes.map(incomeType => incomeType._id);
+    const ids = incomeTypes.map((incomeType) => incomeType._id);
     const context = global.createMockContext();
 
-    const result = await deleteIncomeTypes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteIncomeTypes(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    
+
     // Verify all were deleted
     const remainingIncomeTypes = await IncomeType.find({ _id: { $in: ids } });
     expect(remainingIncomeTypes).toHaveLength(0);
@@ -282,14 +262,10 @@ describe("deleteIncomeTypes mutation", () => {
 
     const ids = [incomeType._id, incomeType._id, incomeType._id];
 
-    const result = await deleteIncomeTypes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteIncomeTypes(null, { ids }, context);
 
     expect(result).toEqual(ids); // Returns all IDs including duplicates
-    
+
     // Verify income type was deleted
     const deletedIncomeType = await IncomeType.findById(incomeType._id);
     expect(deletedIncomeType).toBeNull();
@@ -301,15 +277,13 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should not affect other income types during deletion", async () => {
-    const incomeTypeToDelete = await createIncomeTypeInDB({ name: "To Delete" });
+    const incomeTypeToDelete = await createIncomeTypeInDB({
+      name: "To Delete",
+    });
     const incomeTypeToKeep = await createIncomeTypeInDB({ name: "To Keep" });
     const context = global.createMockContext();
 
-    await deleteIncomeTypes(
-      null,
-      { ids: [incomeTypeToDelete._id] },
-      context
-    );
+    await deleteIncomeTypes(null, { ids: [incomeTypeToDelete._id] }, context);
 
     // Verify correct income type was deleted
     const deletedIncomeType = await IncomeType.findById(incomeTypeToDelete._id);
@@ -327,13 +301,13 @@ describe("deleteIncomeTypes mutation", () => {
 
     // Mock FamilyIncome.countDocuments to throw an error
     const originalCountDocuments = FamilyIncome.countDocuments;
-    FamilyIncome.countDocuments = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    FamilyIncome.countDocuments = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deleteIncomeTypes(
-      null,
-      { ids: [incomeType._id] },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      deleteIncomeTypes(null, { ids: [incomeType._id] }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     FamilyIncome.countDocuments = originalCountDocuments;
@@ -345,13 +319,13 @@ describe("deleteIncomeTypes mutation", () => {
 
     // Mock IncomeType.deleteMany to throw an error
     const originalDeleteMany = IncomeType.deleteMany;
-    IncomeType.deleteMany = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    IncomeType.deleteMany = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deleteIncomeTypes(
-      null,
-      { ids: [incomeType._id] },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      deleteIncomeTypes(null, { ids: [incomeType._id] }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     IncomeType.deleteMany = originalDeleteMany;
@@ -362,16 +336,14 @@ describe("deleteIncomeTypes mutation", () => {
     const context = global.createMockContext();
 
     // Spy on FamilyIncome.countDocuments to verify it's called
-    const countSpy = jest.spyOn(FamilyIncome, 'countDocuments');
+    const countSpy = jest.spyOn(FamilyIncome, "countDocuments");
 
-    await deleteIncomeTypes(
-      null,
-      { ids: [incomeType._id] },
-      context
-    );
+    await deleteIncomeTypes(null, { ids: [incomeType._id] }, context);
 
-    expect(countSpy).toHaveBeenCalledWith({ typeId: { $in: [incomeType._id] } });
-    
+    expect(countSpy).toHaveBeenCalledWith({
+      typeId: { $in: [incomeType._id] },
+    });
+
     countSpy.mockRestore();
   });
 
@@ -386,7 +358,7 @@ describe("deleteIncomeTypes mutation", () => {
     );
 
     expect(result).toEqual([incomeType._id.toString()]);
-    
+
     // Verify deletion
     const deletedIncomeType = await IncomeType.findById(incomeType._id);
     expect(deletedIncomeType).toBeNull();
@@ -404,14 +376,14 @@ describe("deleteIncomeTypes mutation", () => {
     );
 
     expect(result).toEqual([originalId]);
-    
+
     // Verify the income type no longer exists
     const deletedIncomeType = await IncomeType.findById(originalId);
     expect(deletedIncomeType).toBeNull();
   });
 
   it("should handle income types with special characters", async () => {
-    const incomeType = await createIncomeTypeInDB({ 
+    const incomeType = await createIncomeTypeInDB({
       name: "Salaire & Bonus",
       description: "Paiement mensuel - très important!",
     });
@@ -424,14 +396,14 @@ describe("deleteIncomeTypes mutation", () => {
     );
 
     expect(result).toEqual([incomeType._id]);
-    
+
     // Verify deletion
     const deletedIncomeType = await IncomeType.findById(incomeType._id);
     expect(deletedIncomeType).toBeNull();
   });
 
   it("should handle income types with emoji", async () => {
-    const incomeType = await createIncomeTypeInDB({ 
+    const incomeType = await createIncomeTypeInDB({
       name: "Salary 💰",
       description: "Monthly income 🎉",
     });
@@ -444,9 +416,9 @@ describe("deleteIncomeTypes mutation", () => {
     );
 
     expect(result).toEqual([incomeType._id]);
-    
+
     // Verify deletion
     const deletedIncomeType = await IncomeType.findById(incomeType._id);
     expect(deletedIncomeType).toBeNull();
   });
-}); 
+});

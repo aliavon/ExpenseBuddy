@@ -28,18 +28,16 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      name: "Euro",
-      code: "EUR",
-      symbol: "€",
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: "Euro",
+        code: "EUR",
+        symbol: "€",
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("Euro");
@@ -63,17 +61,19 @@ describe("updateCurrencies mutation", () => {
       { id: currency3._id, name: "British Pound Sterling", symbol: "£" },
     ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result).toHaveLength(3);
-    
-    const updatedCurrency1 = result.find(r => r._id.toString() === currency1._id.toString());
-    const updatedCurrency2 = result.find(r => r._id.toString() === currency2._id.toString());
-    const updatedCurrency3 = result.find(r => r._id.toString() === currency3._id.toString());
+
+    const updatedCurrency1 = result.find(
+      (r) => r._id.toString() === currency1._id.toString()
+    );
+    const updatedCurrency2 = result.find(
+      (r) => r._id.toString() === currency2._id.toString()
+    );
+    const updatedCurrency3 = result.find(
+      (r) => r._id.toString() === currency3._id.toString()
+    );
 
     expect(updatedCurrency1.name).toBe("United States Dollar");
     expect(updatedCurrency2.symbol).toBe("€€");
@@ -89,11 +89,7 @@ describe("updateCurrencies mutation", () => {
   it("should handle empty updates array", async () => {
     const context = global.createMockContext();
 
-    const result = await updateCurrencies(
-      null,
-      { updates: [] },
-      context
-    );
+    const result = await updateCurrencies(null, { updates: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -111,16 +107,14 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB(originalData);
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      name: "United States Dollar", // only update name
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: "United States Dollar", // only update name
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].name).toBe("United States Dollar"); // updated
     expect(result[0].code).toBe("USD"); // unchanged
@@ -131,18 +125,16 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      name: "Yen Japonais",
-      code: "JPY",
-      symbol: "¥",
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: "Yen Japonais",
+        code: "JPY",
+        symbol: "¥",
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].name).toBe("Yen Japonais");
     expect(result[0].code).toBe("JPY");
@@ -153,18 +145,16 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      name: "Bitcoin",
-      code: "BTC",
-      symbol: "₿",
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: "Bitcoin",
+        code: "BTC",
+        symbol: "₿",
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].name).toBe("Bitcoin");
     expect(result[0].code).toBe("BTC");
@@ -175,18 +165,16 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      name: "Fun Coin 🎉",
-      code: "FUN",
-      symbol: "🪙",
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: "Fun Coin 🎉",
+        code: "FUN",
+        symbol: "🪙",
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].name).toBe("Fun Coin 🎉");
     expect(result[0].code).toBe("FUN");
@@ -196,10 +184,12 @@ describe("updateCurrencies mutation", () => {
   it("should handle large batch updates", async () => {
     const currencies = [];
     for (let i = 1; i <= 20; i++) {
-      currencies.push(await createCurrencyInDB({ 
-        code: `CUR${i}`,
-        name: `Currency ${i}`,
-      }));
+      currencies.push(
+        await createCurrencyInDB({
+          code: `CUR${i}`,
+          name: `Currency ${i}`,
+        })
+      );
     }
 
     const updates = currencies.map((currency, index) => ({
@@ -209,11 +199,7 @@ describe("updateCurrencies mutation", () => {
 
     const context = global.createMockContext();
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result).toHaveLength(20);
     expect(result[0].name).toBe("Updated Currency 1");
@@ -228,16 +214,14 @@ describe("updateCurrencies mutation", () => {
     const nonExistentId = global.createMockId();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: nonExistentId,
-      name: "Non-existent Currency",
-    }];
+    const updates = [
+      {
+        id: nonExistentId,
+        name: "Non-existent Currency",
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -256,11 +240,7 @@ describe("updateCurrencies mutation", () => {
       { id: nonExistentId, name: "Non-existent" },
     ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("Updated");
@@ -276,18 +256,20 @@ describe("updateCurrencies mutation", () => {
 
     // Mock Currency.bulkWrite to throw an error
     const originalBulkWrite = Currency.bulkWrite;
-    Currency.bulkWrite = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Currency.bulkWrite = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    const updates = [{
-      id: currency._id,
-      name: "Updated",
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: "Updated",
+      },
+    ];
 
-    await expect(updateCurrencies(
-      null,
-      { updates },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(updateCurrencies(null, { updates }, context)).rejects.toThrow(
+      "Database connection failed"
+    );
 
     // Restore original method
     Currency.bulkWrite = originalBulkWrite;
@@ -297,17 +279,15 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      name: "Persisted Update",
-      code: "PER",
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: "Persisted Update",
+        code: "PER",
+      },
+    ];
 
-    await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    await updateCurrencies(null, { updates }, context);
 
     // Verify changes were persisted
     const updatedCurrency = await Currency.findById(currency._id);
@@ -319,16 +299,14 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id.toString(), // string format
-      name: "String ID Update",
-    }];
+    const updates = [
+      {
+        id: currency._id.toString(), // string format
+        name: "String ID Update",
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].name).toBe("String ID Update");
   });
@@ -338,16 +316,14 @@ describe("updateCurrencies mutation", () => {
     const context = global.createMockContext();
     const longName = "A".repeat(200);
 
-    const updates = [{
-      id: currency._id,
-      name: longName,
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: longName,
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].name).toBe(longName);
   });
@@ -356,16 +332,14 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      code: "eur", // lowercase
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        code: "eur", // lowercase
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].code).toBe("eur");
   });
@@ -374,18 +348,16 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      name: "",
-      code: "",
-      symbol: "",
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: "",
+        code: "",
+        symbol: "",
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].name).toBe("");
     expect(result[0].code).toBe("");
@@ -396,17 +368,15 @@ describe("updateCurrencies mutation", () => {
     const currency = await createCurrencyInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: currency._id,
-      name: null,
-      symbol: null,
-    }];
+    const updates = [
+      {
+        id: currency._id,
+        name: null,
+        symbol: null,
+      },
+    ];
 
-    const result = await updateCurrencies(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateCurrencies(null, { updates }, context);
 
     expect(result[0].name).toBeNull();
     expect(result[0].symbol).toBeNull();
@@ -417,22 +387,22 @@ describe("updateCurrencies mutation", () => {
     const context = global.createMockContext();
 
     // First update
-    const firstUpdates = [{
-      id: currency._id,
-      name: "First Update",
-    }];
+    const firstUpdates = [
+      {
+        id: currency._id,
+        name: "First Update",
+      },
+    ];
 
-    await updateCurrencies(
-      null,
-      { updates: firstUpdates },
-      context
-    );
+    await updateCurrencies(null, { updates: firstUpdates }, context);
 
     // Second update
-    const secondUpdates = [{
-      id: currency._id,
-      code: "SEC",
-    }];
+    const secondUpdates = [
+      {
+        id: currency._id,
+        code: "SEC",
+      },
+    ];
 
     const result = await updateCurrencies(
       null,
@@ -443,4 +413,4 @@ describe("updateCurrencies mutation", () => {
     expect(result[0].name).toBe("First Update"); // from first update
     expect(result[0].code).toBe("SEC"); // from second update
   });
-}); 
+});

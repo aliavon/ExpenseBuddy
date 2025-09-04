@@ -24,7 +24,6 @@ describe("editItemsCategory mutation", () => {
   };
 
   it("should update category for single item successfully", async () => {
-    const item = await createItemInDB({ name: "Apple", category: "Old Category" });
     const context = global.createMockContext();
 
     const result = await editItemsCategory(
@@ -55,7 +54,7 @@ describe("editItemsCategory mutation", () => {
     );
 
     expect(result).toHaveLength(3);
-    result.forEach(item => {
+    result.forEach((item) => {
       expect(item.category).toBe("Fruits");
       expect(["Apple", "Banana", "Orange"]).toContain(item.name);
     });
@@ -103,7 +102,10 @@ describe("editItemsCategory mutation", () => {
 
     const result = await editItemsCategory(
       null,
-      { names: ["Existing Item", "Non-existent Item"], newCategory: "New Category" },
+      {
+        names: ["Existing Item", "Non-existent Item"],
+        newCategory: "New Category",
+      },
       context
     );
 
@@ -130,12 +132,18 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle special characters in item names and categories", async () => {
-    await createItemInDB({ name: "Café & Croissant", category: "Old Category" });
+    await createItemInDB({
+      name: "Café & Croissant",
+      category: "Old Category",
+    });
     const context = global.createMockContext();
 
     const result = await editItemsCategory(
       null,
-      { names: ["Café & Croissant"], newCategory: "Boulangerie - très spécial!" },
+      {
+        names: ["Café & Croissant"],
+        newCategory: "Boulangerie - très spécial!",
+      },
       context
     );
 
@@ -188,7 +196,7 @@ describe("editItemsCategory mutation", () => {
     );
 
     expect(result).toHaveLength(20);
-    result.forEach(item => {
+    result.forEach((item) => {
       expect(item.category).toBe("New Category");
     });
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -226,7 +234,7 @@ describe("editItemsCategory mutation", () => {
     // Verify only targeted item was updated
     const updatedItem = await Item.findOne({ name: "Item to Update" });
     const keptItem = await Item.findOne({ name: "Item to Keep" });
-    
+
     expect(updatedItem.category).toBe("New Category");
     expect(keptItem.category).toBe("Keep Category");
   });
@@ -237,7 +245,10 @@ describe("editItemsCategory mutation", () => {
 
     const result = await editItemsCategory(
       null,
-      { names: ["Duplicate Item", "Duplicate Item", "Duplicate Item"], newCategory: "New Category" },
+      {
+        names: ["Duplicate Item", "Duplicate Item", "Duplicate Item"],
+        newCategory: "New Category",
+      },
       context
     );
 
@@ -268,13 +279,17 @@ describe("editItemsCategory mutation", () => {
 
     // Mock Item.updateMany to throw an error
     const originalUpdateMany = Item.updateMany;
-    Item.updateMany = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Item.updateMany = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(editItemsCategory(
-      null,
-      { names: ["Test Item"], newCategory: "New Category" },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      editItemsCategory(
+        null,
+        { names: ["Test Item"], newCategory: "New Category" },
+        context
+      )
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     Item.updateMany = originalUpdateMany;
@@ -286,13 +301,17 @@ describe("editItemsCategory mutation", () => {
 
     // Mock Item.find to throw an error
     const originalFind = Item.find;
-    Item.find = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Item.find = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(editItemsCategory(
-      null,
-      { names: ["Test Item"], newCategory: "New Category" },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      editItemsCategory(
+        null,
+        { names: ["Test Item"], newCategory: "New Category" },
+        context
+      )
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     Item.find = originalFind;
@@ -332,7 +351,7 @@ describe("editItemsCategory mutation", () => {
 
     expect(result).toHaveLength(3);
     // Items should be returned in the order they were found in database
-    const names = result.map(item => item.name);
+    const names = result.map((item) => item.name);
     expect(names).toContain("Zebra");
     expect(names).toContain("Apple");
     expect(names).toContain("Banana");
@@ -378,4 +397,4 @@ describe("editItemsCategory mutation", () => {
     expect(result[0].name).toBe("  Spaced Item  ");
     expect(result[0].category).toBe("New Category");
   });
-}); 
+});

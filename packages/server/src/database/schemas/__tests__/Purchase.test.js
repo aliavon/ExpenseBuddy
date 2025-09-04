@@ -1,12 +1,34 @@
 const Purchase = require("../Purchase");
 const Item = require("../Item");
-const mongoose = require("mongoose");
+const Family = require("../Family");
+const User = require("../User");
+const Currency = require("../Currency");
 
 describe("Purchase Schema", () => {
-  let testItem;
+  let testItem, testFamily, testUser;
 
   beforeEach(async () => {
+    const testCurrency = await Currency.create({
+      name: "US Dollar",
+      code: "USD",
+      symbol: "$",
+    });
+
+    testUser = await User.create({
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      password: "securePassword123",
+    });
+
+    testFamily = await Family.create({
+      name: "Test Family",
+      ownerId: testUser._id,
+      currency: testCurrency._id,
+    });
+
     testItem = await Item.create({
+      familyId: testFamily._id,
       name: "Test Item",
       category: "Electronics",
     });
@@ -14,10 +36,12 @@ describe("Purchase Schema", () => {
 
   it("should create purchase with required fields", async () => {
     const purchaseData = {
+      familyId: testFamily._id,
+      createdByUserId: testUser._id,
       itemId: testItem._id,
       quantity: 2,
       unit: "pieces",
-      price: 100.50,
+      price: 100.5,
       discount: 10,
       date: new Date("2023-01-01"),
       note: "Test purchase",
@@ -26,6 +50,10 @@ describe("Purchase Schema", () => {
     const purchase = new Purchase(purchaseData);
     const savedPurchase = await purchase.save();
 
+    expect(savedPurchase.familyId.toString()).toBe(testFamily._id.toString());
+    expect(savedPurchase.createdByUserId.toString()).toBe(
+      testUser._id.toString()
+    );
     expect(savedPurchase.itemId.toString()).toBe(testItem._id.toString());
     expect(savedPurchase.quantity).toBe(purchaseData.quantity);
     expect(savedPurchase.unit).toBe(purchaseData.unit);
@@ -37,6 +65,8 @@ describe("Purchase Schema", () => {
 
   it("should create purchase with default values", async () => {
     const purchaseData = {
+      familyId: testFamily._id,
+      createdByUserId: testUser._id,
       itemId: testItem._id,
       quantity: 1,
       unit: "piece",
@@ -53,16 +83,88 @@ describe("Purchase Schema", () => {
 
   it("should fail validation without required fields", async () => {
     const testCases = [
-      { field: "itemId", data: { quantity: 1, unit: "piece", price: 50, date: new Date() } },
-      { field: "quantity", data: { itemId: testItem._id, unit: "piece", price: 50, date: new Date() } },
-      { field: "unit", data: { itemId: testItem._id, quantity: 1, price: 50, date: new Date() } },
-      { field: "price", data: { itemId: testItem._id, quantity: 1, unit: "piece", date: new Date() } },
-      { field: "date", data: { itemId: testItem._id, quantity: 1, unit: "piece", price: 50 } },
+      {
+        field: "itemId",
+        data: {
+          familyId: testFamily._id,
+          createdByUserId: testUser._id,
+          quantity: 1,
+          unit: "piece",
+          price: 50,
+          date: new Date(),
+        },
+      },
+      {
+        field: "quantity",
+        data: {
+          familyId: testFamily._id,
+          createdByUserId: testUser._id,
+          itemId: testItem._id,
+          unit: "piece",
+          price: 50,
+          date: new Date(),
+        },
+      },
+      {
+        field: "unit",
+        data: {
+          familyId: testFamily._id,
+          createdByUserId: testUser._id,
+          itemId: testItem._id,
+          quantity: 1,
+          price: 50,
+          date: new Date(),
+        },
+      },
+      {
+        field: "price",
+        data: {
+          familyId: testFamily._id,
+          createdByUserId: testUser._id,
+          itemId: testItem._id,
+          quantity: 1,
+          unit: "piece",
+          date: new Date(),
+        },
+      },
+      {
+        field: "date",
+        data: {
+          familyId: testFamily._id,
+          createdByUserId: testUser._id,
+          itemId: testItem._id,
+          quantity: 1,
+          unit: "piece",
+          price: 50,
+        },
+      },
+      {
+        field: "familyId",
+        data: {
+          createdByUserId: testUser._id,
+          itemId: testItem._id,
+          quantity: 1,
+          unit: "piece",
+          price: 50,
+          date: new Date(),
+        },
+      },
+      {
+        field: "createdByUserId",
+        data: {
+          familyId: testFamily._id,
+          itemId: testItem._id,
+          quantity: 1,
+          unit: "piece",
+          price: 50,
+          date: new Date(),
+        },
+      },
     ];
 
     for (const testCase of testCases) {
       const purchase = new Purchase(testCase.data);
-      
+
       let error;
       try {
         await purchase.save();
@@ -101,13 +203,37 @@ describe("Purchase Schema", () => {
     const outsideDate = new Date("2024-01-01");
 
     await Purchase.create([
-      { itemId: testItem._id, quantity: 1, unit: "piece", price: 50, date: startDate },
-      { itemId: testItem._id, quantity: 2, unit: "piece", price: 75, date: new Date("2023-06-15") },
-      { itemId: testItem._id, quantity: 1, unit: "piece", price: 25, date: outsideDate },
+      {
+        familyId: testFamily._id,
+        createdByUserId: testUser._id,
+        itemId: testItem._id,
+        quantity: 1,
+        unit: "piece",
+        price: 50,
+        date: startDate,
+      },
+      {
+        familyId: testFamily._id,
+        createdByUserId: testUser._id,
+        itemId: testItem._id,
+        quantity: 2,
+        unit: "piece",
+        price: 75,
+        date: new Date("2023-06-15"),
+      },
+      {
+        familyId: testFamily._id,
+        createdByUserId: testUser._id,
+        itemId: testItem._id,
+        quantity: 1,
+        unit: "piece",
+        price: 25,
+        date: outsideDate,
+      },
     ]);
 
     const purchases = await Purchase.find({
-      date: { $gte: startDate, $lte: endDate }
+      date: { $gte: startDate, $lte: endDate },
     });
 
     expect(purchases).toHaveLength(2);
@@ -115,6 +241,8 @@ describe("Purchase Schema", () => {
 
   it("should populate item reference", async () => {
     const purchase = await Purchase.create({
+      familyId: testFamily._id,
+      createdByUserId: testUser._id,
       itemId: testItem._id,
       quantity: 1,
       unit: "piece",
@@ -122,14 +250,18 @@ describe("Purchase Schema", () => {
       date: new Date(),
     });
 
-    const populatedPurchase = await Purchase.findById(purchase._id).populate("itemId");
-    
+    const populatedPurchase = await Purchase.findById(purchase._id).populate(
+      "itemId"
+    );
+
     expect(populatedPurchase.itemId.name).toBe(testItem.name);
     expect(populatedPurchase.itemId.category).toBe(testItem.category);
   });
 
   it("should calculate total with discount", async () => {
     const purchase = await Purchase.create({
+      familyId: testFamily._id,
+      createdByUserId: testUser._id,
       itemId: testItem._id,
       quantity: 2,
       unit: "pieces",
@@ -146,6 +278,8 @@ describe("Purchase Schema", () => {
     const purchases = [];
     for (let i = 0; i < 5; i++) {
       purchases.push({
+        familyId: testFamily._id,
+        createdByUserId: testUser._id,
         itemId: testItem._id,
         quantity: 1,
         unit: "piece",
@@ -157,11 +291,11 @@ describe("Purchase Schema", () => {
     await Purchase.create(purchases);
 
     const sortedPurchases = await Purchase.find({}).sort({ date: 1 });
-    
+
     for (let i = 1; i < sortedPurchases.length; i++) {
       expect(sortedPurchases[i].date.getTime()).toBeGreaterThanOrEqual(
         sortedPurchases[i - 1].date.getTime()
       );
     }
   });
-}); 
+});

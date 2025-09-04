@@ -32,13 +32,17 @@ describe("getItems resolver", () => {
     ]);
 
     const context = global.createMockContext();
-    const result = await getItems(null, { names: ["Apple", "Carrot"] }, context);
+    const result = await getItems(
+      null,
+      { names: ["Apple", "Carrot"] },
+      context
+    );
 
     expect(result).toHaveLength(2);
-    expect(result.map(item => item.name)).toContain("Apple");
-    expect(result.map(item => item.name)).toContain("Carrot");
-    expect(result.map(item => item.name)).not.toContain("Banana");
-    expect(result.map(item => item.name)).not.toContain("Broccoli");
+    expect(result.map((item) => item.name)).toContain("Apple");
+    expect(result.map((item) => item.name)).toContain("Carrot");
+    expect(result.map((item) => item.name)).not.toContain("Banana");
+    expect(result.map((item) => item.name)).not.toContain("Broccoli");
   });
 
   it("should filter items by category", async () => {
@@ -53,9 +57,9 @@ describe("getItems resolver", () => {
     const result = await getItems(null, { category: "Fruits" }, context);
 
     expect(result).toHaveLength(2);
-    expect(result.map(item => item.name)).toContain("Apple");
-    expect(result.map(item => item.name)).toContain("Banana");
-    expect(result.map(item => item.category)).toEqual(["Fruits", "Fruits"]);
+    expect(result.map((item) => item.name)).toContain("Apple");
+    expect(result.map((item) => item.name)).toContain("Banana");
+    expect(result.map((item) => item.category)).toEqual(["Fruits", "Fruits"]);
   });
 
   it("should filter items by both names and category", async () => {
@@ -67,15 +71,19 @@ describe("getItems resolver", () => {
     ]);
 
     const context = global.createMockContext();
-    const result = await getItems(null, { 
-      names: ["Apple", "Banana"], 
-      category: "Fruits" 
-    }, context);
+    const result = await getItems(
+      null,
+      {
+        names: ["Apple", "Banana"],
+        category: "Fruits",
+      },
+      context
+    );
 
     expect(result).toHaveLength(2);
-    expect(result.map(item => item.name)).toContain("Apple");
-    expect(result.map(item => item.name)).toContain("Banana");
-    expect(result.every(item => item.category === "Fruits")).toBe(true);
+    expect(result.map((item) => item.name)).toContain("Apple");
+    expect(result.map((item) => item.name)).toContain("Banana");
+    expect(result.every((item) => item.category === "Fruits")).toBe(true);
   });
 
   it("should return empty array when names filter matches nothing", async () => {
@@ -85,7 +93,11 @@ describe("getItems resolver", () => {
     ]);
 
     const context = global.createMockContext();
-    const result = await getItems(null, { names: ["Orange", "Grape"] }, context);
+    const result = await getItems(
+      null,
+      { names: ["Orange", "Grape"] },
+      context
+    );
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -201,7 +213,11 @@ describe("getItems resolver", () => {
 
     const context = global.createMockContext();
     const result1 = await getItems(null, { names: ["Café Latte"] }, context);
-    const result2 = await getItems(null, { category: "Beverages & Drinks" }, context);
+    const result2 = await getItems(
+      null,
+      { category: "Beverages & Drinks" },
+      context
+    );
 
     expect(result1).toHaveLength(1);
     expect(result2).toHaveLength(2);
@@ -209,12 +225,16 @@ describe("getItems resolver", () => {
 
   it("should handle database errors gracefully", async () => {
     const context = global.createMockContext();
-    
+
     // Mock Item.find to throw an error
     const originalFind = Item.find;
-    Item.find = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Item.find = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(getItems(null, {}, context)).rejects.toThrow("Database connection failed");
+    await expect(getItems(null, {}, context)).rejects.toThrow(
+      "Database connection failed"
+    );
 
     // Restore original method
     Item.find = originalFind;
@@ -222,11 +242,11 @@ describe("getItems resolver", () => {
 
   it("should return items with all fields", async () => {
     await Item.create([
-      { 
-        name: "Apple", 
+      {
+        name: "Apple",
         category: "Fruits",
         description: "Red apple",
-        price: 1.50
+        price: 1.5,
       },
     ]);
 
@@ -247,11 +267,15 @@ describe("getItems resolver", () => {
     ]);
 
     const context = global.createMockContext();
-    const result = await getItems(null, { names: ["Apple", "NonExistent", "Carrot"] }, context);
+    const result = await getItems(
+      null,
+      { names: ["Apple", "NonExistent", "Carrot"] },
+      context
+    );
 
     expect(result).toHaveLength(2);
-    expect(result.map(item => item.name)).toContain("Apple");
-    expect(result.map(item => item.name)).toContain("Carrot");
-    expect(result.map(item => item.name)).not.toContain("NonExistent");
+    expect(result.map((item) => item.name)).toContain("Apple");
+    expect(result.map((item) => item.name)).toContain("Carrot");
+    expect(result.map((item) => item.name)).not.toContain("NonExistent");
   });
-}); 
+});

@@ -31,7 +31,7 @@ describe("Get Schemas Validation", () => {
     it("should validate with valid date range", () => {
       const validInput = {
         from: "2024-01-01T00:00:00.000Z",
-        to: "2024-01-31T23:59:59.999Z"
+        to: "2024-01-31T23:59:59.999Z",
       };
 
       const { error } = getPurchasesSchema.validate(validInput);
@@ -57,7 +57,7 @@ describe("Get Schemas Validation", () => {
     it("should fail with invalid date format", () => {
       const invalidInput = {
         from: "invalid-date",
-        to: "2024-01-31T23:59:59.999Z"
+        to: "2024-01-31T23:59:59.999Z",
       };
 
       const { error } = getPurchasesSchema.validate(invalidInput);
@@ -70,14 +70,16 @@ describe("Get Schemas Validation", () => {
     it("should validate with valid names array", () => {
       const validInput = { names: ["Apple", "Banana", "Orange"] };
 
-      const { error } = getPurchasesCategorySuggestionSchema.validate(validInput);
+      const { error } =
+        getPurchasesCategorySuggestionSchema.validate(validInput);
       expect(error).toBeUndefined();
     });
 
     it("should fail when names is missing", () => {
       const invalidInput = {};
 
-      const { error } = getPurchasesCategorySuggestionSchema.validate(invalidInput);
+      const { error } =
+        getPurchasesCategorySuggestionSchema.validate(invalidInput);
       expect(error).toBeDefined();
       expect(error.details[0].message).toBe('"names" is required');
     });
@@ -85,17 +87,23 @@ describe("Get Schemas Validation", () => {
     it("should fail when names array is empty", () => {
       const invalidInput = { names: [] };
 
-      const { error } = getPurchasesCategorySuggestionSchema.validate(invalidInput);
+      const { error } =
+        getPurchasesCategorySuggestionSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"names" must contain at least 1 items');
+      expect(error.details[0].message).toBe(
+        '"names" must contain at least 1 items'
+      );
     });
 
     it("should fail when names contains empty string", () => {
       const invalidInput = { names: ["Apple", ""] };
 
-      const { error } = getPurchasesCategorySuggestionSchema.validate(invalidInput);
+      const { error } =
+        getPurchasesCategorySuggestionSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"names[1]" is not allowed to be empty');
+      expect(error.details[0].message).toBe(
+        '"names[1]" is not allowed to be empty'
+      );
     });
   });
 
@@ -129,4 +137,4 @@ describe("Get Schemas Validation", () => {
       expect(error.details[0].message).toBe('"search" must be a string');
     });
   });
-}); 
+});

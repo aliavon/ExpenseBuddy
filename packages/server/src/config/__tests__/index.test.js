@@ -72,7 +72,9 @@ describe("Config", () => {
     delete require.cache[require.resolve("../index")];
     const configModule = require("../index");
 
-    expect(configModule.DATABASE_URL).toBe("mongodb://expenseBuddyMongoDB:27019/server");
+    expect(configModule.DATABASE_URL).toBe(
+      "mongodb://expenseBuddyMongoDB:27019/server"
+    );
   });
 
   it("should have correct mongooseConfig structure", () => {
@@ -115,14 +117,12 @@ describe("Config", () => {
   });
 
   it("should maintain immutable mongooseConfig", () => {
-    const originalConfig = { ...config.mongooseConfig };
-    
     // Attempt to modify the config
     config.mongooseConfig.autoIndex = true;
-    
+
     // Verify the original structure is maintained
     expect(config.mongooseConfig.autoIndex).toBe(true); // It will be modified since it's not frozen
-    
+
     // Reset for other tests
     config.mongooseConfig.autoIndex = false;
   });
@@ -135,7 +135,9 @@ describe("Config", () => {
       delete require.cache[require.resolve("../index")];
       const configModule = require("../index");
 
-      expect(configModule.DATABASE_URL).toBe("mongodb://priority-host:27017/priority-db");
+      expect(configModule.DATABASE_URL).toBe(
+        "mongodb://priority-host:27017/priority-db"
+      );
     });
 
     it("should use DATABASE_PORT in default URL when DATABASE_HOST is not provided", () => {
@@ -145,7 +147,9 @@ describe("Config", () => {
       delete require.cache[require.resolve("../index")];
       const configModule = require("../index");
 
-      expect(configModule.DATABASE_URL).toBe("mongodb://expenseBuddyMongoDB:27022/server");
+      expect(configModule.DATABASE_URL).toBe(
+        "mongodb://expenseBuddyMongoDB:27022/server"
+      );
     });
   });
-}); 
+});

@@ -69,7 +69,9 @@ describe("createIncomeTypesSchema validation", () => {
     const { error } = createIncomeTypesSchema.validate(invalidData);
 
     expect(error).toBeDefined();
-    expect(error.details[0].message).toContain('"incomeTypes" must be an array');
+    expect(error.details[0].message).toContain(
+      '"incomeTypes" must be an array'
+    );
   });
 
   it("should fail validation when incomeTypes array is empty", () => {
@@ -80,7 +82,9 @@ describe("createIncomeTypesSchema validation", () => {
     const { error } = createIncomeTypesSchema.validate(invalidData);
 
     expect(error).toBeDefined();
-    expect(error.details[0].message).toContain('"incomeTypes" must contain at least one element');
+    expect(error.details[0].message).toContain(
+      '"incomeTypes" must contain at least one element'
+    );
   });
 
   it("should fail validation when name is missing", () => {
@@ -143,7 +147,9 @@ describe("createIncomeTypesSchema validation", () => {
     const { error } = createIncomeTypesSchema.validate(invalidData);
 
     expect(error).toBeDefined();
-    expect(error.details[0].message).toContain('"description" must be a string');
+    expect(error.details[0].message).toContain(
+      '"description" must be a string'
+    );
   });
 
   it("should validate multiple income types with mixed valid data", () => {
@@ -186,12 +192,14 @@ describe("createIncomeTypesSchema validation", () => {
       ],
     };
 
-    const { error } = createIncomeTypesSchema.validate(invalidData, { abortEarly: false });
+    const { error } = createIncomeTypesSchema.validate(invalidData, {
+      abortEarly: false,
+    });
 
     expect(error).toBeDefined();
     expect(error.details).toHaveLength(3); // Empty name, wrong description type, missing name
-    
-    const messages = error.details.map(detail => detail.message);
+
+    const messages = error.details.map((detail) => detail.message);
     expect(messages).toContain('"name" cannot be empty');
     expect(messages).toContain('"description" must be a string');
     expect(messages).toContain('"name" is required');
@@ -236,7 +244,7 @@ describe("createIncomeTypesSchema validation", () => {
   it("should validate very long names and descriptions", () => {
     const longName = "A".repeat(1000);
     const longDescription = "B".repeat(2000);
-    
+
     const validData = {
       incomeTypes: [
         {
@@ -251,4 +259,4 @@ describe("createIncomeTypesSchema validation", () => {
     expect(error).toBeUndefined();
     expect(value).toEqual(validData);
   });
-}); 
+});

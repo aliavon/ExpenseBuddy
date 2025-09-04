@@ -15,8 +15,8 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple", "Carrot"] }, 
+      null,
+      { names: ["Apple", "Carrot"] },
       context
     );
 
@@ -30,14 +30,12 @@ describe("getPurchasesCategorySuggestion resolver", () => {
   });
 
   it("should return null category for non-existing items", async () => {
-    await Item.create([
-      { name: "Apple", category: "Fruits" },
-    ]);
+    await Item.create([{ name: "Apple", category: "Fruits" }]);
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple", "NonExistent"] }, 
+      null,
+      { names: ["Apple", "NonExistent"] },
       context
     );
 
@@ -47,14 +45,12 @@ describe("getPurchasesCategorySuggestion resolver", () => {
   });
 
   it("should handle empty names array", async () => {
-    await Item.create([
-      { name: "Apple", category: "Fruits" },
-    ]);
+    await Item.create([{ name: "Apple", category: "Fruits" }]);
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: [] }, 
+      null,
+      { names: [] },
       context
     );
 
@@ -74,8 +70,8 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Carrot", "Apple", "Banana"] }, 
+      null,
+      { names: ["Carrot", "Apple", "Banana"] },
       context
     );
 
@@ -86,14 +82,12 @@ describe("getPurchasesCategorySuggestion resolver", () => {
   });
 
   it("should handle duplicate names in input", async () => {
-    await Item.create([
-      { name: "Apple", category: "Fruits" },
-    ]);
+    await Item.create([{ name: "Apple", category: "Fruits" }]);
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple", "Apple", "Apple"] }, 
+      null,
+      { names: ["Apple", "Apple", "Apple"] },
       context
     );
 
@@ -114,8 +108,8 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple"] }, 
+      null,
+      { names: ["Apple"] },
       context
     );
 
@@ -133,8 +127,8 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple", "apple"] }, 
+      null,
+      { names: ["Apple", "apple"] },
       context
     );
 
@@ -152,14 +146,20 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Café Latte", "Piña Colada"] }, 
+      null,
+      { names: ["Café Latte", "Piña Colada"] },
       context
     );
 
     expect(result).toHaveLength(2);
-    expect(result).toContainEqual({ name: "Café Latte", category: "Beverages" });
-    expect(result).toContainEqual({ name: "Piña Colada", category: "Beverages" });
+    expect(result).toContainEqual({
+      name: "Café Latte",
+      category: "Beverages",
+    });
+    expect(result).toContainEqual({
+      name: "Piña Colada",
+      category: "Beverages",
+    });
   });
 
   it("should handle large number of names", async () => {
@@ -173,13 +173,13 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names }, 
+      null,
+      { names },
       context
     );
 
     expect(result).toHaveLength(100);
-    expect(result.every(item => item.category !== null)).toBe(true);
+    expect(result.every((item) => item.category !== null)).toBe(true);
   });
 
   it("should handle mixed existing and non-existing items", async () => {
@@ -190,8 +190,8 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple", "NonExistent1", "Banana", "NonExistent2"] }, 
+      null,
+      { names: ["Apple", "NonExistent1", "Banana", "NonExistent2"] },
       context
     );
 
@@ -212,8 +212,8 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Item1", "Item2", "Item3"] }, 
+      null,
+      { names: ["Item1", "Item2", "Item3"] },
       context
     );
 
@@ -225,16 +225,16 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
   it("should handle database errors gracefully", async () => {
     const context = global.createMockContext();
-    
+
     // Mock Item.find to throw an error
     const originalFind = Item.find;
-    Item.find = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Item.find = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple"] }, 
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      getPurchasesCategorySuggestion(null, { names: ["Apple"] }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     Item.find = originalFind;
@@ -242,14 +242,12 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
   it("should handle very long item names", async () => {
     const longName = "A".repeat(200);
-    await Item.create([
-      { name: longName, category: "LongNames" },
-    ]);
+    await Item.create([{ name: longName, category: "LongNames" }]);
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: [longName] }, 
+      null,
+      { names: [longName] },
       context
     );
 
@@ -265,8 +263,8 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["  Apple  ", "Apple"] }, 
+      null,
+      { names: ["  Apple  ", "Apple"] },
       context
     );
 
@@ -283,16 +281,16 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     const context = global.createMockContext();
     const result1 = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple", "Banana", "NonExistent"] }, 
+      null,
+      { names: ["Apple", "Banana", "NonExistent"] },
       context
     );
     const result2 = await getPurchasesCategorySuggestion(
-      null, 
-      { names: ["Apple", "Banana", "NonExistent"] }, 
+      null,
+      { names: ["Apple", "Banana", "NonExistent"] },
       context
     );
 
     expect(result1).toEqual(result2);
   });
-}); 
+});

@@ -21,11 +21,7 @@ describe("addItems mutation", () => {
     const context = global.createMockContext();
     const items = [createItemData({ name: "Apple", category: "Fruits" })];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("Apple");
@@ -45,11 +41,7 @@ describe("addItems mutation", () => {
       createItemData({ name: "Milk", category: "Dairy" }),
     ];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result).toHaveLength(3);
     expect(result[0].name).toBe("Apple");
@@ -67,11 +59,7 @@ describe("addItems mutation", () => {
   it("should handle empty items array", async () => {
     const context = global.createMockContext();
 
-    const result = await addItems(
-      null,
-      { items: [] },
-      context
-    );
+    const result = await addItems(null, { items: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -84,11 +72,7 @@ describe("addItems mutation", () => {
     const context = global.createMockContext();
     const items = [createItemData({ name: "Generic Item", category: "" })];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0].name).toBe("Generic Item");
     expect(result[0].category).toBe("");
@@ -98,11 +82,7 @@ describe("addItems mutation", () => {
     const context = global.createMockContext();
     const items = [{ name: "No Category Item" }];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0].name).toBe("No Category Item");
     expect(result[0].category).toBe(""); // default value
@@ -110,16 +90,14 @@ describe("addItems mutation", () => {
 
   it("should handle special characters in item data", async () => {
     const context = global.createMockContext();
-    const items = [createItemData({ 
-      name: "Café & Croissant",
-      category: "Boulangerie - très spécial!",
-    })];
+    const items = [
+      createItemData({
+        name: "Café & Croissant",
+        category: "Boulangerie - très spécial!",
+      }),
+    ];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0].name).toBe("Café & Croissant");
     expect(result[0].category).toBe("Boulangerie - très spécial!");
@@ -127,16 +105,14 @@ describe("addItems mutation", () => {
 
   it("should handle unicode characters", async () => {
     const context = global.createMockContext();
-    const items = [createItemData({ 
-      name: "苹果",
-      category: "水果",
-    })];
+    const items = [
+      createItemData({
+        name: "苹果",
+        category: "水果",
+      }),
+    ];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0].name).toBe("苹果");
     expect(result[0].category).toBe("水果");
@@ -144,16 +120,14 @@ describe("addItems mutation", () => {
 
   it("should handle emoji in item data", async () => {
     const context = global.createMockContext();
-    const items = [createItemData({ 
-      name: "Apple 🍎",
-      category: "Fruits 🍓",
-    })];
+    const items = [
+      createItemData({
+        name: "Apple 🍎",
+        category: "Fruits 🍓",
+      }),
+    ];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0].name).toBe("Apple 🍎");
     expect(result[0].category).toBe("Fruits 🍓");
@@ -163,17 +137,15 @@ describe("addItems mutation", () => {
     const context = global.createMockContext();
     const items = [];
     for (let i = 1; i <= 50; i++) {
-      items.push(createItemData({ 
-        name: `Item ${i}`,
-        category: `Category ${i % 5}`, // 5 different categories
-      }));
+      items.push(
+        createItemData({
+          name: `Item ${i}`,
+          category: `Category ${i % 5}`, // 5 different categories
+        })
+      );
     }
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result).toHaveLength(50);
     expect(result[0].name).toBe("Item 1");
@@ -191,17 +163,17 @@ describe("addItems mutation", () => {
       createItemData({ name: "Persistent Bread", category: "Bakery" }),
     ];
 
-    await addItems(
-      null,
-      { items },
-      context
-    );
+    await addItems(null, { items }, context);
 
     // Verify items were persisted
     const persistedItems = await Item.find({});
     expect(persistedItems).toHaveLength(2);
-    expect(persistedItems.find(item => item.name === "Persistent Apple")).toBeDefined();
-    expect(persistedItems.find(item => item.name === "Persistent Bread")).toBeDefined();
+    expect(
+      persistedItems.find((item) => item.name === "Persistent Apple")
+    ).toBeDefined();
+    expect(
+      persistedItems.find((item) => item.name === "Persistent Bread")
+    ).toBeDefined();
   });
 
   it("should handle database errors gracefully", async () => {
@@ -210,13 +182,13 @@ describe("addItems mutation", () => {
 
     // Mock Item.insertMany to throw an error
     const originalInsertMany = Item.insertMany;
-    Item.insertMany = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Item.insertMany = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(addItems(
-      null,
-      { items },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(addItems(null, { items }, context)).rejects.toThrow(
+      "Database connection failed"
+    );
 
     // Restore original method
     Item.insertMany = originalInsertMany;
@@ -230,11 +202,7 @@ describe("addItems mutation", () => {
       createItemData({ name: "Third Item" }),
     ];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0].name).toBe("First Item");
     expect(result[1].name).toBe("Second Item");
@@ -247,11 +215,7 @@ describe("addItems mutation", () => {
     const longCategory = "B".repeat(200);
     const items = [createItemData({ name: longName, category: longCategory })];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0].name).toBe(longName);
     expect(result[0].category).toBe(longCategory);
@@ -264,11 +228,7 @@ describe("addItems mutation", () => {
       createItemData({ name: "Duplicate Item", category: "Category 2" }),
     ];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result).toHaveLength(2);
     expect(result[0].name).toBe("Duplicate Item");
@@ -279,13 +239,11 @@ describe("addItems mutation", () => {
 
   it("should handle null category values", async () => {
     const context = global.createMockContext();
-    const items = [createItemData({ name: "Null Category Item", category: null })];
+    const items = [
+      createItemData({ name: "Null Category Item", category: null }),
+    ];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0].name).toBe("Null Category Item");
     expect(result[0].category).toBeNull();
@@ -295,11 +253,7 @@ describe("addItems mutation", () => {
     const context = global.createMockContext();
     const items = [createItemData({ name: "ID Test Item" })];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result[0]._id).toBeDefined();
     expect(result[0]._id.toString()).toMatch(/^[0-9a-fA-F]{24}$/); // MongoDB ObjectId format
@@ -314,11 +268,7 @@ describe("addItems mutation", () => {
       { name: "Item with null category", category: null },
     ];
 
-    const result = await addItems(
-      null,
-      { items },
-      context
-    );
+    const result = await addItems(null, { items }, context);
 
     expect(result).toHaveLength(4);
     expect(result[0].category).toBe("Food");
@@ -326,4 +276,4 @@ describe("addItems mutation", () => {
     expect(result[2].category).toBe("");
     expect(result[3].category).toBeNull();
   });
-}); 
+});

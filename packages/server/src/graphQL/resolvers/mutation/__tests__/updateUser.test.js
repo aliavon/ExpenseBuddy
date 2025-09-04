@@ -30,11 +30,7 @@ describe("updateUser mutation", () => {
       lastName: "Smith",
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe("Jane");
     expect(result.lastName).toBe("Smith");
@@ -59,11 +55,7 @@ describe("updateUser mutation", () => {
       firstName: "Johnny", // only update firstName
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe("Johnny"); // updated
     expect(result.middleName).toBe("William"); // unchanged
@@ -83,11 +75,7 @@ describe("updateUser mutation", () => {
       isVerified: true,
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe("Jane");
     expect(result.middleName).toBe("Marie");
@@ -106,11 +94,7 @@ describe("updateUser mutation", () => {
       lastName: "García-López",
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe("José");
     expect(result.middleName).toBe("María");
@@ -127,11 +111,7 @@ describe("updateUser mutation", () => {
       lastName: "明",
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe("李");
     expect(result.lastName).toBe("明");
@@ -147,11 +127,7 @@ describe("updateUser mutation", () => {
       lastName: "Doe 🎉",
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe("John 😊");
     expect(result.lastName).toBe("Doe 🎉");
@@ -166,11 +142,7 @@ describe("updateUser mutation", () => {
       middleName: "",
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.middleName).toBe("");
   });
@@ -184,11 +156,7 @@ describe("updateUser mutation", () => {
       middleName: null,
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.middleName).toBeNull();
   });
@@ -202,11 +170,7 @@ describe("updateUser mutation", () => {
       isVerified: true,
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.isVerified).toBe(true);
   });
@@ -222,11 +186,7 @@ describe("updateUser mutation", () => {
       lastName: longName,
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe(longName);
     expect(result.lastName).toBe(longName);
@@ -238,20 +198,18 @@ describe("updateUser mutation", () => {
     const context = global.createMockContext();
 
     // Wait a bit to ensure timestamp difference
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     const updateData = {
       id: user._id,
       firstName: "Updated",
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
-    expect(result.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime());
+    expect(result.updatedAt.getTime()).toBeGreaterThan(
+      originalUpdatedAt.getTime()
+    );
     expect(result.createdAt).toEqual(user.createdAt); // should not change
   });
 
@@ -264,17 +222,13 @@ describe("updateUser mutation", () => {
       firstName: "Jane",
     };
 
-    await expect(updateUser(
-      null,
-      { user: updateData },
-      context
-    )).rejects.toThrow(GraphQLError);
+    await expect(
+      updateUser(null, { user: updateData }, context)
+    ).rejects.toThrow(GraphQLError);
 
-    await expect(updateUser(
-      null,
-      { user: updateData },
-      context
-    )).rejects.toThrow(`User not found for id ${nonExistentId}`);
+    await expect(
+      updateUser(null, { user: updateData }, context)
+    ).rejects.toThrow(`User not found for id ${nonExistentId}`);
   });
 
   it("should throw error with correct error code for non-existent user", async () => {
@@ -301,18 +255,18 @@ describe("updateUser mutation", () => {
 
     // Mock User.findByIdAndUpdate to throw an error
     const originalFindByIdAndUpdate = User.findByIdAndUpdate;
-    User.findByIdAndUpdate = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    User.findByIdAndUpdate = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
     const updateData = {
       id: user._id,
       firstName: "Jane",
     };
 
-    await expect(updateUser(
-      null,
-      { user: updateData },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      updateUser(null, { user: updateData }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     User.findByIdAndUpdate = originalFindByIdAndUpdate;
@@ -328,11 +282,7 @@ describe("updateUser mutation", () => {
       lastName: "Name",
     };
 
-    await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    await updateUser(null, { user: updateData }, context);
 
     // Verify changes were persisted
     const updatedUser = await User.findById(user._id);
@@ -354,11 +304,7 @@ describe("updateUser mutation", () => {
       lastName: "Smith", // only update lastName
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe("John"); // unchanged
     expect(result.middleName).toBe("William"); // unchanged
@@ -376,11 +322,7 @@ describe("updateUser mutation", () => {
       firstName: "First",
     };
 
-    const firstResult = await updateUser(
-      null,
-      { user: firstUpdate },
-      context
-    );
+    const firstResult = await updateUser(null, { user: firstUpdate }, context);
 
     expect(firstResult.firstName).toBe("First");
 
@@ -409,11 +351,7 @@ describe("updateUser mutation", () => {
       firstName: "StringId",
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     expect(result.firstName).toBe("StringId");
   });
@@ -428,11 +366,7 @@ describe("updateUser mutation", () => {
       isVerified: true,
     };
 
-    const trueResult = await updateUser(
-      null,
-      { user: updateToTrue },
-      context
-    );
+    const trueResult = await updateUser(null, { user: updateToTrue }, context);
 
     expect(trueResult.isVerified).toBe(true);
 
@@ -460,13 +394,9 @@ describe("updateUser mutation", () => {
       firstName: "Updated",
     };
 
-    const result = await updateUser(
-      null,
-      { user: updateData },
-      context
-    );
+    const result = await updateUser(null, { user: updateData }, context);
 
     // Should return the updated document, not the original
     expect(result.firstName).toBe("Updated");
   });
-}); 
+});

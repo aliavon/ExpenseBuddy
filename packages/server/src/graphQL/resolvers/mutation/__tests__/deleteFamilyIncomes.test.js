@@ -51,11 +51,7 @@ describe("deleteFamilyIncomes mutation", () => {
 
     const ids = [income1._id, income2._id, income3._id];
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -71,11 +67,7 @@ describe("deleteFamilyIncomes mutation", () => {
   it("should handle empty ids array", async () => {
     const context = global.createMockContext();
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids: [] },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -91,11 +83,7 @@ describe("deleteFamilyIncomes mutation", () => {
 
     const ids = [nonExistentId1, nonExistentId2];
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -112,11 +100,7 @@ describe("deleteFamilyIncomes mutation", () => {
 
     const ids = [existingIncome1._id, nonExistentId, existingIncome2._id];
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -139,11 +123,7 @@ describe("deleteFamilyIncomes mutation", () => {
 
     const ids = [income3._id, income1._id, income2._id];
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual([income3._id, income1._id, income2._id]);
   });
@@ -154,14 +134,10 @@ describe("deleteFamilyIncomes mutation", () => {
       incomes.push(await createFamilyIncomeInDB({ amount: i * 100 }));
     }
 
-    const ids = incomes.map(income => income._id);
+    const ids = incomes.map((income) => income._id);
     const context = global.createMockContext();
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -180,11 +156,7 @@ describe("deleteFamilyIncomes mutation", () => {
 
     const ids = [income._id, income._id, income._id];
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -203,11 +175,7 @@ describe("deleteFamilyIncomes mutation", () => {
     const incomeToKeep2 = await createFamilyIncomeInDB({ amount: 3000 });
     const context = global.createMockContext();
 
-    await deleteFamilyIncomes(
-      null,
-      { ids: [incomeToDelete._id] },
-      context
-    );
+    await deleteFamilyIncomes(null, { ids: [incomeToDelete._id] }, context);
 
     // Verify only the targeted family income was deleted
     const deletedIncome = await FamilyIncome.findById(incomeToDelete._id);
@@ -223,31 +191,27 @@ describe("deleteFamilyIncomes mutation", () => {
 
   it("should handle deletion of family incomes with different data types", async () => {
     const incomes = [
-      await createFamilyIncomeInDB({ 
-        amount: 1000.50, 
+      await createFamilyIncomeInDB({
+        amount: 1000.5,
         periodicity: "DAILY",
-        note: "Test income 1" 
+        note: "Test income 1",
       }),
-      await createFamilyIncomeInDB({ 
-        amount: 2000, 
+      await createFamilyIncomeInDB({
+        amount: 2000,
         periodicity: "WEEKLY",
-        note: "" 
+        note: "",
       }),
-      await createFamilyIncomeInDB({ 
-        amount: 3000.99, 
+      await createFamilyIncomeInDB({
+        amount: 3000.99,
         periodicity: "YEARLY",
-        date: new Date("2024-12-25") 
+        date: new Date("2024-12-25"),
       }),
     ];
 
-    const ids = incomes.map(income => income._id);
+    const ids = incomes.map((income) => income._id);
     const context = global.createMockContext();
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
 
@@ -264,13 +228,13 @@ describe("deleteFamilyIncomes mutation", () => {
 
     // Mock FamilyIncome.deleteMany to throw an error
     const originalDeleteMany = FamilyIncome.deleteMany;
-    FamilyIncome.deleteMany = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    FamilyIncome.deleteMany = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deleteFamilyIncomes(
-      null,
-      { ids: [income._id] },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      deleteFamilyIncomes(null, { ids: [income._id] }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     FamilyIncome.deleteMany = originalDeleteMany;
@@ -280,12 +244,14 @@ describe("deleteFamilyIncomes mutation", () => {
     // Create a large array of IDs (some existing, some not)
     const existingIncomes = [];
     for (let i = 0; i < 10; i++) {
-      existingIncomes.push(await createFamilyIncomeInDB({ amount: (i + 1) * 100 }));
+      existingIncomes.push(
+        await createFamilyIncomeInDB({ amount: (i + 1) * 100 })
+      );
     }
 
     const ids = [];
     // Add existing IDs
-    existingIncomes.forEach(income => ids.push(income._id));
+    existingIncomes.forEach((income) => ids.push(income._id));
     // Add many non-existing IDs
     for (let i = 0; i < 100; i++) {
       ids.push(global.createMockId());
@@ -293,11 +259,7 @@ describe("deleteFamilyIncomes mutation", () => {
 
     const context = global.createMockContext();
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(result).toHaveLength(110);
@@ -324,11 +286,7 @@ describe("deleteFamilyIncomes mutation", () => {
       income2._id, // ObjectId format
     ];
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toHaveLength(2);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -367,14 +325,10 @@ describe("deleteFamilyIncomes mutation", () => {
       await createFamilyIncomeInDB({ periodicity: "ONE_TIME" }),
     ];
 
-    const ids = incomes.map(income => income._id);
+    const ids = incomes.map((income) => income._id);
     const context = global.createMockContext();
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
 
@@ -396,14 +350,10 @@ describe("deleteFamilyIncomes mutation", () => {
       await createFamilyIncomeInDB({ contributorId: contributor3 }),
     ];
 
-    const ids = incomes.map(income => income._id);
+    const ids = incomes.map((income) => income._id);
     const context = global.createMockContext();
 
-    const result = await deleteFamilyIncomes(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteFamilyIncomes(null, { ids }, context);
 
     expect(result).toEqual(ids);
 
@@ -432,4 +382,4 @@ describe("deleteFamilyIncomes mutation", () => {
     const deletedIncome = await FamilyIncome.findById(income._id);
     expect(deletedIncome).toBeNull();
   });
-}); 
+});

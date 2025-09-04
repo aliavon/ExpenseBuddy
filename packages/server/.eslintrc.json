@@ -16,5 +16,18 @@
     ],
     "rules": {
       "prettier/prettier": "error"
-    }
+    },
+    "overrides": [
+      {
+        "files": ["**/*.test.js", "**/__tests__/**/*.js"],
+        "env": {
+          "jest": true
+        },
+        "globals": {
+          "createMockContext": "readonly",
+          "createMockId": "readonly",
+          "fail": "readonly"
+        }
+      }
+    ]
 }

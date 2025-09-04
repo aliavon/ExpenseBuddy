@@ -26,22 +26,22 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      amount: 2000,
-      periodicity: "WEEKLY",
-    }];
+    const updates = [
+      {
+        id: income._id,
+        amount: 2000,
+        periodicity: "WEEKLY",
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result).toHaveLength(1);
     expect(result[0].amount).toBe(2000);
     expect(result[0].periodicity).toBe("WEEKLY");
-    expect(result[0].contributorId.toString()).toBe(income.contributorId.toString()); // unchanged
+    expect(result[0].contributorId.toString()).toBe(
+      income.contributorId.toString()
+    ); // unchanged
     expect(context.logger.info).toHaveBeenCalledWith(
       { count: 1 },
       "Successfully updated FamilyIncome records"
@@ -60,17 +60,19 @@ describe("updateFamilyIncomes mutation", () => {
       { id: income3._id, amount: 3500, note: "Updated note" },
     ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result).toHaveLength(3);
-    
-    const updatedIncome1 = result.find(r => r._id.toString() === income1._id.toString());
-    const updatedIncome2 = result.find(r => r._id.toString() === income2._id.toString());
-    const updatedIncome3 = result.find(r => r._id.toString() === income3._id.toString());
+
+    const updatedIncome1 = result.find(
+      (r) => r._id.toString() === income1._id.toString()
+    );
+    const updatedIncome2 = result.find(
+      (r) => r._id.toString() === income2._id.toString()
+    );
+    const updatedIncome3 = result.find(
+      (r) => r._id.toString() === income3._id.toString()
+    );
 
     expect(updatedIncome1.amount).toBe(1500);
     expect(updatedIncome2.periodicity).toBe("DAILY");
@@ -86,11 +88,7 @@ describe("updateFamilyIncomes mutation", () => {
   it("should handle empty updates array", async () => {
     const context = global.createMockContext();
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates: [] },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -103,22 +101,20 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      contributorId: global.createMockId(),
-      currencyId: global.createMockId(),
-      typeId: global.createMockId(),
-      amount: 5000,
-      periodicity: "YEARLY",
-      date: new Date("2024-12-25"),
-      note: "Updated family income",
-    }];
+    const updates = [
+      {
+        id: income._id,
+        contributorId: global.createMockId(),
+        currencyId: global.createMockId(),
+        typeId: global.createMockId(),
+        amount: 5000,
+        periodicity: "YEARLY",
+        date: new Date("2024-12-25"),
+        note: "Updated family income",
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].amount).toBe(5000);
     expect(result[0].periodicity).toBe("YEARLY");
@@ -135,16 +131,14 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB(originalData);
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      amount: 1500, // only update amount
-    }];
+    const updates = [
+      {
+        id: income._id,
+        amount: 1500, // only update amount
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].amount).toBe(1500); // updated
     expect(result[0].periodicity).toBe("MONTHLY"); // unchanged
@@ -170,31 +164,31 @@ describe("updateFamilyIncomes mutation", () => {
 
     const context = global.createMockContext();
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result).toHaveLength(5);
-    const periodicities = result.map(r => r.periodicity).sort();
-    expect(periodicities).toEqual(["DAILY", "MONTHLY", "ONE_TIME", "WEEKLY", "YEARLY"]);
+    const periodicities = result.map((r) => r.periodicity).sort();
+    expect(periodicities).toEqual([
+      "DAILY",
+      "MONTHLY",
+      "ONE_TIME",
+      "WEEKLY",
+      "YEARLY",
+    ]);
   });
 
   it("should handle decimal amounts", async () => {
     const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      amount: 1234.56,
-    }];
+    const updates = [
+      {
+        id: income._id,
+        amount: 1234.56,
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].amount).toBe(1234.56);
   });
@@ -203,16 +197,14 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      note: "Salaire mensuel - très important! 💰€",
-    }];
+    const updates = [
+      {
+        id: income._id,
+        note: "Salaire mensuel - très important! 💰€",
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].note).toBe("Salaire mensuel - très important! 💰€");
   });
@@ -223,22 +215,18 @@ describe("updateFamilyIncomes mutation", () => {
       incomes.push(await createFamilyIncomeInDB({ amount: i * 100 }));
     }
 
-    const updates = incomes.map(income => ({
+    const updates = incomes.map((income) => ({
       id: income._id,
       amount: income.amount * 2,
     }));
 
     const context = global.createMockContext();
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result).toHaveLength(20);
-    expect(result.find(r => r.amount === 200)).toBeTruthy(); // 100 * 2
-    expect(result.find(r => r.amount === 4000)).toBeTruthy(); // 2000 * 2
+    expect(result.find((r) => r.amount === 200)).toBeTruthy(); // 100 * 2
+    expect(result.find((r) => r.amount === 4000)).toBeTruthy(); // 2000 * 2
     expect(context.logger.info).toHaveBeenCalledWith(
       { count: 20 },
       "Successfully updated FamilyIncome records"
@@ -249,16 +237,14 @@ describe("updateFamilyIncomes mutation", () => {
     const nonExistentId = global.createMockId();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: nonExistentId,
-      amount: 1000,
-    }];
+    const updates = [
+      {
+        id: nonExistentId,
+        amount: 1000,
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -277,11 +263,7 @@ describe("updateFamilyIncomes mutation", () => {
       { id: nonExistentId, amount: 3000 },
     ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result).toHaveLength(1);
     expect(result[0].amount).toBe(2000);
@@ -297,18 +279,20 @@ describe("updateFamilyIncomes mutation", () => {
 
     // Mock FamilyIncome.bulkWrite to throw an error
     const originalBulkWrite = FamilyIncome.bulkWrite;
-    FamilyIncome.bulkWrite = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    FamilyIncome.bulkWrite = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    const updates = [{
-      id: income._id,
-      amount: 2000,
-    }];
+    const updates = [
+      {
+        id: income._id,
+        amount: 2000,
+      },
+    ];
 
-    await expect(updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      updateFamilyIncomes(null, { updates }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     FamilyIncome.bulkWrite = originalBulkWrite;
@@ -318,17 +302,15 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      amount: 2500,
-      note: "Updated note",
-    }];
+    const updates = [
+      {
+        id: income._id,
+        amount: 2500,
+        note: "Updated note",
+      },
+    ];
 
-    await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    await updateFamilyIncomes(null, { updates }, context);
 
     // Verify changes were persisted
     const updatedIncome = await FamilyIncome.findById(income._id);
@@ -340,18 +322,16 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      amount: -100,
-    }];
+    const updates = [
+      {
+        id: income._id,
+        amount: -100,
+      },
+    ];
 
     // Note: MongoDB bulkWrite may not enforce schema validation
     // This test documents the current behavior
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].amount).toBe(-100);
   });
@@ -360,18 +340,16 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      periodicity: "INVALID_PERIOD",
-    }];
+    const updates = [
+      {
+        id: income._id,
+        periodicity: "INVALID_PERIOD",
+      },
+    ];
 
     // Note: MongoDB bulkWrite may not enforce enum validation
     // This test documents the current behavior
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].periodicity).toBe("INVALID_PERIOD");
   });
@@ -381,16 +359,14 @@ describe("updateFamilyIncomes mutation", () => {
     const context = global.createMockContext();
     const newDate = new Date("2025-06-15T10:30:00Z");
 
-    const updates = [{
-      id: income._id,
-      date: newDate,
-    }];
+    const updates = [
+      {
+        id: income._id,
+        date: newDate,
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].date).toEqual(newDate);
   });
@@ -399,16 +375,14 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id.toString(), // string format
-      amount: 1500,
-    }];
+    const updates = [
+      {
+        id: income._id.toString(), // string format
+        amount: 1500,
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].amount).toBe(1500);
   });
@@ -417,17 +391,15 @@ describe("updateFamilyIncomes mutation", () => {
     const income = await createFamilyIncomeInDB({ note: "Original note" });
     const context = global.createMockContext();
 
-    const updates = [{
-      id: income._id,
-      note: null,
-    }];
+    const updates = [
+      {
+        id: income._id,
+        note: null,
+      },
+    ];
 
-    const result = await updateFamilyIncomes(
-      null,
-      { updates },
-      context
-    );
+    const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result[0].note).toBeNull();
   });
-}); 
+});

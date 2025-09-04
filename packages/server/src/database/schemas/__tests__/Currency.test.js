@@ -128,4 +128,4 @@ describe("Currency Schema", () => {
 
     expect(updatedCurrency.symbol).toBe("$");
   });
-}); 
+});

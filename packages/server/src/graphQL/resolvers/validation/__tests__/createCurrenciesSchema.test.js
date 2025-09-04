@@ -6,8 +6,8 @@ describe("createCurrenciesSchema validation", () => {
       const validInput = {
         currencies: [
           { name: "US Dollar", code: "USD", symbol: "$" },
-          { name: "Euro", code: "EUR", symbol: "€" }
-        ]
+          { name: "Euro", code: "EUR", symbol: "€" },
+        ],
       };
 
       const { error } = createCurrenciesSchema.validate(validInput);
@@ -16,9 +16,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should validate without optional symbol", () => {
       const validInput = {
-        currencies: [
-          { name: "Bitcoin", code: "BTC" }
-        ]
+        currencies: [{ name: "Bitcoin", code: "BTC" }],
       };
 
       const { error } = createCurrenciesSchema.validate(validInput);
@@ -27,9 +25,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should validate with single currency", () => {
       const validInput = {
-        currencies: [
-          { name: "US Dollar", code: "USD", symbol: "$" }
-        ]
+        currencies: [{ name: "US Dollar", code: "USD", symbol: "$" }],
       };
 
       const { error } = createCurrenciesSchema.validate(validInput);
@@ -48,17 +44,19 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail when currencies is empty array", () => {
       const invalidInput = {
-        currencies: []
+        currencies: [],
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"currencies" must contain at least one element');
+      expect(error.details[0].message).toBe(
+        '"currencies" must contain at least one element'
+      );
     });
 
     it("should fail when currencies is not an array", () => {
       const invalidInput = {
-        currencies: "not an array"
+        currencies: "not an array",
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
@@ -68,9 +66,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail when currency name is missing", () => {
       const invalidInput = {
-        currencies: [
-          { code: "USD", symbol: "$" }
-        ]
+        currencies: [{ code: "USD", symbol: "$" }],
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
@@ -80,9 +76,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail when currency name is empty", () => {
       const invalidInput = {
-        currencies: [
-          { name: "", code: "USD", symbol: "$" }
-        ]
+        currencies: [{ name: "", code: "USD", symbol: "$" }],
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
@@ -92,9 +86,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail when currency code is missing", () => {
       const invalidInput = {
-        currencies: [
-          { name: "US Dollar", symbol: "$" }
-        ]
+        currencies: [{ name: "US Dollar", symbol: "$" }],
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
@@ -104,9 +96,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail when currency code is empty", () => {
       const invalidInput = {
-        currencies: [
-          { name: "US Dollar", code: "", symbol: "$" }
-        ]
+        currencies: [{ name: "US Dollar", code: "", symbol: "$" }],
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
@@ -116,9 +106,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail when name is not a string", () => {
       const invalidInput = {
-        currencies: [
-          { name: 123, code: "USD", symbol: "$" }
-        ]
+        currencies: [{ name: 123, code: "USD", symbol: "$" }],
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
@@ -128,9 +116,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail when code is not a string", () => {
       const invalidInput = {
-        currencies: [
-          { name: "US Dollar", code: 123, symbol: "$" }
-        ]
+        currencies: [{ name: "US Dollar", code: 123, symbol: "$" }],
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
@@ -140,9 +126,7 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail when symbol is not a string", () => {
       const invalidInput = {
-        currencies: [
-          { name: "US Dollar", code: "USD", symbol: 123 }
-        ]
+        currencies: [{ name: "US Dollar", code: "USD", symbol: 123 }],
       };
 
       const { error } = createCurrenciesSchema.validate(invalidInput);
@@ -152,14 +136,14 @@ describe("createCurrenciesSchema validation", () => {
 
     it("should fail with multiple validation errors", () => {
       const invalidInput = {
-        currencies: [
-          { name: "", code: "", symbol: 123 }
-        ]
+        currencies: [{ name: "", code: "", symbol: 123 }],
       };
 
-      const { error } = createCurrenciesSchema.validate(invalidInput, { abortEarly: false });
+      const { error } = createCurrenciesSchema.validate(invalidInput, {
+        abortEarly: false,
+      });
       expect(error).toBeDefined();
       expect(error.details).toHaveLength(3);
     });
   });
-}); 
+});

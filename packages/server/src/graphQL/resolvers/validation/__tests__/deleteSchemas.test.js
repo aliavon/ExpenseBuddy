@@ -11,7 +11,7 @@ describe("Delete Schemas Validation", () => {
   describe("deleteCurrenciesSchema", () => {
     it("should validate with valid ObjectIds", () => {
       const validInput = {
-        ids: [validObjectId, "507f1f77bcf86cd799439012"]
+        ids: [validObjectId, "507f1f77bcf86cd799439012"],
       };
 
       const { error } = deleteCurrenciesSchema.validate(validInput);
@@ -31,7 +31,9 @@ describe("Delete Schemas Validation", () => {
 
       const { error } = deleteCurrenciesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"ids" must contain at least one element');
+      expect(error.details[0].message).toBe(
+        '"ids" must contain at least one element'
+      );
     });
 
     it("should fail when ids contains invalid ObjectId", () => {
@@ -39,7 +41,9 @@ describe("Delete Schemas Validation", () => {
 
       const { error } = deleteCurrenciesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"ids" must contain valid ObjectIds');
+      expect(error.details[0].message).toBe(
+        '"ids" must contain valid ObjectIds'
+      );
     });
 
     it("should fail when ids is not an array", () => {
@@ -122,4 +126,4 @@ describe("Delete Schemas Validation", () => {
       expect(error).toBeDefined();
     });
   });
-}); 
+});

@@ -72,11 +72,7 @@ describe("deleteCurrencies mutation", () => {
 
     const ids = [currency1._id, currency2._id, currency3._id];
 
-    const result = await deleteCurrencies(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -92,11 +88,7 @@ describe("deleteCurrencies mutation", () => {
   it("should handle empty ids array", async () => {
     const context = global.createMockContext();
 
-    const result = await deleteCurrencies(
-      null,
-      { ids: [] },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -107,23 +99,21 @@ describe("deleteCurrencies mutation", () => {
 
   it("should throw error when currency is used in FamilyIncome records", async () => {
     const currency = await createCurrencyInDB();
-    
+
     // Create FamilyIncome record referencing this currency
     await createFamilyIncomeInDB({ currencyId: currency._id });
-    
+
     const context = global.createMockContext();
 
-    await expect(deleteCurrencies(
-      null,
-      { ids: [currency._id] },
-      context
-    )).rejects.toThrow(GraphQLError);
+    await expect(
+      deleteCurrencies(null, { ids: [currency._id] }, context)
+    ).rejects.toThrow(GraphQLError);
 
-    await expect(deleteCurrencies(
-      null,
-      { ids: [currency._id] },
-      context
-    )).rejects.toThrow("One or more currencies are in use and cannot be deleted.");
+    await expect(
+      deleteCurrencies(null, { ids: [currency._id] }, context)
+    ).rejects.toThrow(
+      "One or more currencies are in use and cannot be deleted."
+    );
 
     // Verify currency was not deleted
     const existingCurrency = await Currency.findById(currency._id);
@@ -146,11 +136,11 @@ describe("deleteCurrencies mutation", () => {
 
   it("should delete currencies when no FamilyIncome references exist", async () => {
     const currency = await createCurrencyInDB();
-    
+
     // Create FamilyIncome record with different currencyId
     const otherCurrencyId = global.createMockId();
     await createFamilyIncomeInDB({ currencyId: otherCurrencyId });
-    
+
     const context = global.createMockContext();
 
     const result = await deleteCurrencies(
@@ -166,25 +156,27 @@ describe("deleteCurrencies mutation", () => {
     expect(deletedCurrency).toBeNull();
 
     // Verify other FamilyIncome record still exists
-    const remainingIncome = await FamilyIncome.findOne({ currencyId: otherCurrencyId });
+    const remainingIncome = await FamilyIncome.findOne({
+      currencyId: otherCurrencyId,
+    });
     expect(remainingIncome).not.toBeNull();
   });
 
   it("should handle multiple FamilyIncome references to same currency", async () => {
     const currency = await createCurrencyInDB();
-    
+
     // Create multiple FamilyIncome records referencing this currency
     await createFamilyIncomeInDB({ currencyId: currency._id, amount: 1000 });
     await createFamilyIncomeInDB({ currencyId: currency._id, amount: 2000 });
     await createFamilyIncomeInDB({ currencyId: currency._id, amount: 3000 });
-    
+
     const context = global.createMockContext();
 
-    await expect(deleteCurrencies(
-      null,
-      { ids: [currency._id] },
-      context
-    )).rejects.toThrow("One or more currencies are in use and cannot be deleted.");
+    await expect(
+      deleteCurrencies(null, { ids: [currency._id] }, context)
+    ).rejects.toThrow(
+      "One or more currencies are in use and cannot be deleted."
+    );
 
     // Verify currency was not deleted
     const existingCurrency = await Currency.findById(currency._id);
@@ -194,18 +186,22 @@ describe("deleteCurrencies mutation", () => {
   it("should handle mixed currencies - some in use, some not", async () => {
     const usedCurrency = await createCurrencyInDB({ code: "USD" });
     const unusedCurrency = await createCurrencyInDB({ code: "EUR" });
-    
+
     // Create FamilyIncome record referencing only one currency
     await createFamilyIncomeInDB({ currencyId: usedCurrency._id });
-    
+
     const context = global.createMockContext();
 
     // Should fail because one currency is in use
-    await expect(deleteCurrencies(
-      null,
-      { ids: [usedCurrency._id, unusedCurrency._id] },
-      context
-    )).rejects.toThrow("One or more currencies are in use and cannot be deleted.");
+    await expect(
+      deleteCurrencies(
+        null,
+        { ids: [usedCurrency._id, unusedCurrency._id] },
+        context
+      )
+    ).rejects.toThrow(
+      "One or more currencies are in use and cannot be deleted."
+    );
 
     // Verify both currencies still exist
     const existingUsedCurrency = await Currency.findById(usedCurrency._id);
@@ -221,11 +217,7 @@ describe("deleteCurrencies mutation", () => {
 
     const ids = [nonExistentId1, nonExistentId2];
 
-    const result = await deleteCurrencies(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -242,11 +234,7 @@ describe("deleteCurrencies mutation", () => {
 
     const ids = [existingCurrency1._id, nonExistentId, existingCurrency2._id];
 
-    const result = await deleteCurrencies(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -269,11 +257,7 @@ describe("deleteCurrencies mutation", () => {
 
     const ids = [currency3._id, currency1._id, currency2._id];
 
-    const result = await deleteCurrencies(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual([currency3._id, currency1._id, currency2._id]);
   });
@@ -281,20 +265,18 @@ describe("deleteCurrencies mutation", () => {
   it("should handle large batch deletion", async () => {
     const currencies = [];
     for (let i = 1; i <= 50; i++) {
-      currencies.push(await createCurrencyInDB({ 
-        code: `CUR${i}`,
-        name: `Currency ${i}`,
-      }));
+      currencies.push(
+        await createCurrencyInDB({
+          code: `CUR${i}`,
+          name: `Currency ${i}`,
+        })
+      );
     }
 
-    const ids = currencies.map(currency => currency._id);
+    const ids = currencies.map((currency) => currency._id);
     const context = global.createMockContext();
 
-    const result = await deleteCurrencies(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -313,11 +295,7 @@ describe("deleteCurrencies mutation", () => {
 
     const ids = [currency._id, currency._id, currency._id];
 
-    const result = await deleteCurrencies(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -336,11 +314,7 @@ describe("deleteCurrencies mutation", () => {
     const currencyToKeep2 = await createCurrencyInDB({ code: "KEEP2" });
     const context = global.createMockContext();
 
-    await deleteCurrencies(
-      null,
-      { ids: [currencyToDelete._id] },
-      context
-    );
+    await deleteCurrencies(null, { ids: [currencyToDelete._id] }, context);
 
     // Verify only the targeted currency was deleted
     const deletedCurrency = await Currency.findById(currencyToDelete._id);
@@ -360,13 +334,13 @@ describe("deleteCurrencies mutation", () => {
 
     // Mock FamilyIncome.countDocuments to throw an error
     const originalCountDocuments = FamilyIncome.countDocuments;
-    FamilyIncome.countDocuments = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    FamilyIncome.countDocuments = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deleteCurrencies(
-      null,
-      { ids: [currency._id] },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      deleteCurrencies(null, { ids: [currency._id] }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     FamilyIncome.countDocuments = originalCountDocuments;
@@ -378,13 +352,13 @@ describe("deleteCurrencies mutation", () => {
 
     // Mock Currency.deleteMany to throw an error
     const originalDeleteMany = Currency.deleteMany;
-    Currency.deleteMany = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Currency.deleteMany = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deleteCurrencies(
-      null,
-      { ids: [currency._id] },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      deleteCurrencies(null, { ids: [currency._id] }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     Currency.deleteMany = originalDeleteMany;
@@ -402,11 +376,11 @@ describe("deleteCurrencies mutation", () => {
     // Create FamilyIncome record using the currency
     await createFamilyIncomeInDB({ currencyId: currency._id });
 
-    await expect(deleteCurrencies(
-      null,
-      { ids: [currency._id] },
-      context
-    )).rejects.toThrow("One or more currencies are in use and cannot be deleted.");
+    await expect(
+      deleteCurrencies(null, { ids: [currency._id] }, context)
+    ).rejects.toThrow(
+      "One or more currencies are in use and cannot be deleted."
+    );
 
     // Verify deleteMany was not called
     expect(mockDeleteMany).not.toHaveBeenCalled();
@@ -426,11 +400,7 @@ describe("deleteCurrencies mutation", () => {
       currency2._id, // ObjectId format
     ];
 
-    const result = await deleteCurrencies(
-      null,
-      { ids },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toHaveLength(2);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -450,11 +420,7 @@ describe("deleteCurrencies mutation", () => {
     const originalId = currency._id;
     const context = global.createMockContext();
 
-    const result = await deleteCurrencies(
-      null,
-      { ids: [originalId] },
-      context
-    );
+    const result = await deleteCurrencies(null, { ids: [originalId] }, context);
 
     expect(result).toEqual([originalId]);
     expect(result[0]).toBe(originalId); // Same reference
@@ -500,4 +466,4 @@ describe("deleteCurrencies mutation", () => {
     const deletedCurrency = await Currency.findById(currency._id);
     expect(deletedCurrency).toBeNull();
   });
-}); 
+});

@@ -9,15 +9,17 @@ describe("Family Income Schemas Validation", () => {
   describe("createFamilyIncomesSchema", () => {
     it("should validate with all required fields", () => {
       const validInput = {
-        familyIncomes: [{
-          date: "2024-01-15T00:00:00.000Z",
-          amount: 5000,
-          note: "Monthly salary",
-          periodicity: "MONTHLY",
-          typeId: validObjectId,
-          contributorId: validObjectId2,
-          currencyId: validObjectId3
-        }]
+        familyIncomes: [
+          {
+            date: "2024-01-15T00:00:00.000Z",
+            amount: 5000,
+            note: "Monthly salary",
+            periodicity: "MONTHLY",
+            typeId: validObjectId,
+            contributorId: validObjectId2,
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(validInput);
@@ -26,15 +28,17 @@ describe("Family Income Schemas Validation", () => {
 
     it("should validate with empty note", () => {
       const validInput = {
-        familyIncomes: [{
-          date: "2024-01-15T00:00:00.000Z",
-          amount: 5000,
-          note: "",
-          periodicity: "ONE_TIME",
-          typeId: validObjectId,
-          contributorId: validObjectId2,
-          currencyId: validObjectId3
-        }]
+        familyIncomes: [
+          {
+            date: "2024-01-15T00:00:00.000Z",
+            amount: 5000,
+            note: "",
+            periodicity: "ONE_TIME",
+            typeId: validObjectId,
+            contributorId: validObjectId2,
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(validInput);
@@ -50,7 +54,7 @@ describe("Family Income Schemas Validation", () => {
             periodicity: "DAILY",
             typeId: validObjectId,
             contributorId: validObjectId2,
-            currencyId: validObjectId3
+            currencyId: validObjectId3,
           },
           {
             date: "2024-01-15T00:00:00.000Z",
@@ -58,7 +62,7 @@ describe("Family Income Schemas Validation", () => {
             periodicity: "WEEKLY",
             typeId: validObjectId,
             contributorId: validObjectId2,
-            currencyId: validObjectId3
+            currencyId: validObjectId3,
           },
           {
             date: "2024-01-15T00:00:00.000Z",
@@ -66,9 +70,9 @@ describe("Family Income Schemas Validation", () => {
             periodicity: "YEARLY",
             typeId: validObjectId,
             contributorId: validObjectId2,
-            currencyId: validObjectId3
-          }
-        ]
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(validInput);
@@ -88,18 +92,22 @@ describe("Family Income Schemas Validation", () => {
 
       const { error } = createFamilyIncomesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"familyIncomes" must contain at least one element');
+      expect(error.details[0].message).toBe(
+        '"familyIncomes" must contain at least one element'
+      );
     });
 
     it("should fail when date is missing", () => {
       const invalidInput = {
-        familyIncomes: [{
-          amount: 5000,
-          periodicity: "MONTHLY",
-          typeId: validObjectId,
-          contributorId: validObjectId2,
-          currencyId: validObjectId3
-        }]
+        familyIncomes: [
+          {
+            amount: 5000,
+            periodicity: "MONTHLY",
+            typeId: validObjectId,
+            contributorId: validObjectId2,
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(invalidInput);
@@ -109,14 +117,16 @@ describe("Family Income Schemas Validation", () => {
 
     it("should fail when date is invalid", () => {
       const invalidInput = {
-        familyIncomes: [{
-          date: "invalid-date",
-          amount: 5000,
-          periodicity: "MONTHLY",
-          typeId: validObjectId,
-          contributorId: validObjectId2,
-          currencyId: validObjectId3
-        }]
+        familyIncomes: [
+          {
+            date: "invalid-date",
+            amount: 5000,
+            periodicity: "MONTHLY",
+            typeId: validObjectId,
+            contributorId: validObjectId2,
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(invalidInput);
@@ -126,13 +136,15 @@ describe("Family Income Schemas Validation", () => {
 
     it("should fail when amount is missing", () => {
       const invalidInput = {
-        familyIncomes: [{
-          date: "2024-01-15T00:00:00.000Z",
-          periodicity: "MONTHLY",
-          typeId: validObjectId,
-          contributorId: validObjectId2,
-          currencyId: validObjectId3
-        }]
+        familyIncomes: [
+          {
+            date: "2024-01-15T00:00:00.000Z",
+            periodicity: "MONTHLY",
+            typeId: validObjectId,
+            contributorId: validObjectId2,
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(invalidInput);
@@ -142,14 +154,16 @@ describe("Family Income Schemas Validation", () => {
 
     it("should fail when amount is not positive", () => {
       const invalidInput = {
-        familyIncomes: [{
-          date: "2024-01-15T00:00:00.000Z",
-          amount: -100,
-          periodicity: "MONTHLY",
-          typeId: validObjectId,
-          contributorId: validObjectId2,
-          currencyId: validObjectId3
-        }]
+        familyIncomes: [
+          {
+            date: "2024-01-15T00:00:00.000Z",
+            amount: -100,
+            periodicity: "MONTHLY",
+            typeId: validObjectId,
+            contributorId: validObjectId2,
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(invalidInput);
@@ -159,45 +173,55 @@ describe("Family Income Schemas Validation", () => {
 
     it("should fail when periodicity is invalid", () => {
       const invalidInput = {
-        familyIncomes: [{
-          date: "2024-01-15T00:00:00.000Z",
-          amount: 5000,
-          periodicity: "INVALID",
-          typeId: validObjectId,
-          contributorId: validObjectId2,
-          currencyId: validObjectId3
-        }]
+        familyIncomes: [
+          {
+            date: "2024-01-15T00:00:00.000Z",
+            amount: 5000,
+            periodicity: "INVALID",
+            typeId: validObjectId,
+            contributorId: validObjectId2,
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"periodicity" must be one of [ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY]');
+      expect(error.details[0].message).toBe(
+        '"periodicity" must be one of [ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY]'
+      );
     });
 
     it("should fail when typeId is invalid ObjectId", () => {
       const invalidInput = {
-        familyIncomes: [{
-          date: "2024-01-15T00:00:00.000Z",
-          amount: 5000,
-          periodicity: "MONTHLY",
-          typeId: "invalid-id",
-          contributorId: validObjectId2,
-          currencyId: validObjectId3
-        }]
+        familyIncomes: [
+          {
+            date: "2024-01-15T00:00:00.000Z",
+            amount: 5000,
+            periodicity: "MONTHLY",
+            typeId: "invalid-id",
+            contributorId: validObjectId2,
+            currencyId: validObjectId3,
+          },
+        ],
       };
 
       const { error } = createFamilyIncomesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"typeId" must be a valid ObjectId');
+      expect(error.details[0].message).toBe(
+        '"typeId" must be a valid ObjectId'
+      );
     });
   });
 
   describe("updateFamilyIncomesSchema", () => {
     it("should validate with id only", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId
-        }]
+        updates: [
+          {
+            id: validObjectId,
+          },
+        ],
       };
 
       const { error } = updateFamilyIncomesSchema.validate(validInput);
@@ -206,16 +230,18 @@ describe("Family Income Schemas Validation", () => {
 
     it("should validate with all optional fields", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId,
-          date: "2024-01-15T00:00:00.000Z",
-          amount: 6000,
-          note: "Updated salary",
-          periodicity: "MONTHLY",
-          typeId: validObjectId2,
-          contributorId: validObjectId3,
-          currencyId: validObjectId
-        }]
+        updates: [
+          {
+            id: validObjectId,
+            date: "2024-01-15T00:00:00.000Z",
+            amount: 6000,
+            note: "Updated salary",
+            periodicity: "MONTHLY",
+            typeId: validObjectId2,
+            contributorId: validObjectId3,
+            currencyId: validObjectId,
+          },
+        ],
       };
 
       const { error } = updateFamilyIncomesSchema.validate(validInput);
@@ -226,8 +252,8 @@ describe("Family Income Schemas Validation", () => {
       const validInput = {
         updates: [
           { id: validObjectId, amount: 5500 },
-          { id: validObjectId2, periodicity: "WEEKLY" }
-        ]
+          { id: validObjectId2, periodicity: "WEEKLY" },
+        ],
       };
 
       const { error } = updateFamilyIncomesSchema.validate(validInput);
@@ -247,12 +273,14 @@ describe("Family Income Schemas Validation", () => {
 
       const { error } = updateFamilyIncomesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"updates" must contain at least one element');
+      expect(error.details[0].message).toBe(
+        '"updates" must contain at least one element'
+      );
     });
 
     it("should fail when id is missing", () => {
       const invalidInput = {
-        updates: [{ amount: 5000 }]
+        updates: [{ amount: 5000 }],
       };
 
       const { error } = updateFamilyIncomesSchema.validate(invalidInput);
@@ -262,7 +290,7 @@ describe("Family Income Schemas Validation", () => {
 
     it("should fail with invalid ObjectId", () => {
       const invalidInput = {
-        updates: [{ id: "invalid-id" }]
+        updates: [{ id: "invalid-id" }],
       };
 
       const { error } = updateFamilyIncomesSchema.validate(invalidInput);
@@ -272,10 +300,12 @@ describe("Family Income Schemas Validation", () => {
 
     it("should fail when amount is not positive", () => {
       const invalidInput = {
-        updates: [{
-          id: validObjectId,
-          amount: 0
-        }]
+        updates: [
+          {
+            id: validObjectId,
+            amount: 0,
+          },
+        ],
       };
 
       const { error } = updateFamilyIncomesSchema.validate(invalidInput);
@@ -285,15 +315,19 @@ describe("Family Income Schemas Validation", () => {
 
     it("should fail when periodicity is invalid", () => {
       const invalidInput = {
-        updates: [{
-          id: validObjectId,
-          periodicity: "INVALID_PERIOD"
-        }]
+        updates: [
+          {
+            id: validObjectId,
+            periodicity: "INVALID_PERIOD",
+          },
+        ],
       };
 
       const { error } = updateFamilyIncomesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"periodicity" must be one of [ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY]');
+      expect(error.details[0].message).toBe(
+        '"periodicity" must be one of [ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY]'
+      );
     });
   });
-}); 
+});

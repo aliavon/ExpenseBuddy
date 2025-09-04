@@ -18,7 +18,7 @@ describe("currencyLoader", () => {
     const currency = await Currency.create({
       name: "USD",
       symbol: "$",
-      code: "USD"
+      code: "USD",
     });
 
     const result = await currencyLoader.load(currency._id);
@@ -31,10 +31,10 @@ describe("currencyLoader", () => {
     const currencies = await Currency.create([
       { name: "USD", symbol: "$", code: "USD" },
       { name: "EUR", symbol: "€", code: "EUR" },
-      { name: "GBP", symbol: "£", code: "GBP" }
+      { name: "GBP", symbol: "£", code: "GBP" },
     ]);
 
-    const ids = currencies.map(c => c._id);
+    const ids = currencies.map((c) => c._id);
     const results = await currencyLoader.loadMany(ids);
 
     expect(results).toHaveLength(3);
@@ -53,20 +53,27 @@ describe("currencyLoader", () => {
     const currency = await Currency.create({
       name: "USD",
       symbol: "$",
-      code: "USD"
+      code: "USD",
     });
     const nonExistentId = global.createMockId();
 
-    const results = await currencyLoader.loadMany([currency._id, nonExistentId]);
+    const results = await currencyLoader.loadMany([
+      currency._id,
+      nonExistentId,
+    ]);
     expect(results).toHaveLength(2);
     expect(results[0].name).toBe("USD");
     expect(results[1]).toBeNull();
   });
 
   it("should handle errors gracefully", async () => {
-    const spy = jest.spyOn(Currency, "find").mockRejectedValue(new Error("Database error"));
-    
-    await expect(currencyLoader.load(global.createMockId())).rejects.toThrow("Database error");
+    const spy = jest
+      .spyOn(Currency, "find")
+      .mockRejectedValue(new Error("Database error"));
+
+    await expect(currencyLoader.load(global.createMockId())).rejects.toThrow(
+      "Database error"
+    );
     spy.mockRestore();
   });
-}); 
+});

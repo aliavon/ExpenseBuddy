@@ -79,4 +79,4 @@ describe("withErrorHandlingCurried", () => {
     expect(withErrorHandling).toHaveBeenCalledWith(mockResolver, options);
     expect(wrappedResolver).toBe(mockWrappedResolver);
   });
-}); 
+});

@@ -93,10 +93,18 @@ describe("getCategories resolver", () => {
 
   it("should handle large number of categories", async () => {
     const categories = [
-      "Fruits", "Vegetables", "Dairy", "Meat", "Grains", 
-      "Beverages", "Snacks", "Frozen", "Canned", "Bakery"
+      "Fruits",
+      "Vegetables",
+      "Dairy",
+      "Meat",
+      "Grains",
+      "Beverages",
+      "Snacks",
+      "Frozen",
+      "Canned",
+      "Bakery",
     ];
-    
+
     const items = categories.map((category, index) => ({
       name: `Item${index}`,
       category,
@@ -108,7 +116,7 @@ describe("getCategories resolver", () => {
     const result = await getCategories(null, {}, context);
 
     expect(result).toHaveLength(10);
-    categories.forEach(category => {
+    categories.forEach((category) => {
       expect(result).toContain(category);
     });
   });
@@ -133,7 +141,7 @@ describe("getCategories resolver", () => {
 
   it("should handle very long category names", async () => {
     const longCategory = "A".repeat(100);
-    
+
     await Item.create([
       { name: "Item1", category: "Short" },
       { name: "Item2", category: longCategory },
@@ -149,12 +157,16 @@ describe("getCategories resolver", () => {
 
   it("should handle database errors gracefully", async () => {
     const context = global.createMockContext();
-    
+
     // Mock Item.distinct to throw an error
     const originalDistinct = Item.distinct;
-    Item.distinct = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Item.distinct = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(getCategories(null, {}, context)).rejects.toThrow("Database connection failed");
+    await expect(getCategories(null, {}, context)).rejects.toThrow(
+      "Database connection failed"
+    );
 
     // Restore original method
     Item.distinct = originalDistinct;
@@ -190,4 +202,4 @@ describe("getCategories resolver", () => {
     expect(result).toContain("VEGETABLES");
     expect(result).toContain("Dairy Products");
   });
-}); 
+});

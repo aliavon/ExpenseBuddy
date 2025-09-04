@@ -17,7 +17,7 @@ describe("userLoader", () => {
   it("should load single user by id", async () => {
     const user = await User.create({
       firstName: "John",
-      lastName: "Doe"
+      lastName: "Doe",
     });
 
     const result = await userLoader.load(user._id);
@@ -29,10 +29,10 @@ describe("userLoader", () => {
     const users = await User.create([
       { firstName: "John", lastName: "Doe" },
       { firstName: "Jane", lastName: "Smith" },
-      { firstName: "Bob", lastName: "Wilson" }
+      { firstName: "Bob", lastName: "Wilson" },
     ]);
 
-    const ids = users.map(u => u._id);
+    const ids = users.map((u) => u._id);
     const results = await userLoader.loadMany(ids);
 
     expect(results).toHaveLength(3);
@@ -50,7 +50,7 @@ describe("userLoader", () => {
   it("should handle mixed existing and non-existing users", async () => {
     const user = await User.create({
       firstName: "John",
-      lastName: "Doe"
+      lastName: "Doe",
     });
     const nonExistentId = global.createMockId();
 
@@ -61,9 +61,13 @@ describe("userLoader", () => {
   });
 
   it("should handle errors gracefully", async () => {
-    const spy = jest.spyOn(User, "find").mockRejectedValue(new Error("Database error"));
-    
-    await expect(userLoader.load(global.createMockId())).rejects.toThrow("Database error");
+    const spy = jest
+      .spyOn(User, "find")
+      .mockRejectedValue(new Error("Database error"));
+
+    await expect(userLoader.load(global.createMockId())).rejects.toThrow(
+      "Database error"
+    );
     spy.mockRestore();
   });
-}); 
+});

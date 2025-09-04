@@ -5,9 +5,7 @@ describe("createCurrencies resolver", () => {
   it("should create single currency", async () => {
     const context = global.createMockContext();
     const args = {
-      currencies: [
-        { name: "USD", symbol: "$", code: "USD" }
-      ]
+      currencies: [{ name: "USD", symbol: "$", code: "USD" }],
     };
 
     const result = await createCurrencies(null, args, context);
@@ -27,8 +25,8 @@ describe("createCurrencies resolver", () => {
       currencies: [
         { name: "USD", symbol: "$", code: "USD" },
         { name: "EUR", symbol: "€", code: "EUR" },
-        { name: "GBP", symbol: "£", code: "GBP" }
-      ]
+        { name: "GBP", symbol: "£", code: "GBP" },
+      ],
     };
 
     const result = await createCurrencies(null, args, context);
@@ -46,8 +44,8 @@ describe("createCurrencies resolver", () => {
     const context = global.createMockContext();
     const args = {
       currencies: [
-        { symbol: "$", code: "USD" } // missing name
-      ]
+        { symbol: "$", code: "USD" }, // missing name
+      ],
     };
 
     await expect(createCurrencies(null, args, context)).rejects.toThrow();
@@ -59,23 +57,25 @@ describe("createCurrencies resolver", () => {
     const context = global.createMockContext();
     const args = {
       currencies: [
-        { name: "US Dollar", symbol: "$", code: "USD" } // duplicate code
-      ]
+        { name: "US Dollar", symbol: "$", code: "USD" }, // duplicate code
+      ],
     };
 
     await expect(createCurrencies(null, args, context)).rejects.toThrow();
   });
 
   it("should handle database errors", async () => {
-    const spy = jest.spyOn(Currency, "insertMany").mockRejectedValue(new Error("Database error"));
+    const spy = jest
+      .spyOn(Currency, "insertMany")
+      .mockRejectedValue(new Error("Database error"));
     const context = global.createMockContext();
     const args = {
-      currencies: [
-        { name: "USD", symbol: "$", code: "USD" }
-      ]
+      currencies: [{ name: "USD", symbol: "$", code: "USD" }],
     };
 
-    await expect(createCurrencies(null, args, context)).rejects.toThrow("Database error");
+    await expect(createCurrencies(null, args, context)).rejects.toThrow(
+      "Database error"
+    );
     spy.mockRestore();
   });
-}); 
+});

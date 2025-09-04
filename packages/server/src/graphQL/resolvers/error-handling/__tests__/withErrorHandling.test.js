@@ -64,7 +64,9 @@ describe("withErrorHandling", () => {
     } catch (error) {
       expect(error.message).toBe("An error occurred");
       expect(error.extensions.code).toBe(ERROR_CODES.INTERNAL_SERVER_ERROR);
-      expect(error.extensions.detailedMessage).toBe("Database connection failed");
+      expect(error.extensions.detailedMessage).toBe(
+        "Database connection failed"
+      );
     }
 
     expect(mockContext.logger.error).toHaveBeenCalledWith(
@@ -163,7 +165,7 @@ describe("withErrorHandling", () => {
 
   it("should preserve async resolver behavior", async () => {
     const mockResolver = jest.fn().mockImplementation(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       return "async result";
     });
     const wrappedResolver = withErrorHandling(mockResolver);
@@ -172,4 +174,4 @@ describe("withErrorHandling", () => {
 
     expect(result).toBe("async result");
   });
-}); 
+});

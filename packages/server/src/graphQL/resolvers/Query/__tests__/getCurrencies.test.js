@@ -6,15 +6,15 @@ describe("getCurrencies resolver", () => {
     await Currency.create([
       { name: "USD", symbol: "$", code: "USD" },
       { name: "EUR", symbol: "€", code: "EUR" },
-      { name: "GBP", symbol: "£", code: "GBP" }
+      { name: "GBP", symbol: "£", code: "GBP" },
     ]);
 
     const context = global.createMockContext();
     const result = await getCurrencies(null, {}, context);
 
     expect(result).toHaveLength(3);
-    
-    const names = result.map(currency => currency.name);
+
+    const names = result.map((currency) => currency.name);
     expect(names).toContain("USD");
     expect(names).toContain("EUR");
     expect(names).toContain("GBP");
@@ -28,10 +28,14 @@ describe("getCurrencies resolver", () => {
   });
 
   it("should handle database errors", async () => {
-    const spy = jest.spyOn(Currency, "find").mockRejectedValue(new Error("Database error"));
+    const spy = jest
+      .spyOn(Currency, "find")
+      .mockRejectedValue(new Error("Database error"));
     const context = global.createMockContext();
 
-    await expect(getCurrencies(null, {}, context)).rejects.toThrow("Database error");
+    await expect(getCurrencies(null, {}, context)).rejects.toThrow(
+      "Database error"
+    );
     spy.mockRestore();
   });
-}); 
+});

@@ -51,7 +51,11 @@ describe("createIncomeTypes resolver", () => {
     const result = await createIncomeTypes(null, args, mockContext);
 
     expect(result).toHaveLength(3);
-    expect(result.map(item => item.name)).toEqual(["Salary", "Bonus", "Freelance"]);
+    expect(result.map((item) => item.name)).toEqual([
+      "Salary",
+      "Bonus",
+      "Freelance",
+    ]);
 
     const savedIncomeTypes = await IncomeType.find({});
     expect(savedIncomeTypes).toHaveLength(3);
@@ -143,7 +147,9 @@ describe("createIncomeTypes resolver", () => {
     const result = await createIncomeTypes(null, args, mockContext);
 
     expect(result[0].name).toBe("Freelance & Consulting");
-    expect(result[0].description).toBe("Income from freelance work & consulting services");
+    expect(result[0].description).toBe(
+      "Income from freelance work & consulting services"
+    );
   });
 
   it("should create income types with long descriptions", async () => {
@@ -161,4 +167,4 @@ describe("createIncomeTypes resolver", () => {
 
     expect(result[0].description).toBe(longDescription);
   });
-}); 
+});

@@ -7,8 +7,8 @@ describe("User Schemas Validation", () => {
       const validInput = {
         user: {
           firstName: "John",
-          lastName: "Doe"
-        }
+          lastName: "Doe",
+        },
       };
 
       const { error } = createUserSchema.validate(validInput);
@@ -21,8 +21,8 @@ describe("User Schemas Validation", () => {
           firstName: "John",
           middleName: "Michael",
           lastName: "Doe",
-          isVerified: true
-        }
+          isVerified: true,
+        },
       };
 
       const { error } = createUserSchema.validate(validInput);
@@ -34,8 +34,8 @@ describe("User Schemas Validation", () => {
         user: {
           firstName: "John",
           middleName: "",
-          lastName: "Doe"
-        }
+          lastName: "Doe",
+        },
       };
 
       const { error } = createUserSchema.validate(validInput);
@@ -53,8 +53,8 @@ describe("User Schemas Validation", () => {
     it("should fail when firstName is missing", () => {
       const invalidInput = {
         user: {
-          lastName: "Doe"
-        }
+          lastName: "Doe",
+        },
       };
 
       const { error } = createUserSchema.validate(invalidInput);
@@ -66,8 +66,8 @@ describe("User Schemas Validation", () => {
       const invalidInput = {
         user: {
           firstName: "",
-          lastName: "Doe"
-        }
+          lastName: "Doe",
+        },
       };
 
       const { error } = createUserSchema.validate(invalidInput);
@@ -79,8 +79,8 @@ describe("User Schemas Validation", () => {
       const invalidInput = {
         user: {
           firstName: 123,
-          lastName: "Doe"
-        }
+          lastName: "Doe",
+        },
       };
 
       const { error } = createUserSchema.validate(invalidInput);
@@ -91,8 +91,8 @@ describe("User Schemas Validation", () => {
     it("should fail when lastName is missing", () => {
       const invalidInput = {
         user: {
-          firstName: "John"
-        }
+          firstName: "John",
+        },
       };
 
       const { error } = createUserSchema.validate(invalidInput);
@@ -104,8 +104,8 @@ describe("User Schemas Validation", () => {
       const invalidInput = {
         user: {
           firstName: "John",
-          lastName: ""
-        }
+          lastName: "",
+        },
       };
 
       const { error } = createUserSchema.validate(invalidInput);
@@ -118,8 +118,8 @@ describe("User Schemas Validation", () => {
         user: {
           firstName: "John",
           middleName: 123,
-          lastName: "Doe"
-        }
+          lastName: "Doe",
+        },
       };
 
       const { error } = createUserSchema.validate(invalidInput);
@@ -134,8 +134,8 @@ describe("User Schemas Validation", () => {
     it("should validate with required id only", () => {
       const validInput = {
         user: {
-          id: validObjectId
-        }
+          id: validObjectId,
+        },
       };
 
       const { error } = updateUserSchema.validate(validInput);
@@ -148,8 +148,8 @@ describe("User Schemas Validation", () => {
           id: validObjectId,
           firstName: "John",
           middleName: "Michael",
-          lastName: "Doe"
-        }
+          lastName: "Doe",
+        },
       };
 
       const { error } = updateUserSchema.validate(validInput);
@@ -160,8 +160,8 @@ describe("User Schemas Validation", () => {
       const validInput = {
         user: {
           id: validObjectId,
-          middleName: ""
-        }
+          middleName: "",
+        },
       };
 
       const { error } = updateUserSchema.validate(validInput);
@@ -179,8 +179,8 @@ describe("User Schemas Validation", () => {
     it("should fail when id is missing", () => {
       const invalidInput = {
         user: {
-          firstName: "John"
-        }
+          firstName: "John",
+        },
       };
 
       const { error } = updateUserSchema.validate(invalidInput);
@@ -191,8 +191,8 @@ describe("User Schemas Validation", () => {
     it("should fail with invalid ObjectId", () => {
       const invalidInput = {
         user: {
-          id: "invalid-id"
-        }
+          id: "invalid-id",
+        },
       };
 
       const { error } = updateUserSchema.validate(invalidInput);
@@ -204,8 +204,8 @@ describe("User Schemas Validation", () => {
       const invalidInput = {
         user: {
           id: validObjectId,
-          firstName: ""
-        }
+          firstName: "",
+        },
       };
 
       const { error } = updateUserSchema.validate(invalidInput);
@@ -217,8 +217,8 @@ describe("User Schemas Validation", () => {
       const invalidInput = {
         user: {
           id: validObjectId,
-          lastName: ""
-        }
+          lastName: "",
+        },
       };
 
       const { error } = updateUserSchema.validate(invalidInput);
@@ -230,8 +230,8 @@ describe("User Schemas Validation", () => {
       const invalidInput = {
         user: {
           id: validObjectId,
-          middleName: 123
-        }
+          middleName: 123,
+        },
       };
 
       const { error } = updateUserSchema.validate(invalidInput);
@@ -239,4 +239,4 @@ describe("User Schemas Validation", () => {
       expect(error.details[0].message).toBe('"middleName" must be a string');
     });
   });
-}); 
+});

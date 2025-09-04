@@ -4,7 +4,9 @@ describe("Validation index exports", () => {
   it("should export all purchase-related schemas", () => {
     expect(validationExports.getItemsSchema).toBeDefined();
     expect(validationExports.getPurchasesSchema).toBeDefined();
-    expect(validationExports.getPurchasesCategorySuggestionSchema).toBeDefined();
+    expect(
+      validationExports.getPurchasesCategorySuggestionSchema
+    ).toBeDefined();
     expect(validationExports.addItemsSchema).toBeDefined();
     expect(validationExports.addPurchasesSchema).toBeDefined();
     expect(validationExports.deletePurchasesSchema).toBeDefined();
@@ -50,7 +52,9 @@ describe("Validation index exports", () => {
 
   it("should have all exports as functions or objects", () => {
     Object.values(validationExports).forEach((exportedItem) => {
-      expect(typeof exportedItem === 'function' || typeof exportedItem === 'object').toBe(true);
+      expect(
+        typeof exportedItem === "function" || typeof exportedItem === "object"
+      ).toBe(true);
     });
   });
-}); 
+});

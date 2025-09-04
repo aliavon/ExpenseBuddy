@@ -21,7 +21,7 @@ describe("Update Schemas Validation", () => {
         price: 15.99,
         discount: 5,
         date: new Date().toISOString(),
-        note: "Updated purchase"
+        note: "Updated purchase",
       };
 
       const { error } = updatePurchaseInputSchema.validate(validInput);
@@ -46,40 +46,46 @@ describe("Update Schemas Validation", () => {
     it("should fail with negative quantity", () => {
       const invalidInput = {
         id: validObjectId,
-        quantity: -1
+        quantity: -1,
       };
 
       const { error } = updatePurchaseInputSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"quantity" must be a positive number');
+      expect(error.details[0].message).toBe(
+        '"quantity" must be a positive number'
+      );
     });
 
     it("should fail with negative price", () => {
       const invalidInput = {
         id: validObjectId,
-        price: -10
+        price: -10,
       };
 
       const { error } = updatePurchaseInputSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"price" must be a positive number');
+      expect(error.details[0].message).toBe(
+        '"price" must be a positive number'
+      );
     });
 
     it("should fail with negative discount", () => {
       const invalidInput = {
         id: validObjectId,
-        discount: -5
+        discount: -5,
       };
 
       const { error } = updatePurchaseInputSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"discount" must be greater than or equal to 0');
+      expect(error.details[0].message).toBe(
+        '"discount" must be greater than or equal to 0'
+      );
     });
 
     it("should fail with invalid date format", () => {
       const invalidInput = {
         id: validObjectId,
-        date: "invalid-date"
+        date: "invalid-date",
       };
 
       const { error } = updatePurchaseInputSchema.validate(invalidInput);
@@ -91,10 +97,12 @@ describe("Update Schemas Validation", () => {
   describe("updatePurchasesSchema", () => {
     it("should validate with valid updates array", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId,
-          quantity: 2
-        }]
+        updates: [
+          {
+            id: validObjectId,
+            quantity: 2,
+          },
+        ],
       };
 
       const { error } = updatePurchasesSchema.validate(validInput);
@@ -118,7 +126,7 @@ describe("Update Schemas Validation", () => {
 
     it("should fail with invalid purchase in array", () => {
       const invalidInput = {
-        updates: [{ quantity: 2 }] // missing required id
+        updates: [{ quantity: 2 }], // missing required id
       };
 
       const { error } = updatePurchasesSchema.validate(invalidInput);
@@ -126,4 +134,4 @@ describe("Update Schemas Validation", () => {
       expect(error.details[0].message).toBe('"updates[0].id" is required');
     });
   });
-}); 
+});

@@ -30,7 +30,7 @@ describe("getIncomeTypes resolver", () => {
     const result = await getIncomeTypes(null, {}, mockContext);
 
     expect(result).toHaveLength(3);
-    expect(result.map(item => item.name)).toEqual(
+    expect(result.map((item) => item.name)).toEqual(
       expect.arrayContaining(["Salary", "Bonus", "Freelance"])
     );
     expect(mockContext.logger.info).toHaveBeenCalledWith(
@@ -69,10 +69,10 @@ describe("getIncomeTypes resolver", () => {
     const result = await getIncomeTypes(null, {}, mockContext);
 
     expect(result).toHaveLength(3);
-    
-    const type2 = result.find(item => item.name === "Type2");
-    const type3 = result.find(item => item.name === "Type3");
-    
+
+    const type2 = result.find((item) => item.name === "Type2");
+    const type3 = result.find((item) => item.name === "Type3");
+
     expect(type2.description).toBe("");
     expect(type3.description).toBe("");
   });
@@ -89,7 +89,9 @@ describe("getIncomeTypes resolver", () => {
     const result1 = await getIncomeTypes(null, {}, mockContext);
     const result2 = await getIncomeTypes(null, {}, mockContext);
 
-    expect(result1.map(item => item.name)).toEqual(result2.map(item => item.name));
+    expect(result1.map((item) => item.name)).toEqual(
+      result2.map((item) => item.name)
+    );
   });
 
   it("should handle large number of income types", async () => {
@@ -121,7 +123,7 @@ describe("getIncomeTypes resolver", () => {
     const result = await getIncomeTypes(null, {}, mockContext);
 
     expect(result).toHaveLength(3);
-    expect(result.map(item => item.name)).toEqual(
+    expect(result.map((item) => item.name)).toEqual(
       expect.arrayContaining([
         "Freelance & Consulting",
         "投資収益",
@@ -151,11 +153,14 @@ describe("getIncomeTypes resolver", () => {
     expect(result1).toHaveLength(0);
 
     // Add data
-    await IncomeType.create({ name: "New Type", description: "New description" });
+    await IncomeType.create({
+      name: "New Type",
+      description: "New description",
+    });
 
     // Second call should include new data
     const result2 = await getIncomeTypes(null, {}, mockContext);
     expect(result2).toHaveLength(1);
     expect(result2[0].name).toBe("New Type");
   });
-}); 
+});

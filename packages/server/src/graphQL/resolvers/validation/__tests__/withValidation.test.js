@@ -26,7 +26,12 @@ describe("withValidation", () => {
     const result = await wrappedResolver(null, args, mockContext, mockInfo);
 
     expect(result).toBe("success");
-    expect(mockResolver).toHaveBeenCalledWith(null, args, mockContext, mockInfo);
+    expect(mockResolver).toHaveBeenCalledWith(
+      null,
+      args,
+      mockContext,
+      mockInfo
+    );
     expect(mockResolver).toHaveBeenCalledTimes(1);
   });
 
@@ -39,7 +44,9 @@ describe("withValidation", () => {
     const wrappedResolver = withValidation(schema, mockResolver);
     const args = { name: "", age: -5 };
 
-    await expect(wrappedResolver(null, args, mockContext, mockInfo)).rejects.toThrow(GraphQLError);
+    await expect(
+      wrappedResolver(null, args, mockContext, mockInfo)
+    ).rejects.toThrow(GraphQLError);
     expect(mockResolver).not.toHaveBeenCalled();
   });
 
@@ -83,7 +90,9 @@ describe("withValidation", () => {
       expect.objectContaining({
         validationErrors: expect.any(Array),
       }),
-      expect.stringContaining('Validation error in resolver "Query" for field "testField"')
+      expect.stringContaining(
+        'Validation error in resolver "Query" for field "testField"'
+      )
     );
   });
 
@@ -96,7 +105,9 @@ describe("withValidation", () => {
     const wrappedResolver = withValidation(schema, mockResolver);
     const args = {};
 
-    await expect(wrappedResolver(null, args, contextWithoutLogger, mockInfo)).rejects.toThrow(GraphQLError);
+    await expect(
+      wrappedResolver(null, args, contextWithoutLogger, mockInfo)
+    ).rejects.toThrow(GraphQLError);
     expect(mockResolver).not.toHaveBeenCalled();
   });
 
@@ -122,32 +133,55 @@ describe("withValidation", () => {
       },
     };
 
-    const result = await wrappedResolver(null, validArgs, mockContext, mockInfo);
+    const result = await wrappedResolver(
+      null,
+      validArgs,
+      mockContext,
+      mockInfo
+    );
     expect(result).toBe("success");
-    expect(mockResolver).toHaveBeenCalledWith(null, validArgs, mockContext, mockInfo);
+    expect(mockResolver).toHaveBeenCalledWith(
+      null,
+      validArgs,
+      mockContext,
+      mockInfo
+    );
   });
 
   it("should validate arrays with items", async () => {
     const schema = Joi.object({
-      items: Joi.array().items(
-        Joi.object({
-          name: Joi.string().required(),
-          price: Joi.number().positive().required(),
-        })
-      ).min(1).required(),
+      items: Joi.array()
+        .items(
+          Joi.object({
+            name: Joi.string().required(),
+            price: Joi.number().positive().required(),
+          })
+        )
+        .min(1)
+        .required(),
     });
 
     const wrappedResolver = withValidation(schema, mockResolver);
     const validArgs = {
       items: [
-        { name: "Item 1", price: 10.50 },
-        { name: "Item 2", price: 25.00 },
+        { name: "Item 1", price: 10.5 },
+        { name: "Item 2", price: 25.0 },
       ],
     };
 
-    const result = await wrappedResolver(null, validArgs, mockContext, mockInfo);
+    const result = await wrappedResolver(
+      null,
+      validArgs,
+      mockContext,
+      mockInfo
+    );
     expect(result).toBe("success");
-    expect(mockResolver).toHaveBeenCalledWith(null, validArgs, mockContext, mockInfo);
+    expect(mockResolver).toHaveBeenCalledWith(
+      null,
+      validArgs,
+      mockContext,
+      mockInfo
+    );
   });
 
   it("should handle validation with custom messages", async () => {
@@ -165,7 +199,9 @@ describe("withValidation", () => {
       await wrappedResolver(null, args, mockContext, mockInfo);
       fail("Should have thrown an error");
     } catch (error) {
-      expect(error.extensions.detailedMessage).toContain("Password must be at least 8 characters long");
+      expect(error.extensions.detailedMessage).toContain(
+        "Password must be at least 8 characters long"
+      );
     }
   });
 
@@ -188,4 +224,4 @@ describe("withValidation", () => {
       expect(error.extensions.detailedMessage).toContain("age");
     }
   });
-}); 
+});

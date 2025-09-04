@@ -50,11 +50,7 @@ describe("deletePurchases mutation", () => {
 
     const ids = [purchase1._id, purchase2._id, purchase3._id];
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -70,11 +66,7 @@ describe("deletePurchases mutation", () => {
   it("should handle empty ids array", async () => {
     const context = global.createMockContext();
 
-    const result = await deletePurchases(
-      null,
-      { ids: [] },
-      context
-    );
+    const result = await deletePurchases(null, { ids: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -90,11 +82,7 @@ describe("deletePurchases mutation", () => {
 
     const ids = [nonExistentId1, nonExistentId2];
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -111,11 +99,7 @@ describe("deletePurchases mutation", () => {
 
     const ids = [existingPurchase1._id, nonExistentId, existingPurchase2._id];
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -138,11 +122,7 @@ describe("deletePurchases mutation", () => {
 
     const ids = [purchase3._id, purchase1._id, purchase2._id];
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual([purchase3._id, purchase1._id, purchase2._id]);
   });
@@ -153,14 +133,10 @@ describe("deletePurchases mutation", () => {
       purchases.push(await createPurchaseInDB({ quantity: i }));
     }
 
-    const ids = purchases.map(p => p._id);
+    const ids = purchases.map((p) => p._id);
     const context = global.createMockContext();
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -179,11 +155,7 @@ describe("deletePurchases mutation", () => {
 
     const ids = [purchase._id, purchase._id, purchase._id];
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -202,11 +174,7 @@ describe("deletePurchases mutation", () => {
     const purchaseToKeep2 = await createPurchaseInDB({ quantity: 3 });
     const context = global.createMockContext();
 
-    await deletePurchases(
-      null,
-      { ids: [purchaseToDelete._id] },
-      context
-    );
+    await deletePurchases(null, { ids: [purchaseToDelete._id] }, context);
 
     // Verify only the targeted purchase was deleted
     const deletedPurchase = await Purchase.findById(purchaseToDelete._id);
@@ -222,31 +190,27 @@ describe("deletePurchases mutation", () => {
 
   it("should handle deletion of purchases with different data types", async () => {
     const purchases = [
-      await createPurchaseInDB({ 
-        quantity: 1.5, 
-        price: 10.99, 
-        note: "Test item 1" 
+      await createPurchaseInDB({
+        quantity: 1.5,
+        price: 10.99,
+        note: "Test item 1",
       }),
-      await createPurchaseInDB({ 
-        quantity: 2, 
-        price: 20.00, 
-        discount: 2.50 
+      await createPurchaseInDB({
+        quantity: 2,
+        price: 20.0,
+        discount: 2.5,
       }),
-      await createPurchaseInDB({ 
-        quantity: 3.75, 
+      await createPurchaseInDB({
+        quantity: 3.75,
         unit: "lbs",
-        date: new Date("2024-12-25") 
+        date: new Date("2024-12-25"),
       }),
     ];
 
-    const ids = purchases.map(p => p._id);
+    const ids = purchases.map((p) => p._id);
     const context = global.createMockContext();
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
 
@@ -263,13 +227,13 @@ describe("deletePurchases mutation", () => {
 
     // Mock Purchase.deleteMany to throw an error
     const originalDeleteMany = Purchase.deleteMany;
-    Purchase.deleteMany = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Purchase.deleteMany = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deletePurchases(
-      null,
-      { ids: [purchase._id] },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      deletePurchases(null, { ids: [purchase._id] }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     Purchase.deleteMany = originalDeleteMany;
@@ -284,7 +248,7 @@ describe("deletePurchases mutation", () => {
 
     const ids = [];
     // Add existing IDs
-    existingPurchases.forEach(p => ids.push(p._id));
+    existingPurchases.forEach((p) => ids.push(p._id));
     // Add many non-existing IDs
     for (let i = 0; i < 100; i++) {
       ids.push(global.createMockId());
@@ -292,11 +256,7 @@ describe("deletePurchases mutation", () => {
 
     const context = global.createMockContext();
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(result).toHaveLength(110);
@@ -323,11 +283,7 @@ describe("deletePurchases mutation", () => {
       purchase2._id, // ObjectId format
     ];
 
-    const result = await deletePurchases(
-      null,
-      { ids },
-      context
-    );
+    const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toHaveLength(2);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -347,13 +303,9 @@ describe("deletePurchases mutation", () => {
     const originalId = purchase._id;
     const context = global.createMockContext();
 
-    const result = await deletePurchases(
-      null,
-      { ids: [originalId] },
-      context
-    );
+    const result = await deletePurchases(null, { ids: [originalId] }, context);
 
     expect(result).toEqual([originalId]);
     expect(result[0]).toBe(originalId); // Same reference
   });
-}); 
+});

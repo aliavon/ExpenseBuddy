@@ -40,7 +40,9 @@ describe("Simple Validation Schemas", () => {
 
       const { error } = itemInputSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"name" is not allowed to be empty');
+      expect(error.details[0].message).toBe(
+        '"name" is not allowed to be empty'
+      );
     });
 
     it("should fail when name is not a string", () => {
@@ -63,7 +65,7 @@ describe("Simple Validation Schemas", () => {
         price: 10.99,
         date: new Date().toISOString(),
         discount: 0,
-        note: "Test purchase"
+        note: "Test purchase",
       };
 
       const { error } = purchaseInputSchema.validate(validInput);
@@ -76,7 +78,7 @@ describe("Simple Validation Schemas", () => {
         quantity: 1,
         unit: "piece",
         price: 5.99,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       const { error } = purchaseInputSchema.validate(validInput);
@@ -88,7 +90,7 @@ describe("Simple Validation Schemas", () => {
         quantity: 1,
         unit: "piece",
         price: 10.99,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       const { error } = purchaseInputSchema.validate(invalidInput);
@@ -101,7 +103,7 @@ describe("Simple Validation Schemas", () => {
         itemId: validObjectId,
         unit: "piece",
         price: 10.99,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       const { error } = purchaseInputSchema.validate(invalidInput);
@@ -115,12 +117,14 @@ describe("Simple Validation Schemas", () => {
         quantity: 0,
         unit: "piece",
         price: 10.99,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       const { error } = purchaseInputSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"quantity" must be a positive number');
+      expect(error.details[0].message).toBe(
+        '"quantity" must be a positive number'
+      );
     });
 
     it("should fail when unit is missing", () => {
@@ -128,7 +132,7 @@ describe("Simple Validation Schemas", () => {
         itemId: validObjectId,
         quantity: 1,
         price: 10.99,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       const { error } = purchaseInputSchema.validate(invalidInput);
@@ -142,12 +146,14 @@ describe("Simple Validation Schemas", () => {
         quantity: 1,
         unit: "piece",
         price: 0,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       const { error } = purchaseInputSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"price" must be a positive number');
+      expect(error.details[0].message).toBe(
+        '"price" must be a positive number'
+      );
     });
 
     it("should fail when date is invalid", () => {
@@ -156,7 +162,7 @@ describe("Simple Validation Schemas", () => {
         quantity: 1,
         unit: "piece",
         price: 10.99,
-        date: "invalid-date"
+        date: "invalid-date",
       };
 
       const { error } = purchaseInputSchema.validate(invalidInput);
@@ -168,7 +174,7 @@ describe("Simple Validation Schemas", () => {
   describe("addItemsSchema", () => {
     it("should validate with valid items array", () => {
       const validInput = {
-        items: [{ name: "Item 1" }, { name: "Item 2", category: "Food" }]
+        items: [{ name: "Item 1" }, { name: "Item 2", category: "Food" }],
       };
 
       const { error } = addItemsSchema.validate(validInput);
@@ -192,12 +198,14 @@ describe("Simple Validation Schemas", () => {
 
     it("should fail when items contains invalid item", () => {
       const invalidInput = {
-        items: [{ name: "" }]
+        items: [{ name: "" }],
       };
 
       const { error } = addItemsSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"items[0].name" is not allowed to be empty');
+      expect(error.details[0].message).toBe(
+        '"items[0].name" is not allowed to be empty'
+      );
     });
   });
 
@@ -206,13 +214,15 @@ describe("Simple Validation Schemas", () => {
 
     it("should validate with valid purchases array", () => {
       const validInput = {
-        purchases: [{
-          itemId: validObjectId,
-          quantity: 1,
-          unit: "piece",
-          price: 10.99,
-          date: new Date().toISOString()
-        }]
+        purchases: [
+          {
+            itemId: validObjectId,
+            quantity: 1,
+            unit: "piece",
+            price: 10.99,
+            date: new Date().toISOString(),
+          },
+        ],
       };
 
       const { error } = addPurchasesSchema.validate(validInput);
@@ -239,7 +249,7 @@ describe("Simple Validation Schemas", () => {
     it("should validate with valid category update", () => {
       const validInput = {
         names: ["Item 1", "Item 2"],
-        newCategory: "New Category"
+        newCategory: "New Category",
       };
 
       const { error } = editItemsCategorySchema.validate(validInput);
@@ -265,23 +275,27 @@ describe("Simple Validation Schemas", () => {
     it("should fail when names array is empty", () => {
       const invalidInput = {
         names: [],
-        newCategory: "New Category"
+        newCategory: "New Category",
       };
 
       const { error } = editItemsCategorySchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"names" must contain at least 1 items');
+      expect(error.details[0].message).toBe(
+        '"names" must contain at least 1 items'
+      );
     });
 
     it("should fail when names contains empty string", () => {
       const invalidInput = {
         names: ["Item 1", ""],
-        newCategory: "New Category"
+        newCategory: "New Category",
       };
 
       const { error } = editItemsCategorySchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"names[1]" is not allowed to be empty');
+      expect(error.details[0].message).toBe(
+        '"names[1]" is not allowed to be empty'
+      );
     });
   });
-}); 
+});

@@ -7,12 +7,14 @@ describe("Update Currency and Income Type Schemas", () => {
   describe("updateCurrenciesSchema", () => {
     it("should validate with valid updates array", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId,
-          name: "US Dollar",
-          code: "USD",
-          symbol: "$"
-        }]
+        updates: [
+          {
+            id: validObjectId,
+            name: "US Dollar",
+            code: "USD",
+            symbol: "$",
+          },
+        ],
       };
 
       const { error } = updateCurrenciesSchema.validate(validInput);
@@ -21,9 +23,11 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should validate with only required id", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId
-        }]
+        updates: [
+          {
+            id: validObjectId,
+          },
+        ],
       };
 
       const { error } = updateCurrenciesSchema.validate(validInput);
@@ -32,10 +36,12 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should validate with partial updates", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId,
-          name: "Euro"
-        }]
+        updates: [
+          {
+            id: validObjectId,
+            name: "Euro",
+          },
+        ],
       };
 
       const { error } = updateCurrenciesSchema.validate(validInput);
@@ -46,8 +52,8 @@ describe("Update Currency and Income Type Schemas", () => {
       const validInput = {
         updates: [
           { id: validObjectId, name: "US Dollar" },
-          { id: "507f1f77bcf86cd799439012", code: "EUR" }
-        ]
+          { id: "507f1f77bcf86cd799439012", code: "EUR" },
+        ],
       };
 
       const { error } = updateCurrenciesSchema.validate(validInput);
@@ -67,7 +73,9 @@ describe("Update Currency and Income Type Schemas", () => {
 
       const { error } = updateCurrenciesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"updates" must contain at least one element');
+      expect(error.details[0].message).toBe(
+        '"updates" must contain at least one element'
+      );
     });
 
     it("should fail when updates is not an array", () => {
@@ -80,7 +88,7 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should fail when id is missing in update", () => {
       const invalidInput = {
-        updates: [{ name: "US Dollar" }]
+        updates: [{ name: "US Dollar" }],
       };
 
       const { error } = updateCurrenciesSchema.validate(invalidInput);
@@ -90,7 +98,7 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should fail with invalid ObjectId", () => {
       const invalidInput = {
-        updates: [{ id: "invalid-id" }]
+        updates: [{ id: "invalid-id" }],
       };
 
       const { error } = updateCurrenciesSchema.validate(invalidInput);
@@ -100,7 +108,7 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should fail when name is empty", () => {
       const invalidInput = {
-        updates: [{ id: validObjectId, name: "" }]
+        updates: [{ id: validObjectId, name: "" }],
       };
 
       const { error } = updateCurrenciesSchema.validate(invalidInput);
@@ -110,7 +118,7 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should fail when code is empty", () => {
       const invalidInput = {
-        updates: [{ id: validObjectId, code: "" }]
+        updates: [{ id: validObjectId, code: "" }],
       };
 
       const { error } = updateCurrenciesSchema.validate(invalidInput);
@@ -120,7 +128,7 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should fail when symbol is not a string", () => {
       const invalidInput = {
-        updates: [{ id: validObjectId, symbol: 123 }]
+        updates: [{ id: validObjectId, symbol: 123 }],
       };
 
       const { error } = updateCurrenciesSchema.validate(invalidInput);
@@ -132,11 +140,13 @@ describe("Update Currency and Income Type Schemas", () => {
   describe("updateIncomeTypesSchema", () => {
     it("should validate with valid updates array", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId,
-          name: "Salary",
-          description: "Monthly salary income"
-        }]
+        updates: [
+          {
+            id: validObjectId,
+            name: "Salary",
+            description: "Monthly salary income",
+          },
+        ],
       };
 
       const { error } = updateIncomeTypesSchema.validate(validInput);
@@ -145,9 +155,11 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should validate with only required id", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId
-        }]
+        updates: [
+          {
+            id: validObjectId,
+          },
+        ],
       };
 
       const { error } = updateIncomeTypesSchema.validate(validInput);
@@ -156,10 +168,12 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should validate with empty description", () => {
       const validInput = {
-        updates: [{
-          id: validObjectId,
-          description: ""
-        }]
+        updates: [
+          {
+            id: validObjectId,
+            description: "",
+          },
+        ],
       };
 
       const { error } = updateIncomeTypesSchema.validate(validInput);
@@ -170,8 +184,12 @@ describe("Update Currency and Income Type Schemas", () => {
       const validInput = {
         updates: [
           { id: validObjectId, name: "Salary" },
-          { id: "507f1f77bcf86cd799439012", name: "Bonus", description: "Annual bonus" }
-        ]
+          {
+            id: "507f1f77bcf86cd799439012",
+            name: "Bonus",
+            description: "Annual bonus",
+          },
+        ],
       };
 
       const { error } = updateIncomeTypesSchema.validate(validInput);
@@ -191,12 +209,14 @@ describe("Update Currency and Income Type Schemas", () => {
 
       const { error } = updateIncomeTypesSchema.validate(invalidInput);
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('"updates" must contain at least one element');
+      expect(error.details[0].message).toBe(
+        '"updates" must contain at least one element'
+      );
     });
 
     it("should fail when id is missing", () => {
       const invalidInput = {
-        updates: [{ name: "Salary" }]
+        updates: [{ name: "Salary" }],
       };
 
       const { error } = updateIncomeTypesSchema.validate(invalidInput);
@@ -206,7 +226,7 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should fail with invalid ObjectId", () => {
       const invalidInput = {
-        updates: [{ id: "invalid-id" }]
+        updates: [{ id: "invalid-id" }],
       };
 
       const { error } = updateIncomeTypesSchema.validate(invalidInput);
@@ -216,7 +236,7 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should fail when name is empty", () => {
       const invalidInput = {
-        updates: [{ id: validObjectId, name: "" }]
+        updates: [{ id: validObjectId, name: "" }],
       };
 
       const { error } = updateIncomeTypesSchema.validate(invalidInput);
@@ -226,7 +246,7 @@ describe("Update Currency and Income Type Schemas", () => {
 
     it("should fail when description is not a string", () => {
       const invalidInput = {
-        updates: [{ id: validObjectId, description: 123 }]
+        updates: [{ id: validObjectId, description: 123 }],
       };
 
       const { error } = updateIncomeTypesSchema.validate(invalidInput);
@@ -234,4 +254,4 @@ describe("Update Currency and Income Type Schemas", () => {
       expect(error.details[0].message).toBe('"description" must be a string');
     });
   });
-}); 
+});

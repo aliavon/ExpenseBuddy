@@ -19,7 +19,7 @@ describe("getUnits resolver", () => {
 
   it("should return distinct units from purchases", async () => {
     const itemId = global.createMockId();
-    
+
     await Purchase.create([
       {
         itemId,
@@ -58,7 +58,7 @@ describe("getUnits resolver", () => {
 
   it("should filter out empty and whitespace-only units", async () => {
     const itemId = global.createMockId();
-    
+
     // Create purchases with valid units first
     await Purchase.create([
       {
@@ -107,7 +107,7 @@ describe("getUnits resolver", () => {
 
   it("should filter out null units", async () => {
     const itemId = global.createMockId();
-    
+
     // Create purchase with null unit directly in database
     await Purchase.collection.insertMany([
       {
@@ -137,7 +137,7 @@ describe("getUnits resolver", () => {
   it("should handle large number of units", async () => {
     const itemId = global.createMockId();
     const units = ["kg", "lbs", "oz", "g", "ton", "piece", "box", "pack"];
-    
+
     const purchases = units.map((unit, index) => ({
       itemId,
       quantity: index + 1,
@@ -152,14 +152,14 @@ describe("getUnits resolver", () => {
     const result = await getUnits(null, {}, context);
 
     expect(result).toHaveLength(8);
-    units.forEach(unit => {
+    units.forEach((unit) => {
       expect(result).toContain(unit);
     });
   });
 
   it("should handle special characters in units", async () => {
     const itemId = global.createMockId();
-    
+
     await Purchase.create([
       {
         itemId,
@@ -195,10 +195,12 @@ describe("getUnits resolver", () => {
 
   it("should handle database errors gracefully", async () => {
     const context = global.createMockContext();
-    
+
     // Mock Purchase.distinct to throw an error
     const originalDistinct = Purchase.distinct;
-    Purchase.distinct = jest.fn().mockRejectedValue(new Error("Database error"));
+    Purchase.distinct = jest
+      .fn()
+      .mockRejectedValue(new Error("Database error"));
 
     await expect(getUnits(null, {}, context)).rejects.toThrow("Database error");
 
@@ -208,7 +210,7 @@ describe("getUnits resolver", () => {
 
   it("should return units in consistent order", async () => {
     const itemId = global.createMockId();
-    
+
     await Purchase.create([
       {
         itemId,
@@ -240,4 +242,4 @@ describe("getUnits resolver", () => {
     expect(result1).toEqual(result2);
     expect(result1).toHaveLength(3);
   });
-}); 
+});

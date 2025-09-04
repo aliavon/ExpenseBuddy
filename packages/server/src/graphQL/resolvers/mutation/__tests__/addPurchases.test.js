@@ -39,17 +39,13 @@ describe("addPurchases mutation", () => {
 
   it("should add multiple purchases successfully", async () => {
     const purchases = [
-      createPurchaseData({ quantity: 1, price: 10.50 }),
+      createPurchaseData({ quantity: 1, price: 10.5 }),
       createPurchaseData({ quantity: 3, price: 25.99 }),
       createPurchaseData({ quantity: 2, price: 18.75 }),
     ];
     const context = global.createMockContext();
 
-    const result = await addPurchases(
-      null,
-      { purchases },
-      context
-    );
+    const result = await addPurchases(null, { purchases }, context);
 
     expect(result).toHaveLength(3);
     expect(result[0].quantity).toBe(1);
@@ -64,11 +60,7 @@ describe("addPurchases mutation", () => {
   it("should handle empty purchases array", async () => {
     const context = global.createMockContext();
 
-    const result = await addPurchases(
-      null,
-      { purchases: [] },
-      context
-    );
+    const result = await addPurchases(null, { purchases: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -79,7 +71,7 @@ describe("addPurchases mutation", () => {
 
   it("should add purchases with all optional fields", async () => {
     const purchaseData = createPurchaseData({
-      discount: 2.50,
+      discount: 2.5,
       note: "Fresh organic apples",
     });
     const context = global.createMockContext();
@@ -91,7 +83,7 @@ describe("addPurchases mutation", () => {
     );
 
     expect(result).toHaveLength(1);
-    expect(result[0].discount).toBe(2.50);
+    expect(result[0].discount).toBe(2.5);
     expect(result[0].note).toBe("Fresh organic apples");
   });
 
@@ -103,14 +95,10 @@ describe("addPurchases mutation", () => {
     ];
     const context = global.createMockContext();
 
-    const result = await addPurchases(
-      null,
-      { purchases },
-      context
-    );
+    const result = await addPurchases(null, { purchases }, context);
 
     expect(result).toHaveLength(3);
-    const itemIds = result.map(p => p.itemId.toString());
+    const itemIds = result.map((p) => p.itemId.toString());
     const uniqueItemIds = [...new Set(itemIds)];
     expect(uniqueItemIds).toHaveLength(3);
   });
@@ -140,14 +128,15 @@ describe("addPurchases mutation", () => {
     ];
     const context = global.createMockContext();
 
-    const result = await addPurchases(
-      null,
-      { purchases },
-      context
-    );
+    const result = await addPurchases(null, { purchases }, context);
 
     expect(result).toHaveLength(4);
-    expect(result.map(p => p.unit)).toEqual(["kg", "lbs", "pieces", "liters"]);
+    expect(result.map((p) => p.unit)).toEqual([
+      "kg",
+      "lbs",
+      "pieces",
+      "liters",
+    ]);
   });
 
   it("should handle purchases with different dates", async () => {
@@ -158,11 +147,7 @@ describe("addPurchases mutation", () => {
     ];
     const context = global.createMockContext();
 
-    const result = await addPurchases(
-      null,
-      { purchases },
-      context
-    );
+    const result = await addPurchases(null, { purchases }, context);
 
     expect(result).toHaveLength(3);
     expect(result[0].date).toEqual(new Date("2024-01-01"));
@@ -173,18 +158,16 @@ describe("addPurchases mutation", () => {
   it("should handle large batch of purchases", async () => {
     const purchases = [];
     for (let i = 1; i <= 50; i++) {
-      purchases.push(createPurchaseData({
-        quantity: i,
-        price: i * 1.5,
-      }));
+      purchases.push(
+        createPurchaseData({
+          quantity: i,
+          price: i * 1.5,
+        })
+      );
     }
     const context = global.createMockContext();
 
-    const result = await addPurchases(
-      null,
-      { purchases },
-      context
-    );
+    const result = await addPurchases(null, { purchases }, context);
 
     expect(result).toHaveLength(50);
     expect(result[0].quantity).toBe(1);
@@ -222,21 +205,23 @@ describe("addPurchases mutation", () => {
       context
     );
 
-    expect(result[0].note).toBe("Café au lait & croissants - très délicieux! 🥐☕");
+    expect(result[0].note).toBe(
+      "Café au lait & croissants - très délicieux! 🥐☕"
+    );
   });
 
   it("should handle database errors gracefully", async () => {
     const context = global.createMockContext();
-    
+
     // Mock Purchase.insertMany to throw an error
     const originalInsertMany = Purchase.insertMany;
-    Purchase.insertMany = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Purchase.insertMany = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(addPurchases(
-      null,
-      { purchases: [createPurchaseData()] },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      addPurchases(null, { purchases: [createPurchaseData()] }, context)
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     Purchase.insertMany = originalInsertMany;
@@ -250,11 +235,7 @@ describe("addPurchases mutation", () => {
     ];
     const context = global.createMockContext();
 
-    const result = await addPurchases(
-      null,
-      { purchases },
-      context
-    );
+    const result = await addPurchases(null, { purchases }, context);
 
     expect(result[0].quantity).toBe(1);
     expect(result[1].quantity).toBe(2);
@@ -290,4 +271,4 @@ describe("addPurchases mutation", () => {
 
     expect(result[0].quantity).toBe(0.001);
   });
-}); 
+});

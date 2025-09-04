@@ -6,6 +6,14 @@ const {
 const modelNames = require("../modelNames");
 
 const familyIncomeSchema = new mongoose.Schema({
+  // Family context for multi-family support
+  familyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: modelNames.Family,
+    required: true,
+    index: true,
+  },
+
   date: {
     type: Date,
     required: true,
@@ -42,6 +50,9 @@ const familyIncomeSchema = new mongoose.Schema({
   },
 });
 
-familyIncomeSchema.index({ date: 1 });
+// Compound indexes for better query performance
+familyIncomeSchema.index({ familyId: 1, date: -1 });
+familyIncomeSchema.index({ familyId: 1, contributorId: 1 });
+familyIncomeSchema.index({ date: 1 }); // Keep existing index
 
 module.exports = mongoose.model(modelNames.FamilyIncome, familyIncomeSchema);

@@ -17,7 +17,7 @@ describe("incomeTypeLoader", () => {
   it("should load single income type by id", async () => {
     const incomeType = await IncomeType.create({
       name: "Salary",
-      description: "Monthly salary income"
+      description: "Monthly salary income",
     });
 
     const result = await incomeTypeLoader.load(incomeType._id);
@@ -29,10 +29,10 @@ describe("incomeTypeLoader", () => {
     const incomeTypes = await IncomeType.create([
       { name: "Salary", description: "Monthly salary" },
       { name: "Freelance", description: "Freelance projects" },
-      { name: "Investment", description: "Investment returns" }
+      { name: "Investment", description: "Investment returns" },
     ]);
 
-    const ids = incomeTypes.map(it => it._id);
+    const ids = incomeTypes.map((it) => it._id);
     const results = await incomeTypeLoader.loadMany(ids);
 
     expect(results).toHaveLength(3);
@@ -50,20 +50,27 @@ describe("incomeTypeLoader", () => {
   it("should handle mixed existing and non-existing income types", async () => {
     const incomeType = await IncomeType.create({
       name: "Salary",
-      description: "Monthly salary income"
+      description: "Monthly salary income",
     });
     const nonExistentId = global.createMockId();
 
-    const results = await incomeTypeLoader.loadMany([incomeType._id, nonExistentId]);
+    const results = await incomeTypeLoader.loadMany([
+      incomeType._id,
+      nonExistentId,
+    ]);
     expect(results).toHaveLength(2);
     expect(results[0].name).toBe("Salary");
     expect(results[1]).toBeNull();
   });
 
   it("should handle errors gracefully", async () => {
-    const spy = jest.spyOn(IncomeType, "find").mockRejectedValue(new Error("Database error"));
-    
-    await expect(incomeTypeLoader.load(global.createMockId())).rejects.toThrow("Database error");
+    const spy = jest
+      .spyOn(IncomeType, "find")
+      .mockRejectedValue(new Error("Database error"));
+
+    await expect(incomeTypeLoader.load(global.createMockId())).rejects.toThrow(
+      "Database error"
+    );
     spy.mockRestore();
   });
-}); 
+});

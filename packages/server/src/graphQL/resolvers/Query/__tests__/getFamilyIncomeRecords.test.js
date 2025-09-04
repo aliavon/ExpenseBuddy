@@ -40,7 +40,9 @@ describe("getFamilyIncomeRecords resolver", () => {
       totalCount: 3,
     });
     // Default sort by date descending
-    expect(result.items[0].date.getTime()).toBeGreaterThanOrEqual(result.items[1].date.getTime());
+    expect(result.items[0].date.getTime()).toBeGreaterThanOrEqual(
+      result.items[1].date.getTime()
+    );
     expect(context.logger.info).toHaveBeenCalledWith(
       { count: 3 },
       "Successfully retrieved FamilyIncome records"
@@ -68,9 +70,13 @@ describe("getFamilyIncomeRecords resolver", () => {
     );
 
     expect(result.items).toHaveLength(2);
-    expect(result.items.every(item => 
-      item.date >= new Date("2024-01-01") && item.date <= new Date("2024-02-28")
-    )).toBe(true);
+    expect(
+      result.items.every(
+        (item) =>
+          item.date >= new Date("2024-01-01") &&
+          item.date <= new Date("2024-02-28")
+      )
+    ).toBe(true);
   });
 
   it("should filter by contributorId", async () => {
@@ -94,7 +100,11 @@ describe("getFamilyIncomeRecords resolver", () => {
     );
 
     expect(result.items).toHaveLength(2);
-    expect(result.items.every(item => item.contributorId.toString() === contributorId1)).toBe(true);
+    expect(
+      result.items.every(
+        (item) => item.contributorId.toString() === contributorId1
+      )
+    ).toBe(true);
   });
 
   it("should filter by typeId", async () => {
@@ -118,22 +128,26 @@ describe("getFamilyIncomeRecords resolver", () => {
     );
 
     expect(result.items).toHaveLength(2);
-    expect(result.items.every(item => item.typeId.toString() === typeId1)).toBe(true);
+    expect(
+      result.items.every((item) => item.typeId.toString() === typeId1)
+    ).toBe(true);
   });
 
   it("should handle pagination correctly", async () => {
     // Create 15 records
     const records = [];
     for (let i = 1; i <= 15; i++) {
-      records.push(createFamilyIncomeRecord({
-        amount: i * 100,
-        date: new Date(`2024-01-${String(i).padStart(2, '0')}`),
-      }));
+      records.push(
+        createFamilyIncomeRecord({
+          amount: i * 100,
+          date: new Date(`2024-01-${String(i).padStart(2, "0")}`),
+        })
+      );
     }
     await FamilyIncome.create(records);
 
     const context = global.createMockContext();
-    
+
     // Test first page
     const result1 = await getFamilyIncomeRecords(
       null,
@@ -252,9 +266,7 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should handle filters with no matches", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 1000 }),
-    ]);
+    await FamilyIncome.create([createFamilyIncomeRecord({ amount: 1000 })]);
 
     const context = global.createMockContext();
     const result = await getFamilyIncomeRecords(
@@ -364,27 +376,29 @@ describe("getFamilyIncomeRecords resolver", () => {
 
   it("should handle database errors gracefully", async () => {
     const context = global.createMockContext();
-    
+
     // Mock FamilyIncome.countDocuments to throw an error
     const originalCountDocuments = FamilyIncome.countDocuments;
-    FamilyIncome.countDocuments = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    FamilyIncome.countDocuments = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(getFamilyIncomeRecords(
-      null,
-      {
-        pagination: { page: 1, limit: 10 },
-      },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      getFamilyIncomeRecords(
+        null,
+        {
+          pagination: { page: 1, limit: 10 },
+        },
+        context
+      )
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     FamilyIncome.countDocuments = originalCountDocuments;
   });
 
   it("should handle invalid sort order gracefully", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 1000 }),
-    ]);
+    await FamilyIncome.create([createFamilyIncomeRecord({ amount: 1000 })]);
 
     const context = global.createMockContext();
     const result = await getFamilyIncomeRecords(
@@ -401,9 +415,7 @@ describe("getFamilyIncomeRecords resolver", () => {
   });
 
   it("should handle page beyond available data", async () => {
-    await FamilyIncome.create([
-      createFamilyIncomeRecord({ amount: 1000 }),
-    ]);
+    await FamilyIncome.create([createFamilyIncomeRecord({ amount: 1000 })]);
 
     const context = global.createMockContext();
     const result = await getFamilyIncomeRecords(
@@ -422,4 +434,4 @@ describe("getFamilyIncomeRecords resolver", () => {
       totalCount: 1,
     });
   });
-}); 
+});

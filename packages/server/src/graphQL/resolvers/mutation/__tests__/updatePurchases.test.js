@@ -25,17 +25,15 @@ describe("updatePurchases mutation", () => {
     const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: purchase._id,
-      quantity: 5,
-      price: 25.99,
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        quantity: 5,
+        price: 25.99,
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result).toHaveLength(1);
     expect(result[0].quantity).toBe(5);
@@ -59,17 +57,19 @@ describe("updatePurchases mutation", () => {
       { id: purchase3._id, quantity: 30, price: 300 },
     ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result).toHaveLength(3);
-    
-    const updatedPurchase1 = result.find(p => p._id.toString() === purchase1._id.toString());
-    const updatedPurchase2 = result.find(p => p._id.toString() === purchase2._id.toString());
-    const updatedPurchase3 = result.find(p => p._id.toString() === purchase3._id.toString());
+
+    const updatedPurchase1 = result.find(
+      (p) => p._id.toString() === purchase1._id.toString()
+    );
+    const updatedPurchase2 = result.find(
+      (p) => p._id.toString() === purchase2._id.toString()
+    );
+    const updatedPurchase3 = result.find(
+      (p) => p._id.toString() === purchase3._id.toString()
+    );
 
     expect(updatedPurchase1.quantity).toBe(10);
     expect(updatedPurchase1.price).toBe(10); // unchanged
@@ -87,11 +87,7 @@ describe("updatePurchases mutation", () => {
   it("should handle empty updates array", async () => {
     const context = global.createMockContext();
 
-    const result = await updatePurchases(
-      null,
-      { updates: [] },
-      context
-    );
+    const result = await updatePurchases(null, { updates: [] }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -104,27 +100,25 @@ describe("updatePurchases mutation", () => {
     const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: purchase._id,
-      itemId: global.createMockId(),
-      quantity: 10,
-      unit: "lbs",
-      price: 99.99,
-      discount: 5.50,
-      note: "Updated note",
-      date: new Date("2024-12-25"),
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        itemId: global.createMockId(),
+        quantity: 10,
+        unit: "lbs",
+        price: 99.99,
+        discount: 5.5,
+        note: "Updated note",
+        date: new Date("2024-12-25"),
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result[0].quantity).toBe(10);
     expect(result[0].unit).toBe("lbs");
     expect(result[0].price).toBe(99.99);
-    expect(result[0].discount).toBe(5.50);
+    expect(result[0].discount).toBe(5.5);
     expect(result[0].note).toBe("Updated note");
     expect(result[0].date).toEqual(new Date("2024-12-25"));
   });
@@ -133,26 +127,24 @@ describe("updatePurchases mutation", () => {
     const originalData = {
       quantity: 5,
       unit: "kg",
-      price: 50.00,
+      price: 50.0,
       note: "Original note",
     };
     const purchase = await createPurchaseInDB(originalData);
     const context = global.createMockContext();
 
-    const updates = [{
-      id: purchase._id,
-      quantity: 10, // only update quantity
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        quantity: 10, // only update quantity
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result[0].quantity).toBe(10); // updated
     expect(result[0].unit).toBe("kg"); // unchanged
-    expect(result[0].price).toBe(50.00); // unchanged
+    expect(result[0].price).toBe(50.0); // unchanged
     expect(result[0].note).toBe("Original note"); // unchanged
   });
 
@@ -160,18 +152,16 @@ describe("updatePurchases mutation", () => {
     const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: purchase._id,
-      quantity: 2.75,
-      price: 15.99,
-      discount: 1.25,
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        quantity: 2.75,
+        price: 15.99,
+        discount: 1.25,
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result[0].quantity).toBe(2.75);
     expect(result[0].price).toBe(15.99);
@@ -182,17 +172,15 @@ describe("updatePurchases mutation", () => {
     const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: purchase._id,
-      discount: 0,
-      quantity: 0,
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        discount: 0,
+        quantity: 0,
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result[0].discount).toBe(0);
     expect(result[0].quantity).toBe(0);
@@ -202,17 +190,15 @@ describe("updatePurchases mutation", () => {
     const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: purchase._id,
-      note: "Café & croissants - très délicieux! 🥐☕",
-      unit: "pièces",
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        note: "Café & croissants - très délicieux! 🥐☕",
+        unit: "pièces",
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result[0].note).toBe("Café & croissants - très délicieux! 🥐☕");
     expect(result[0].unit).toBe("pièces");
@@ -224,18 +210,14 @@ describe("updatePurchases mutation", () => {
       purchases.push(await createPurchaseInDB({ quantity: i }));
     }
 
-    const updates = purchases.map(purchase => ({
+    const updates = purchases.map((purchase) => ({
       id: purchase._id,
       quantity: purchase.quantity * 2,
     }));
 
     const context = global.createMockContext();
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result).toHaveLength(20);
     expect(result[0].quantity).toBe(2);
@@ -249,25 +231,23 @@ describe("updatePurchases mutation", () => {
   it("should handle updates with null/undefined values", async () => {
     const purchase = await createPurchaseInDB({
       note: "Original note",
-      discount: 5.00,
+      discount: 5.0,
     });
     const context = global.createMockContext();
 
-    const updates = [{
-      id: purchase._id,
-      note: null,
-      // Skip undefined values as they cause MongoDB errors
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        note: null,
+        // Skip undefined values as they cause MongoDB errors
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result[0].note).toBeNull();
     // discount should remain unchanged since we didn't update it
-    expect(result[0].discount).toBe(5.00);
+    expect(result[0].discount).toBe(5.0);
   });
 
   it("should return updated purchases in correct order", async () => {
@@ -283,15 +263,11 @@ describe("updatePurchases mutation", () => {
 
     const context = global.createMockContext();
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result).toHaveLength(3);
     // Results should be ordered by the database query, not input order
-    const quantities = result.map(p => p.quantity).sort();
+    const quantities = result.map((p) => p.quantity).sort();
     expect(quantities).toEqual([10, 20, 30]);
   });
 
@@ -299,16 +275,14 @@ describe("updatePurchases mutation", () => {
     const nonExistentId = global.createMockId();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: nonExistentId,
-      quantity: 10,
-    }];
+    const updates = [
+      {
+        id: nonExistentId,
+        quantity: 10,
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -327,11 +301,7 @@ describe("updatePurchases mutation", () => {
       { id: nonExistentId, quantity: 100 },
     ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result).toHaveLength(1);
     expect(result[0].quantity).toBe(50);
@@ -347,18 +317,20 @@ describe("updatePurchases mutation", () => {
 
     // Mock Purchase.bulkWrite to throw an error
     const originalBulkWrite = Purchase.bulkWrite;
-    Purchase.bulkWrite = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    Purchase.bulkWrite = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    const updates = [{
-      id: purchase._id,
-      quantity: 10,
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        quantity: 10,
+      },
+    ];
 
-    await expect(updatePurchases(
-      null,
-      { updates },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(updatePurchases(null, { updates }, context)).rejects.toThrow(
+      "Database connection failed"
+    );
 
     // Restore original method
     Purchase.bulkWrite = originalBulkWrite;
@@ -368,20 +340,18 @@ describe("updatePurchases mutation", () => {
     const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
 
-    const updates = [{
-      id: purchase._id,
-      quantity: 999999.999,
-      price: 1000000.00,
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        quantity: 999999.999,
+        price: 1000000.0,
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result[0].quantity).toBe(999999.999);
-    expect(result[0].price).toBe(1000000.00);
+    expect(result[0].price).toBe(1000000.0);
   });
 
   it("should handle date updates correctly", async () => {
@@ -389,17 +359,15 @@ describe("updatePurchases mutation", () => {
     const context = global.createMockContext();
     const newDate = new Date("2025-06-15T10:30:00Z");
 
-    const updates = [{
-      id: purchase._id,
-      date: newDate,
-    }];
+    const updates = [
+      {
+        id: purchase._id,
+        date: newDate,
+      },
+    ];
 
-    const result = await updatePurchases(
-      null,
-      { updates },
-      context
-    );
+    const result = await updatePurchases(null, { updates }, context);
 
     expect(result[0].date).toEqual(newDate);
   });
-}); 
+});

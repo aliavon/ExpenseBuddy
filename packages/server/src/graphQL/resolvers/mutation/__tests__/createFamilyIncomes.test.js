@@ -27,8 +27,12 @@ describe("createFamilyIncomes mutation", () => {
     );
 
     expect(result).toHaveLength(1);
-    expect(result[0].contributorId.toString()).toBe(incomeData.contributorId.toString());
-    expect(result[0].currencyId.toString()).toBe(incomeData.currencyId.toString());
+    expect(result[0].contributorId.toString()).toBe(
+      incomeData.contributorId.toString()
+    );
+    expect(result[0].currencyId.toString()).toBe(
+      incomeData.currencyId.toString()
+    );
     expect(result[0].typeId.toString()).toBe(incomeData.typeId.toString());
     expect(result[0].amount).toBe(1000);
     expect(result[0].periodicity).toBe("MONTHLY");
@@ -100,15 +104,19 @@ describe("createFamilyIncomes mutation", () => {
     );
 
     expect(result).toHaveLength(5);
-    expect(result.map(r => r.periodicity)).toEqual([
-      "DAILY", "WEEKLY", "MONTHLY", "YEARLY", "ONE_TIME"
+    expect(result.map((r) => r.periodicity)).toEqual([
+      "DAILY",
+      "WEEKLY",
+      "MONTHLY",
+      "YEARLY",
+      "ONE_TIME",
     ]);
   });
 
   it("should create family incomes with different amounts", async () => {
     const incomes = [
       createFamilyIncomeData({ amount: 0.01 }),
-      createFamilyIncomeData({ amount: 100.50 }),
+      createFamilyIncomeData({ amount: 100.5 }),
       createFamilyIncomeData({ amount: 999999.99 }),
     ];
     const context = global.createMockContext();
@@ -121,7 +129,7 @@ describe("createFamilyIncomes mutation", () => {
 
     expect(result).toHaveLength(3);
     expect(result[0].amount).toBe(0.01);
-    expect(result[1].amount).toBe(100.50);
+    expect(result[1].amount).toBe(100.5);
     expect(result[2].amount).toBe(999999.99);
   });
 
@@ -207,10 +215,12 @@ describe("createFamilyIncomes mutation", () => {
   it("should handle large batch creation", async () => {
     const incomes = [];
     for (let i = 1; i <= 50; i++) {
-      incomes.push(createFamilyIncomeData({
-        amount: i * 100,
-        date: new Date(`2024-01-${String(i % 28 + 1).padStart(2, '0')}`),
-      }));
+      incomes.push(
+        createFamilyIncomeData({
+          amount: i * 100,
+          date: new Date(`2024-01-${String((i % 28) + 1).padStart(2, "0")}`),
+        })
+      );
     }
     const context = global.createMockContext();
 
@@ -250,16 +260,20 @@ describe("createFamilyIncomes mutation", () => {
 
   it("should handle database errors gracefully", async () => {
     const context = global.createMockContext();
-    
+
     // Mock FamilyIncome.insertMany to throw an error
     const originalInsertMany = FamilyIncome.insertMany;
-    FamilyIncome.insertMany = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    FamilyIncome.insertMany = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(createFamilyIncomes(
-      null,
-      { familyIncomes: [createFamilyIncomeData()] },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(
+      createFamilyIncomes(
+        null,
+        { familyIncomes: [createFamilyIncomeData()] },
+        context
+      )
+    ).rejects.toThrow("Database connection failed");
 
     // Restore original method
     FamilyIncome.insertMany = originalInsertMany;
@@ -269,48 +283,64 @@ describe("createFamilyIncomes mutation", () => {
     const context = global.createMockContext();
 
     // Test missing contributorId
-    await expect(createFamilyIncomes(
-      null,
-      { familyIncomes: [{ 
-        currencyId: global.createMockId(),
-        typeId: global.createMockId(),
-        amount: 1000,
-        date: new Date(),
-      }] },
-      context
-    )).rejects.toThrow();
+    await expect(
+      createFamilyIncomes(
+        null,
+        {
+          familyIncomes: [
+            {
+              currencyId: global.createMockId(),
+              typeId: global.createMockId(),
+              amount: 1000,
+              date: new Date(),
+            },
+          ],
+        },
+        context
+      )
+    ).rejects.toThrow();
 
     // Test missing amount
-    await expect(createFamilyIncomes(
-      null,
-      { familyIncomes: [{ 
-        contributorId: global.createMockId(),
-        currencyId: global.createMockId(),
-        typeId: global.createMockId(),
-        date: new Date(),
-      }] },
-      context
-    )).rejects.toThrow();
+    await expect(
+      createFamilyIncomes(
+        null,
+        {
+          familyIncomes: [
+            {
+              contributorId: global.createMockId(),
+              currencyId: global.createMockId(),
+              typeId: global.createMockId(),
+              date: new Date(),
+            },
+          ],
+        },
+        context
+      )
+    ).rejects.toThrow();
   });
 
   it("should handle validation errors for negative amounts", async () => {
     const context = global.createMockContext();
 
-    await expect(createFamilyIncomes(
-      null,
-      { familyIncomes: [createFamilyIncomeData({ amount: -100 })] },
-      context
-    )).rejects.toThrow();
+    await expect(
+      createFamilyIncomes(
+        null,
+        { familyIncomes: [createFamilyIncomeData({ amount: -100 })] },
+        context
+      )
+    ).rejects.toThrow();
   });
 
   it("should handle validation errors for invalid periodicity", async () => {
     const context = global.createMockContext();
 
-    await expect(createFamilyIncomes(
-      null,
-      { familyIncomes: [createFamilyIncomeData({ periodicity: "INVALID" })] },
-      context
-    )).rejects.toThrow();
+    await expect(
+      createFamilyIncomes(
+        null,
+        { familyIncomes: [createFamilyIncomeData({ periodicity: "INVALID" })] },
+        context
+      )
+    ).rejects.toThrow();
   });
 
   it("should persist family incomes in database", async () => {
@@ -362,17 +392,21 @@ describe("createFamilyIncomes mutation", () => {
     const context = global.createMockContext();
 
     // This should fail for the entire batch due to one invalid record
-    await expect(createFamilyIncomes(
-      null,
-      { familyIncomes: [
-        createFamilyIncomeData({ amount: 1000 }), // valid
-        createFamilyIncomeData({ amount: -100 }), // invalid (negative)
-      ] },
-      context
-    )).rejects.toThrow();
+    await expect(
+      createFamilyIncomes(
+        null,
+        {
+          familyIncomes: [
+            createFamilyIncomeData({ amount: 1000 }), // valid
+            createFamilyIncomeData({ amount: -100 }), // invalid (negative)
+          ],
+        },
+        context
+      )
+    ).rejects.toThrow();
 
     // Verify no records were created
     const count = await FamilyIncome.countDocuments();
     expect(count).toBe(0);
   });
-}); 
+});

@@ -7,7 +7,7 @@ describe("itemLoader", () => {
 
   beforeEach(async () => {
     itemLoader = createItemLoader();
-    
+
     testItems = await Item.create([
       { name: "Apple", category: "Fruits" },
       { name: "Bread", category: "Bakery" },
@@ -26,7 +26,7 @@ describe("itemLoader", () => {
   });
 
   it("should load multiple items by ids", async () => {
-    const itemIds = testItems.map(item => item._id.toString());
+    const itemIds = testItems.map((item) => item._id.toString());
     const results = await itemLoader.loadMany(itemIds);
 
     expect(results).toHaveLength(3);
@@ -55,7 +55,7 @@ describe("itemLoader", () => {
   it("should cache results and avoid duplicate database calls", async () => {
     // Note: cache is disabled in the loader, so this test checks different behavior
     const itemId = testItems[0]._id.toString();
-    
+
     // First load
     const result1 = await itemLoader.load(itemId);
     expect(result1.name).toBe("Apple");
@@ -68,14 +68,18 @@ describe("itemLoader", () => {
   });
 
   it("should batch multiple individual loads", async () => {
-    const itemIds = testItems.map(item => item._id.toString());
-    
+    const itemIds = testItems.map((item) => item._id.toString());
+
     // Make multiple individual load calls
-    const promises = itemIds.map(id => itemLoader.load(id));
+    const promises = itemIds.map((id) => itemLoader.load(id));
     const results = await Promise.all(promises);
 
     expect(results).toHaveLength(3);
-    expect(results.map(item => item.name)).toEqual(["Apple", "Bread", "Milk"]);
+    expect(results.map((item) => item.name)).toEqual([
+      "Apple",
+      "Bread",
+      "Milk",
+    ]);
   });
 
   it("should handle duplicate ids in batch", async () => {
@@ -100,7 +104,7 @@ describe("itemLoader", () => {
     });
 
     const itemId = testItems[0]._id.toString();
-    
+
     // Load and cache
     const result1 = await cachedLoader.load(itemId);
     expect(result1.name).toBe("Apple");
@@ -142,6 +146,10 @@ describe("itemLoader", () => {
     ];
 
     const results = await itemLoader.loadMany(itemIds);
-    expect(results.map(item => item.name)).toEqual(["Milk", "Apple", "Bread"]);
+    expect(results.map((item) => item.name)).toEqual([
+      "Milk",
+      "Apple",
+      "Bread",
+    ]);
   });
-}); 
+});

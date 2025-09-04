@@ -42,11 +42,7 @@ describe("deleteUser mutation", () => {
     const user = await createUserInDB({ isVerified: false });
     const context = global.createMockContext();
 
-    const result = await deleteUser(
-      null,
-      { id: user._id },
-      context
-    );
+    const result = await deleteUser(null, { id: user._id }, context);
 
     expect(result).toBe(user._id);
     expect(context.logger.info).toHaveBeenCalledWith(
@@ -63,17 +59,13 @@ describe("deleteUser mutation", () => {
     const user = await createUserInDB({ isVerified: true });
     const context = global.createMockContext();
 
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow(GraphQLError);
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      GraphQLError
+    );
 
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow("Cannot delete verified user.");
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      "Cannot delete verified user."
+    );
 
     // Verify user was not deleted
     const existingUser = await User.findById(user._id);
@@ -97,17 +89,13 @@ describe("deleteUser mutation", () => {
     const nonExistentId = global.createMockId();
     const context = global.createMockContext();
 
-    await expect(deleteUser(
-      null,
-      { id: nonExistentId },
-      context
-    )).rejects.toThrow(GraphQLError);
+    await expect(
+      deleteUser(null, { id: nonExistentId }, context)
+    ).rejects.toThrow(GraphQLError);
 
-    await expect(deleteUser(
-      null,
-      { id: nonExistentId },
-      context
-    )).rejects.toThrow(`User not found for id ${nonExistentId}`);
+    await expect(
+      deleteUser(null, { id: nonExistentId }, context)
+    ).rejects.toThrow(`User not found for id ${nonExistentId}`);
   });
 
   it("should throw error with correct error code for non-existent user", async () => {
@@ -125,23 +113,19 @@ describe("deleteUser mutation", () => {
 
   it("should throw error when user is referenced in FamilyIncome records", async () => {
     const user = await createUserInDB({ isVerified: false });
-    
+
     // Create FamilyIncome record referencing this user
     await createFamilyIncomeInDB({ contributorId: user._id });
-    
+
     const context = global.createMockContext();
 
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow(GraphQLError);
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      GraphQLError
+    );
 
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow("User is used in family income records and cannot be deleted.");
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      "User is used in family income records and cannot be deleted."
+    );
 
     // Verify user was not deleted
     const existingUser = await User.findById(user._id);
@@ -164,18 +148,14 @@ describe("deleteUser mutation", () => {
 
   it("should delete user when no FamilyIncome references exist", async () => {
     const user = await createUserInDB({ isVerified: false });
-    
+
     // Create FamilyIncome record with different contributorId
     const otherUserId = global.createMockId();
     await createFamilyIncomeInDB({ contributorId: otherUserId });
-    
+
     const context = global.createMockContext();
 
-    const result = await deleteUser(
-      null,
-      { id: user._id },
-      context
-    );
+    const result = await deleteUser(null, { id: user._id }, context);
 
     expect(result).toBe(user._id);
 
@@ -184,25 +164,25 @@ describe("deleteUser mutation", () => {
     expect(deletedUser).toBeNull();
 
     // Verify other FamilyIncome record still exists
-    const remainingIncome = await FamilyIncome.findOne({ contributorId: otherUserId });
+    const remainingIncome = await FamilyIncome.findOne({
+      contributorId: otherUserId,
+    });
     expect(remainingIncome).not.toBeNull();
   });
 
   it("should handle multiple FamilyIncome references", async () => {
     const user = await createUserInDB({ isVerified: false });
-    
+
     // Create multiple FamilyIncome records referencing this user
     await createFamilyIncomeInDB({ contributorId: user._id, amount: 1000 });
     await createFamilyIncomeInDB({ contributorId: user._id, amount: 2000 });
     await createFamilyIncomeInDB({ contributorId: user._id, amount: 3000 });
-    
+
     const context = global.createMockContext();
 
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow("User is used in family income records and cannot be deleted.");
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      "User is used in family income records and cannot be deleted."
+    );
 
     // Verify user was not deleted
     const existingUser = await User.findById(user._id);
@@ -232,13 +212,13 @@ describe("deleteUser mutation", () => {
 
     // Mock User.findById to throw an error
     const originalFindById = User.findById;
-    User.findById = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    User.findById = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      "Database connection failed"
+    );
 
     // Restore original method
     User.findById = originalFindById;
@@ -250,13 +230,13 @@ describe("deleteUser mutation", () => {
 
     // Mock FamilyIncome.countDocuments to throw an error
     const originalCountDocuments = FamilyIncome.countDocuments;
-    FamilyIncome.countDocuments = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    FamilyIncome.countDocuments = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      "Database connection failed"
+    );
 
     // Restore original method
     FamilyIncome.countDocuments = originalCountDocuments;
@@ -268,13 +248,13 @@ describe("deleteUser mutation", () => {
 
     // Mock User.findByIdAndDelete to throw an error
     const originalFindByIdAndDelete = User.findByIdAndDelete;
-    User.findByIdAndDelete = jest.fn().mockRejectedValue(new Error("Database connection failed"));
+    User.findByIdAndDelete = jest
+      .fn()
+      .mockRejectedValue(new Error("Database connection failed"));
 
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow("Database connection failed");
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      "Database connection failed"
+    );
 
     // Restore original method
     User.findByIdAndDelete = originalFindByIdAndDelete;
@@ -282,18 +262,16 @@ describe("deleteUser mutation", () => {
 
   it("should check verification status before checking FamilyIncome references", async () => {
     const user = await createUserInDB({ isVerified: true });
-    
+
     // Create FamilyIncome record (this should not be checked since user is verified)
     await createFamilyIncomeInDB({ contributorId: user._id });
-    
+
     const context = global.createMockContext();
 
     // Should fail due to verification, not FamilyIncome references
-    await expect(deleteUser(
-      null,
-      { id: user._id },
-      context
-    )).rejects.toThrow("Cannot delete verified user.");
+    await expect(deleteUser(null, { id: user._id }, context)).rejects.toThrow(
+      "Cannot delete verified user."
+    );
 
     // Verify user was not deleted
     const existingUser = await User.findById(user._id);
@@ -305,11 +283,7 @@ describe("deleteUser mutation", () => {
     const originalId = user._id;
     const context = global.createMockContext();
 
-    const result = await deleteUser(
-      null,
-      { id: originalId },
-      context
-    );
+    const result = await deleteUser(null, { id: originalId }, context);
 
     expect(result).toBe(originalId);
     expect(result.toString()).toBe(originalId.toString());
@@ -320,14 +294,12 @@ describe("deleteUser mutation", () => {
     const context = global.createMockContext();
 
     // Explicitly verify count is 0
-    const count = await FamilyIncome.countDocuments({ contributorId: user._id });
+    const count = await FamilyIncome.countDocuments({
+      contributorId: user._id,
+    });
     expect(count).toBe(0);
 
-    const result = await deleteUser(
-      null,
-      { id: user._id },
-      context
-    );
+    const result = await deleteUser(null, { id: user._id }, context);
 
     expect(result).toBe(user._id);
 
@@ -345,11 +317,7 @@ describe("deleteUser mutation", () => {
     });
     const context = global.createMockContext();
 
-    const result = await deleteUser(
-      null,
-      { id: user._id },
-      context
-    );
+    const result = await deleteUser(null, { id: user._id }, context);
 
     expect(result).toBe(user._id);
 
@@ -359,21 +327,17 @@ describe("deleteUser mutation", () => {
   });
 
   it("should not affect other users during deletion", async () => {
-    const userToDelete = await createUserInDB({ 
-      firstName: "Delete", 
-      isVerified: false 
+    const userToDelete = await createUserInDB({
+      firstName: "Delete",
+      isVerified: false,
     });
-    const userToKeep = await createUserInDB({ 
-      firstName: "Keep", 
-      isVerified: false 
+    const userToKeep = await createUserInDB({
+      firstName: "Keep",
+      isVerified: false,
     });
     const context = global.createMockContext();
 
-    await deleteUser(
-      null,
-      { id: userToDelete._id },
-      context
-    );
+    await deleteUser(null, { id: userToDelete._id }, context);
 
     // Verify only the targeted user was deleted
     const deletedUser = await User.findById(userToDelete._id);
@@ -383,4 +347,4 @@ describe("deleteUser mutation", () => {
     expect(keptUser).not.toBeNull();
     expect(keptUser.firstName).toBe("Keep");
   });
-}); 
+});

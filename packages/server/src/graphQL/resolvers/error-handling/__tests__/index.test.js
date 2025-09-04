@@ -16,7 +16,9 @@ describe("Error Handling Index", () => {
   });
 
   it("should export the correct withErrorHandlingCurried function", () => {
-    expect(errorHandlingIndex.withErrorHandlingCurried).toBe(withErrorHandlingCurried);
+    expect(errorHandlingIndex.withErrorHandlingCurried).toBe(
+      withErrorHandlingCurried
+    );
     expect(typeof errorHandlingIndex.withErrorHandlingCurried).toBe("function");
   });
 
@@ -31,7 +33,7 @@ describe("Error Handling Index", () => {
   });
 
   it("should not export any undefined values", () => {
-    Object.values(errorHandlingIndex).forEach(exportedValue => {
+    Object.values(errorHandlingIndex).forEach((exportedValue) => {
       expect(exportedValue).toBeDefined();
     });
   });
@@ -43,4 +45,4 @@ describe("Error Handling Index", () => {
       defaultHandlerArgs,
     });
   });
-}); 
+});

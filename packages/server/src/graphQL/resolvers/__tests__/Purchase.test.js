@@ -26,7 +26,9 @@ describe("Purchase resolvers", () => {
       const result = await PurchaseResolvers.item(mockParent, {}, mockContext);
 
       expect(result).toEqual(mockItem);
-      expect(mockContext.loaders.itemLoader.load).toHaveBeenCalledWith(mockParent.itemId);
+      expect(mockContext.loaders.itemLoader.load).toHaveBeenCalledWith(
+        mockParent.itemId
+      );
     });
 
     it("should handle missing item", async () => {
@@ -95,7 +97,9 @@ describe("Purchase resolvers", () => {
       const result = await PurchaseResolvers.item(mockParent, {}, mockContext);
 
       expect(result).toEqual(mockItem);
-      expect(mockContext.loaders.itemLoader.load).toHaveBeenCalledWith(mockParent.itemId);
+      expect(mockContext.loaders.itemLoader.load).toHaveBeenCalledWith(
+        mockParent.itemId
+      );
     });
 
     it("should handle null itemId", async () => {
@@ -109,4 +113,4 @@ describe("Purchase resolvers", () => {
       expect(mockContext.loaders.itemLoader.load).toHaveBeenCalledWith(null);
     });
   });
-}); 
+});
