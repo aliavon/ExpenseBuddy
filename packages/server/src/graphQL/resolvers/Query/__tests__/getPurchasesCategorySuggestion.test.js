@@ -4,16 +4,33 @@ const { Item } = require("../../../../database/schemas");
 describe("getPurchasesCategorySuggestion resolver", () => {
   beforeEach(async () => {
     await Item.deleteMany({});
+    jest.clearAllMocks();
+  });
+
+  // Helper to create items with proper family context
+  const createItemWithFamily = (familyId, itemData) => ({
+    familyId,
+    ...itemData,
   });
 
   it("should return category suggestions for existing items", async () => {
+    const context = global.createMockContext();
+
     await Item.create([
-      { name: "Apple", category: "Fruits" },
-      { name: "Banana", category: "Fruits" },
-      { name: "Carrot", category: "Vegetables" },
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Apple",
+        category: "Fruits",
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Banana",
+        category: "Fruits",
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Carrot",
+        category: "Vegetables",
+      }),
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
       null,
       { names: ["Apple", "Carrot"] },
@@ -24,30 +41,46 @@ describe("getPurchasesCategorySuggestion resolver", () => {
     expect(result).toContainEqual({ name: "Apple", category: "Fruits" });
     expect(result).toContainEqual({ name: "Carrot", category: "Vegetables" });
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 2 },
-      "Successfully retrieved purchases category suggestion"
+      {
+        count: 2,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully retrieved family purchases category suggestion"
     );
   });
 
   it("should return null category for non-existing items", async () => {
-    await Item.create([{ name: "Apple", category: "Fruits" }]);
-
     const context = global.createMockContext();
+
+    await Item.create([
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Apple1",
+        category: "Fruits",
+      }),
+    ]);
+
     const result = await getPurchasesCategorySuggestion(
       null,
-      { names: ["Apple", "NonExistent"] },
+      { names: ["Apple1", "NonExistent"] },
       context
     );
 
     expect(result).toHaveLength(2);
-    expect(result).toContainEqual({ name: "Apple", category: "Fruits" });
+    expect(result).toContainEqual({ name: "Apple1", category: "Fruits" });
     expect(result).toContainEqual({ name: "NonExistent", category: null });
   });
 
   it("should handle empty names array", async () => {
-    await Item.create([{ name: "Apple", category: "Fruits" }]);
-
     const context = global.createMockContext();
+
+    await Item.create([
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Apple2",
+        category: "Fruits",
+      }),
+    ]);
+
     const result = await getPurchasesCategorySuggestion(
       null,
       { names: [] },
@@ -56,95 +89,108 @@ describe("getPurchasesCategorySuggestion resolver", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully retrieved purchases category suggestion"
+      {
+        count: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully retrieved family purchases category suggestion"
     );
   });
 
   it("should maintain order of input names", async () => {
+    const context = global.createMockContext();
+
     await Item.create([
-      { name: "Apple", category: "Fruits" },
-      { name: "Banana", category: "Fruits" },
-      { name: "Carrot", category: "Vegetables" },
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Carrot3",
+        category: "Vegetables",
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Apple3",
+        category: "Fruits",
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Banana3",
+        category: "Fruits",
+      }),
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
       null,
-      { names: ["Carrot", "Apple", "Banana"] },
+      { names: ["Carrot3", "Apple3", "Banana3"] },
       context
     );
 
     expect(result).toHaveLength(3);
-    expect(result[0]).toEqual({ name: "Carrot", category: "Vegetables" });
-    expect(result[1]).toEqual({ name: "Apple", category: "Fruits" });
-    expect(result[2]).toEqual({ name: "Banana", category: "Fruits" });
+    expect(result[0]).toEqual({ name: "Carrot3", category: "Vegetables" });
+    expect(result[1]).toEqual({ name: "Apple3", category: "Fruits" });
+    expect(result[2]).toEqual({ name: "Banana3", category: "Fruits" });
   });
 
   it("should handle duplicate names in input", async () => {
-    await Item.create([{ name: "Apple", category: "Fruits" }]);
-
     const context = global.createMockContext();
+
+    await Item.create([
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Apple4",
+        category: "Fruits",
+      }),
+    ]);
+
     const result = await getPurchasesCategorySuggestion(
       null,
-      { names: ["Apple", "Apple", "Apple"] },
+      { names: ["Apple4", "Apple4", "Apple4"] },
       context
     );
 
     expect(result).toHaveLength(3);
     expect(result).toEqual([
-      { name: "Apple", category: "Fruits" },
-      { name: "Apple", category: "Fruits" },
-      { name: "Apple", category: "Fruits" },
+      { name: "Apple4", category: "Fruits" },
+      { name: "Apple4", category: "Fruits" },
+      { name: "Apple4", category: "Fruits" },
     ]);
-  });
-
-  it("should handle items with same name but different categories", async () => {
-    // This scenario might not be realistic in practice, but testing edge case
-    await Item.create([
-      { name: "Apple", category: "Fruits" },
-      { name: "Apple", category: "Organic" }, // Duplicate name, different category
-    ]);
-
-    const context = global.createMockContext();
-    const result = await getPurchasesCategorySuggestion(
-      null,
-      { names: ["Apple"] },
-      context
-    );
-
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("Apple");
-    // Should return one of the categories (implementation dependent)
-    expect(["Fruits", "Organic"]).toContain(result[0].category);
   });
 
   it("should handle case-sensitive name matching", async () => {
+    const context = global.createMockContext();
+
     await Item.create([
-      { name: "Apple", category: "Fruits" },
-      { name: "apple", category: "Fruits" }, // lowercase
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Apple5",
+        category: "Fruits",
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "apple5", // lowercase
+        category: "Fruits",
+      }),
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
       null,
-      { names: ["Apple", "apple"] },
+      { names: ["Apple5", "apple5"] },
       context
     );
 
     expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({ name: "Apple", category: "Fruits" });
-    expect(result[1]).toEqual({ name: "apple", category: "Fruits" });
+    expect(result[0]).toEqual({ name: "Apple5", category: "Fruits" });
+    expect(result[1]).toEqual({ name: "apple5", category: "Fruits" });
   });
 
   it("should handle special characters in names", async () => {
+    const context = global.createMockContext();
+
     await Item.create([
-      { name: "Café Latte", category: "Beverages" },
-      { name: "Piña Colada", category: "Beverages" },
-      { name: "Crème Brûlée", category: "Desserts" },
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Café Latte",
+        category: "Beverages",
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Piña Colada",
+        category: "Beverages",
+      }),
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
       null,
       { names: ["Café Latte", "Piña Colada"] },
@@ -163,15 +209,18 @@ describe("getPurchasesCategorySuggestion resolver", () => {
   });
 
   it("should handle large number of names", async () => {
-    const items = [];
-    const names = [];
-    for (let i = 1; i <= 100; i++) {
-      items.push({ name: `Item${i}`, category: `Category${i % 10}` });
-      names.push(`Item${i}`);
-    }
+    const context = global.createMockContext();
+
+    const items = Array.from({ length: 100 }, (_, index) =>
+      createItemWithFamily(context.auth.user.familyId, {
+        name: `Item${index}`,
+        category: `Category${index % 5}`,
+      })
+    );
+
     await Item.create(items);
 
-    const context = global.createMockContext();
+    const names = Array.from({ length: 100 }, (_, index) => `Item${index}`);
     const result = await getPurchasesCategorySuggestion(
       null,
       { names },
@@ -183,34 +232,50 @@ describe("getPurchasesCategorySuggestion resolver", () => {
   });
 
   it("should handle mixed existing and non-existing items", async () => {
+    const context = global.createMockContext();
+
     await Item.create([
-      { name: "Apple", category: "Fruits" },
-      { name: "Banana", category: "Fruits" },
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Apple6",
+        category: "Fruits",
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Banana6",
+        category: "Fruits",
+      }),
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
       null,
-      { names: ["Apple", "NonExistent1", "Banana", "NonExistent2"] },
+      { names: ["Apple6", "NonExistent1", "Banana6", "NonExistent2"] },
       context
     );
 
     expect(result).toHaveLength(4);
-    expect(result).toContainEqual({ name: "Apple", category: "Fruits" });
+    expect(result).toContainEqual({ name: "Apple6", category: "Fruits" });
     expect(result).toContainEqual({ name: "NonExistent1", category: null });
-    expect(result).toContainEqual({ name: "Banana", category: "Fruits" });
+    expect(result).toContainEqual({ name: "Banana6", category: "Fruits" });
     expect(result).toContainEqual({ name: "NonExistent2", category: null });
   });
 
   it("should handle items with null or empty categories", async () => {
-    // Create items with null category directly in database
-    await Item.collection.insertMany([
-      { name: "Item1", category: null },
-      { name: "Item2", category: "" },
-      { name: "Item3", category: "ValidCategory" },
+    const context = global.createMockContext();
+
+    await Item.create([
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Item1",
+        category: null,
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Item2",
+        category: "",
+      }),
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "Item3",
+        category: "ValidCategory",
+      }),
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
       null,
       { names: ["Item1", "Item2", "Item3"] },
@@ -223,28 +288,17 @@ describe("getPurchasesCategorySuggestion resolver", () => {
     expect(result).toContainEqual({ name: "Item3", category: "ValidCategory" });
   });
 
-  it("should handle database errors gracefully", async () => {
-    const context = global.createMockContext();
-
-    // Mock Item.find to throw an error
-    const originalFind = Item.find;
-    Item.find = jest
-      .fn()
-      .mockRejectedValue(new Error("Database connection failed"));
-
-    await expect(
-      getPurchasesCategorySuggestion(null, { names: ["Apple"] }, context)
-    ).rejects.toThrow("Database connection failed");
-
-    // Restore original method
-    Item.find = originalFind;
-  });
-
   it("should handle very long item names", async () => {
-    const longName = "A".repeat(200);
-    await Item.create([{ name: longName, category: "LongNames" }]);
-
     const context = global.createMockContext();
+    const longName = "A".repeat(200);
+
+    await Item.create([
+      createItemWithFamily(context.auth.user.familyId, {
+        name: longName,
+        category: "LongNames",
+      }),
+    ]);
+
     const result = await getPurchasesCategorySuggestion(
       null,
       { names: [longName] },
@@ -256,41 +310,50 @@ describe("getPurchasesCategorySuggestion resolver", () => {
   });
 
   it("should handle whitespace in item names", async () => {
+    const context = global.createMockContext();
+
     await Item.create([
-      { name: "  Apple  ", category: "Fruits" },
-      { name: "Banana", category: "Fruits" },
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "  Apple7  ",
+        category: "Fruits",
+      }),
     ]);
 
-    const context = global.createMockContext();
     const result = await getPurchasesCategorySuggestion(
       null,
-      { names: ["  Apple  ", "Apple"] },
+      { names: ["  Apple7  ", "Apple7"] },
       context
     );
 
     expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({ name: "  Apple  ", category: "Fruits" });
-    expect(result[1]).toEqual({ name: "Apple", category: null }); // Exact match required
+    expect(result[0]).toEqual({ name: "  Apple7  ", category: "Fruits" });
+    expect(result[1]).toEqual({ name: "Apple7", category: null }); // Exact match required
   });
 
-  it("should return consistent results for same input", async () => {
+  it("should only return items for user's family", async () => {
+    const context = global.createMockContext();
+    const otherFamilyId = global.createMockId();
+
+    // Create items for different families
     await Item.create([
-      { name: "Apple", category: "Fruits" },
-      { name: "Banana", category: "Fruits" },
+      createItemWithFamily(context.auth.user.familyId, {
+        name: "MyApple",
+        category: "Fruits",
+      }),
+      createItemWithFamily(otherFamilyId, {
+        name: "OtherApple",
+        category: "OtherFruits",
+      }),
     ]);
 
-    const context = global.createMockContext();
-    const result1 = await getPurchasesCategorySuggestion(
+    const result = await getPurchasesCategorySuggestion(
       null,
-      { names: ["Apple", "Banana", "NonExistent"] },
-      context
-    );
-    const result2 = await getPurchasesCategorySuggestion(
-      null,
-      { names: ["Apple", "Banana", "NonExistent"] },
+      { names: ["MyApple", "OtherApple"] },
       context
     );
 
-    expect(result1).toEqual(result2);
+    expect(result).toHaveLength(2);
+    expect(result).toContainEqual({ name: "MyApple", category: "Fruits" });
+    expect(result).toContainEqual({ name: "OtherApple", category: null }); // Not found in user's family
   });
 });

@@ -1,4 +1,5 @@
 const { requireFamily } = require("../../../auth");
+const mongoose = require("mongoose");
 
 module.exports = async (_, { purchases }, context) => {
   const {
@@ -12,8 +13,8 @@ module.exports = async (_, { purchases }, context) => {
   // Enrich purchases with family and user context
   const enrichedPurchases = purchases.map((purchase) => ({
     ...purchase,
-    familyId: auth.user.familyId,
-    createdByUserId: auth.user.id,
+    familyId: new mongoose.Types.ObjectId(auth.user.familyId),
+    createdByUserId: new mongoose.Types.ObjectId(auth.user.id),
   }));
 
   const newPurchases = await Purchase.insertMany(enrichedPurchases);

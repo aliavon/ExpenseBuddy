@@ -1,4 +1,5 @@
 const { requireAuth } = require("../../../auth");
+const mongoose = require("mongoose");
 
 module.exports = async (_, { from, to }, context) => {
   const {
@@ -19,7 +20,7 @@ module.exports = async (_, { from, to }, context) => {
 
   // If user has familyId, filter by family. Otherwise return empty array
   if (auth.user.familyId) {
-    filter.familyId = auth.user.familyId;
+    filter.familyId = new mongoose.Types.ObjectId(auth.user.familyId);
   } else {
     // User not in family yet - return empty array
     logger.info(

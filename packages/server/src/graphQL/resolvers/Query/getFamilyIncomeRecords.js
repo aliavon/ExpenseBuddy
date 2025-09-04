@@ -1,5 +1,6 @@
 const { SORT_ORDER } = require("../../../constants/sortOrder");
 const { requireFamily } = require("../../../auth");
+const mongoose = require("mongoose");
 
 module.exports = async (
   _,
@@ -20,7 +21,7 @@ module.exports = async (
 
   const queryFilter = {
     // Always filter by family
-    familyId: auth.user.familyId,
+    familyId: new mongoose.Types.ObjectId(auth.user.familyId),
   };
 
   if (dateFrom || dateTo) {
