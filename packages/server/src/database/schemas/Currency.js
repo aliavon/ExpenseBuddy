@@ -5,6 +5,7 @@ const currencySchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   code: { type: String, required: true, unique: true },
   symbol: { type: String, default: "" },
+  isActive: { type: Boolean, default: true },
 });
 
 module.exports = mongoose.model(modelNames.Currency, currencySchema);

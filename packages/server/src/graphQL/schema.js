@@ -2,7 +2,33 @@ const { SORT_ORDER_VALUES } = require("../constants/sortOrder");
 const { PERIODICITY_VALUES } = require("../constants/familyIncomeEnums");
 
 module.exports = `
+  # ----- Authentication Types -----
+
+  # AuthPayload is returned by authentication mutations (login, register, refreshToken)
+  type AuthPayload {
+    accessToken: String!
+    refreshToken: String!
+    user: User!
+  }
+
+  # Enum for family roles  
+  enum FamilyRole {
+    OWNER
+    ADMIN
+    MEMBER
+  }
+
   type Query {
+    # ----- Authentication Queries -----
+    
+    # Get current authenticated user with full profile info
+    me: User!
+    
+    # Get current user's family with all members
+    myFamily: Family!
+
+    # ----- Existing Queries -----
+    
     # Query for fetching purchases within a date range.
     getPurchases(from: String!, to: String!): [Purchase!]!
 
@@ -40,6 +66,44 @@ module.exports = `
   }
 
   type Mutation {
+    # ----- Authentication Mutations -----
+    
+    # User registration with family creation or joining
+    register(input: RegisterInput!): AuthPayload!
+    
+    # User login with email and password
+    login(input: LoginInput!): AuthPayload!
+    
+    # Refresh access token using refresh token
+    refreshToken(token: String!): AuthPayload!
+    
+    # Logout current user (blacklists tokens)
+    logout: Boolean!
+    
+    # Email verification
+    sendVerificationEmail(email: String!): Boolean!
+    verifyEmail(token: String!): Boolean!
+    
+    # Password reset
+    requestPasswordReset(email: String!): Boolean!
+    resetPassword(input: ResetPasswordInput!): Boolean!
+    changePassword(input: ChangePasswordInput!): Boolean!
+    
+    # Family management
+    createFamily(input: CreateFamilyInput!): Family!
+    updateFamily(input: UpdateFamilyInput!): Family!
+    joinFamilyByCode(inviteCode: String!): Family!
+    leaveFamilyIfNotOwner: Boolean!
+    
+    # Family invitations (JWT-based)
+    inviteToFamily(input: InviteFamilyInput!): Boolean!
+    
+    # Member management (ADMIN/OWNER only)
+    removeFamilyMember(userId: ID!): Boolean!
+    updateMemberRole(input: UpdateMemberRoleInput!): User!
+
+    # ----- Existing Mutations -----
+    
     # Mutations for Purchase-related operations.
     addPurchases(purchases: [PurchaseInput!]!): [Purchase!]!
     updatePurchases(updates: [UpdatePurchaseInput!]!): [Purchase!]!
@@ -201,7 +265,7 @@ module.exports = `
     isVerified: Boolean!    # Legacy field - kept for compatibility
     isActive: Boolean!      # Whether user account is active
     familyId: ID            # Reference to family (nullable during registration)
-    roleInFamily: String    # Role in family: OWNER, ADMIN, MEMBER
+    roleInFamily: FamilyRole # Role in family: OWNER, ADMIN, MEMBER
     lastLoginAt: String     # Last login timestamp
     createdAt: String!      # Account creation timestamp
     updatedAt: String!      # Last update timestamp
@@ -228,7 +292,8 @@ module.exports = `
     id: ID!
     name: String!
     description: String
-    ownerId: ID!              # Reference to owner User
+    owner: User!              # Family owner (resolved from ownerId)
+    members: [User!]!         # All family members
     currency: Currency        # Family's default currency
     timezone: String!
     inviteCode: String        # Code for joining family
@@ -303,5 +368,67 @@ module.exports = `
 
   # Enum for sort order, generated from constants.
   enum SortOrder { ${SORT_ORDER_VALUES.join(", ")} }
+
+  # ----- Authentication Input Types -----
+
+  # Input for user registration
+  input RegisterInput {
+    firstName: String!
+    lastName: String!
+    middleName: String
+    email: String!
+    password: String!
+    familyName: String        # If creating new family
+    inviteCode: String        # If joining existing family
+    invitationToken: String   # If accepting JWT invitation
+  }
+
+  # Input for user login
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
+  # Input for password reset
+  input ResetPasswordInput {
+    token: String!
+    newPassword: String!
+  }
+
+  # Input for password change
+  input ChangePasswordInput {
+    currentPassword: String!
+    newPassword: String!
+  }
+
+  # Input for creating family
+  input CreateFamilyInput {
+    name: String!
+    description: String
+    currencyId: ID!
+    timezone: String
+  }
+
+  # Input for updating family
+  input UpdateFamilyInput {
+    familyId: ID!
+    name: String
+    description: String
+    currencyId: ID
+    timezone: String
+  }
+
+  # Input for family invitation
+  input InviteFamilyInput {
+    email: String!
+    role: FamilyRole!
+    message: String
+  }
+
+  # Input for updating member role
+  input UpdateMemberRoleInput {
+    userId: ID!
+    role: FamilyRole!
+  }
 
 `;

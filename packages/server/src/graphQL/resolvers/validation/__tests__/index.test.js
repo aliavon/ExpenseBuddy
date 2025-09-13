@@ -47,7 +47,7 @@ describe("Validation index exports", () => {
 
   it("should export the correct number of schemas", () => {
     const exportKeys = Object.keys(validationExports);
-    expect(exportKeys).toHaveLength(24);
+    expect(exportKeys).toHaveLength(32); // Updated: added 8 auth schemas
   });
 
   it("should have all exports as functions or objects", () => {

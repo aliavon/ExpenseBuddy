@@ -30,6 +30,18 @@ const updateUserSchema = require("./updateUserSchema");
 const deleteUserSchema = require("./deleteUserSchema");
 const getUsersSchema = require("./getUsersSchema");
 
+// Authentication
+const registerSchema = require("./registerSchema");
+const loginSchema = require("./loginSchema");
+const refreshTokenSchema = require("./refreshTokenSchema");
+const resetPasswordSchema = require("./resetPasswordSchema");
+const changePasswordSchema = require("./changePasswordSchema");
+
+// Family Management
+const createFamilySchema = require("./createFamilySchema");
+const updateFamilySchema = require("./updateFamilySchema");
+const joinFamilyByCodeSchema = require("./joinFamilyByCodeSchema");
+
 const withValidation = require("./withValidation");
 const withValidationCurried = require("./withValidationCurried");
 
@@ -61,6 +73,18 @@ module.exports = {
   updateUserSchema,
   deleteUserSchema,
   getUsersSchema,
+
+  // Authentication schemas
+  registerSchema,
+  loginSchema,
+  refreshTokenSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
+
+  // Family Management schemas
+  createFamilySchema,
+  updateFamilySchema,
+  joinFamilyByCodeSchema,
 
   withValidation,
   withValidationCurried,
