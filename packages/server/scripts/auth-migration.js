@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const fs = require("fs").promises;
 const path = require("path");
+const { mongooseConfig } = require("../src/config");
 
 // Import schemas
 const {
@@ -615,6 +616,12 @@ async function runMigration() {
   console.log("🚀 Starting Authentication Migration...");
   console.log("====================================");
 
+  // Connect to MongoDB
+  console.log("🔌 Connecting to MongoDB...");
+  const DATABASE_URL = "mongodb://localhost:27017/server";
+  await mongoose.connect(DATABASE_URL, mongooseConfig);
+  console.log("✅ Connected to MongoDB");
+
   let checkpoint;
 
   try {
@@ -687,6 +694,10 @@ async function runMigration() {
     }
 
     process.exit(1);
+  } finally {
+    // Disconnect from MongoDB
+    await mongoose.disconnect();
+    console.log("🔌 Disconnected from MongoDB");
   }
 }
 

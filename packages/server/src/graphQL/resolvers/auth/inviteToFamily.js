@@ -2,7 +2,10 @@ const { GraphQLError } = require("graphql");
 const { sendFamilyInvitationEmail } = require("../../../auth/emailService");
 const { generateAccessToken } = require("../../../auth/jwtUtils");
 const { Family, User } = require("../../../database/schemas");
-const { withValidationCurried, inviteToFamilySchema } = require("../validation");
+const {
+  withValidationCurried,
+  inviteToFamilySchema,
+} = require("../validation");
 const { withErrorHandlingCurried } = require("../error-handling");
 const ERROR_CODES = require("../../../constants/errorCodes");
 
@@ -24,9 +27,12 @@ async function inviteToFamily(parent, args, context) {
 
     // Check if user is in a family
     if (!user.familyId) {
-      throw new GraphQLError("You must be a member of a family to invite others", {
-        extensions: { code: ERROR_CODES.VALIDATION_ERROR },
-      });
+      throw new GraphQLError(
+        "You must be a member of a family to invite others",
+        {
+          extensions: { code: ERROR_CODES.VALIDATION_ERROR },
+        }
+      );
     }
 
     // Prevent OWNER role invitations (only one owner per family)
@@ -56,30 +62,39 @@ async function inviteToFamily(parent, args, context) {
     const isAdmin = user.roleInFamily === "ADMIN";
 
     if (!isOwner && !isAdmin) {
-      throw new GraphQLError("Only family owner or admin can invite new members", {
-        extensions: { code: ERROR_CODES.UNAUTHENTICATED },
-      });
+      throw new GraphQLError(
+        "Only family owner or admin can invite new members",
+        {
+          extensions: { code: ERROR_CODES.UNAUTHENTICATED },
+        }
+      );
     }
 
     // Normalize email
     const normalizedEmail = input.email.toLowerCase();
 
     // Check if user is already registered
-    const existingUser = await User.findOne({ 
-      email: normalizedEmail, 
-      isActive: true 
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+      isActive: true,
     });
 
     if (existingUser) {
       if (existingUser.familyId) {
         if (existingUser.familyId.toString() === family._id.toString()) {
-          throw new GraphQLError("This user is already a member of your family", {
-            extensions: { code: ERROR_CODES.VALIDATION_ERROR },
-          });
+          throw new GraphQLError(
+            "This user is already a member of your family",
+            {
+              extensions: { code: ERROR_CODES.VALIDATION_ERROR },
+            }
+          );
         } else {
-          throw new GraphQLError("This user is already registered and in another family", {
-            extensions: { code: ERROR_CODES.VALIDATION_ERROR },
-          });
+          throw new GraphQLError(
+            "This user is already registered and in another family",
+            {
+              extensions: { code: ERROR_CODES.VALIDATION_ERROR },
+            }
+          );
         }
       }
     }
@@ -104,7 +119,10 @@ async function inviteToFamily(parent, args, context) {
         input.message
       );
     } catch (emailError) {
-      console.warn("Failed to send family invitation email:", emailError.message);
+      console.warn(
+        "Failed to send family invitation email:",
+        emailError.message
+      );
       // Continue execution - invitation token is generated, manual invitation possible
     }
 

@@ -57,7 +57,11 @@ describe("removeFamilyMember resolver", () => {
       User.findById.mockResolvedValue(mockMemberToRemove);
       User.findByIdAndUpdate.mockResolvedValue(mockUpdatedMember);
 
-      const result = await removeFamilyMemberResolver(null, { userId }, mockContext);
+      const result = await removeFamilyMemberResolver(
+        null,
+        { userId },
+        mockContext
+      );
 
       expect(result).toBe(true);
       expect(Family.findById).toHaveBeenCalledWith(mockUser.familyId);
@@ -104,7 +108,11 @@ describe("removeFamilyMember resolver", () => {
       User.findById.mockResolvedValue(mockMemberToRemove);
       User.findByIdAndUpdate.mockResolvedValue(mockMemberToRemove);
 
-      const result = await removeFamilyMemberResolver(null, { userId }, mockContext);
+      const result = await removeFamilyMemberResolver(
+        null,
+        { userId },
+        mockContext
+      );
 
       expect(result).toBe(true);
     });
@@ -143,7 +151,11 @@ describe("removeFamilyMember resolver", () => {
       User.findById.mockResolvedValue(mockAdminToRemove);
       User.findByIdAndUpdate.mockResolvedValue(mockAdminToRemove);
 
-      const result = await removeFamilyMemberResolver(null, { userId }, mockContext);
+      const result = await removeFamilyMemberResolver(
+        null,
+        { userId },
+        mockContext
+      );
 
       expect(result).toBe(true);
       expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
@@ -330,7 +342,9 @@ describe("removeFamilyMember resolver", () => {
 
       await expect(
         removeFamilyMemberResolver(null, { userId }, mockContext)
-      ).rejects.toThrow("Admin cannot remove another admin. Only owner can remove admins.");
+      ).rejects.toThrow(
+        "Admin cannot remove another admin. Only owner can remove admins."
+      );
 
       expect(User.findByIdAndUpdate).not.toHaveBeenCalled();
     });
@@ -514,7 +528,9 @@ describe("removeFamilyMember resolver", () => {
 
       await expect(
         removeFamilyMemberResolver(null, { userId }, mockContext)
-      ).rejects.toThrow("You cannot remove yourself from the family. Use leave family instead.");
+      ).rejects.toThrow(
+        "You cannot remove yourself from the family. Use leave family instead."
+      );
 
       expect(User.findById).not.toHaveBeenCalled();
     });
@@ -609,7 +625,9 @@ describe("removeFamilyMember resolver", () => {
 
       Family.findById.mockResolvedValue(mockFamily);
       User.findById.mockResolvedValue(mockMemberToRemove);
-      User.findByIdAndUpdate.mockRejectedValue(new Error("Database update error"));
+      User.findByIdAndUpdate.mockRejectedValue(
+        new Error("Database update error")
+      );
 
       await expect(
         removeFamilyMemberResolver(null, { userId }, mockContext)

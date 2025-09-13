@@ -1,6 +1,5 @@
 version: "3"
 services:
-
   expense-buddy-client:
     container_name: expense-buddy-client
     build:
@@ -31,10 +30,12 @@ services:
       - API_HOST=${API_HOST}
       - APP_SERVER_PORT=${APP_SERVER_PORT}
       - DATABASE_HOST=mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server
+      - REDIS_URL=redis://expenseBuddyRedis:6379
     ports:
       - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./packages/server/src:/home/app/src
 
@@ -45,6 +46,15 @@ services:
       - ${DATABASE_PORT}:${DATABASE_PORT}
     volumes:
       - mongo:/data/${MONGO_DB:-db}
+
+  redis:
+    container_name: expenseBuddyRedis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+    command: redis-server --appendonly yes
 
   expense-buddy-backup:
     container_name: expense-buddy-backup
@@ -69,3 +79,4 @@ services:
 
 volumes:
   mongo:
+  redis:

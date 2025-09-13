@@ -472,16 +472,24 @@ describe("Authentication Validation Schemas", () => {
 
       // Direct input schemas don't have input wrapper
       const directInputSchemas = [
-        { schema: inviteToFamilySchema, nullField: { email: null, role: "MEMBER" } },
+        {
+          schema: inviteToFamilySchema,
+          nullField: { email: null, role: "MEMBER" },
+        },
         { schema: removeFamilyMemberSchema, nullField: { userId: null } },
-        { schema: updateMemberRoleSchema, nullField: { userId: null, role: "MEMBER" } },
+        {
+          schema: updateMemberRoleSchema,
+          nullField: { userId: null, role: "MEMBER" },
+        },
       ];
 
       directInputSchemas.forEach(({ schema, nullField }) => {
         const { error } = schema.validate(nullField);
         expect(error).toBeDefined();
         // Should have error about required field
-        expect(error.details[0].message).toMatch(/(must be a string|is required)/);
+        expect(error.details[0].message).toMatch(
+          /(must be a string|is required)/
+        );
       });
     });
   });

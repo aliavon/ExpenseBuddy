@@ -1,6 +1,9 @@
 const { GraphQLError } = require("graphql");
 const { Family, User } = require("../../../database/schemas");
-const { withValidationCurried, updateMemberRoleSchema } = require("../validation");
+const {
+  withValidationCurried,
+  updateMemberRoleSchema,
+} = require("../validation");
 const { withErrorHandlingCurried } = require("../error-handling");
 const ERROR_CODES = require("../../../constants/errorCodes");
 
@@ -23,9 +26,12 @@ async function updateMemberRole(parent, args, context) {
 
     // Check if user is in a family
     if (!user.familyId) {
-      throw new GraphQLError("You must be a member of a family to update member roles", {
-        extensions: { code: ERROR_CODES.VALIDATION_ERROR },
-      });
+      throw new GraphQLError(
+        "You must be a member of a family to update member roles",
+        {
+          extensions: { code: ERROR_CODES.VALIDATION_ERROR },
+        }
+      );
     }
 
     // Prevent OWNER role assignment
@@ -75,7 +81,10 @@ async function updateMemberRole(parent, args, context) {
     }
 
     // Check if target user is in the same family
-    if (!targetUser.familyId || targetUser.familyId.toString() !== family._id.toString()) {
+    if (
+      !targetUser.familyId ||
+      targetUser.familyId.toString() !== family._id.toString()
+    ) {
       throw new GraphQLError("User is not a member of your family", {
         extensions: { code: ERROR_CODES.VALIDATION_ERROR },
       });

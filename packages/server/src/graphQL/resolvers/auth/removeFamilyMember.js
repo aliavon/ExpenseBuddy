@@ -1,6 +1,9 @@
 const { GraphQLError } = require("graphql");
 const { Family, User } = require("../../../database/schemas");
-const { withValidationCurried, removeFamilyMemberSchema } = require("../validation");
+const {
+  withValidationCurried,
+  removeFamilyMemberSchema,
+} = require("../validation");
 const { withErrorHandlingCurried } = require("../error-handling");
 const ERROR_CODES = require("../../../constants/errorCodes");
 
@@ -22,16 +25,22 @@ async function removeFamilyMember(parent, args, context) {
 
     // Check if user is in a family
     if (!user.familyId) {
-      throw new GraphQLError("You must be a member of a family to remove others", {
-        extensions: { code: ERROR_CODES.VALIDATION_ERROR },
-      });
+      throw new GraphQLError(
+        "You must be a member of a family to remove others",
+        {
+          extensions: { code: ERROR_CODES.VALIDATION_ERROR },
+        }
+      );
     }
 
     // Prevent self-removal
     if (userId === user._id.toString()) {
-      throw new GraphQLError("You cannot remove yourself from the family. Use leave family instead.", {
-        extensions: { code: ERROR_CODES.VALIDATION_ERROR },
-      });
+      throw new GraphQLError(
+        "You cannot remove yourself from the family. Use leave family instead.",
+        {
+          extensions: { code: ERROR_CODES.VALIDATION_ERROR },
+        }
+      );
     }
 
     // Find user's family
@@ -75,7 +84,10 @@ async function removeFamilyMember(parent, args, context) {
     }
 
     // Check if target user is in the same family
-    if (!targetUser.familyId || targetUser.familyId.toString() !== family._id.toString()) {
+    if (
+      !targetUser.familyId ||
+      targetUser.familyId.toString() !== family._id.toString()
+    ) {
       throw new GraphQLError("User is not a member of your family", {
         extensions: { code: ERROR_CODES.VALIDATION_ERROR },
       });
@@ -90,17 +102,16 @@ async function removeFamilyMember(parent, args, context) {
 
     // Check admin permissions: admin cannot remove another admin, only owner can
     if (!isOwner && targetUser.roleInFamily === "ADMIN") {
-      throw new GraphQLError("Admin cannot remove another admin. Only owner can remove admins.", {
-        extensions: { code: ERROR_CODES.UNAUTHENTICATED },
-      });
+      throw new GraphQLError(
+        "Admin cannot remove another admin. Only owner can remove admins.",
+        {
+          extensions: { code: ERROR_CODES.UNAUTHENTICATED },
+        }
+      );
     }
 
     // Remove user from family
-    await User.findByIdAndUpdate(
-      userId,
-      { familyId: null },
-      { new: true }
-    );
+    await User.findByIdAndUpdate(userId, { familyId: null }, { new: true });
 
     return true;
   } catch (error) {

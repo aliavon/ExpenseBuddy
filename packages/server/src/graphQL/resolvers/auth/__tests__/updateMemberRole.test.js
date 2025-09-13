@@ -60,7 +60,11 @@ describe("updateMemberRole resolver", () => {
       User.findById.mockResolvedValue(mockMemberToUpdate);
       User.findByIdAndUpdate.mockResolvedValue(mockUpdatedMember);
 
-      const result = await updateMemberRoleResolver(null, { input }, mockContext);
+      const result = await updateMemberRoleResolver(
+        null,
+        { input },
+        mockContext
+      );
 
       expect(result).toEqual(mockUpdatedMember);
       expect(Family.findById).toHaveBeenCalledWith(mockUser.familyId);
@@ -114,7 +118,11 @@ describe("updateMemberRole resolver", () => {
       User.findById.mockResolvedValue(mockAdminToUpdate);
       User.findByIdAndUpdate.mockResolvedValue(mockUpdatedMember);
 
-      const result = await updateMemberRoleResolver(null, { input }, mockContext);
+      const result = await updateMemberRoleResolver(
+        null,
+        { input },
+        mockContext
+      );
 
       expect(result).toEqual(mockUpdatedMember);
       expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
@@ -161,7 +169,11 @@ describe("updateMemberRole resolver", () => {
       User.findById.mockResolvedValue(mockMember);
       User.findByIdAndUpdate.mockResolvedValue(mockMember);
 
-      const result = await updateMemberRoleResolver(null, { input }, mockContext);
+      const result = await updateMemberRoleResolver(
+        null,
+        { input },
+        mockContext
+      );
 
       expect(result).toEqual(mockMember);
       expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
@@ -229,7 +241,9 @@ describe("updateMemberRole resolver", () => {
 
       await expect(
         updateMemberRoleResolver(null, { input }, mockContext)
-      ).rejects.toThrow("You must be a member of a family to update member roles");
+      ).rejects.toThrow(
+        "You must be a member of a family to update member roles"
+      );
 
       expect(Family.findById).not.toHaveBeenCalled();
     });
@@ -654,7 +668,9 @@ describe("updateMemberRole resolver", () => {
 
       Family.findById.mockResolvedValue(mockFamily);
       User.findById.mockResolvedValue(mockMember);
-      User.findByIdAndUpdate.mockRejectedValue(new Error("Database update error"));
+      User.findByIdAndUpdate.mockRejectedValue(
+        new Error("Database update error")
+      );
 
       await expect(
         updateMemberRoleResolver(null, { input }, mockContext)

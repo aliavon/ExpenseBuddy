@@ -64,7 +64,10 @@ describe("inviteToFamily resolver", () => {
 
       expect(result).toBe(true);
       expect(Family.findById).toHaveBeenCalledWith(mockUser.familyId);
-      expect(User.findOne).toHaveBeenCalledWith({ email: "newmember@example.com", isActive: true });
+      expect(User.findOne).toHaveBeenCalledWith({
+        email: "newmember@example.com",
+        isActive: true,
+      });
       expect(generateAccessToken).toHaveBeenCalledWith({
         inviteeEmail: input.email,
         familyId: mockFamily._id,
@@ -366,7 +369,9 @@ describe("inviteToFamily resolver", () => {
 
       await expect(
         inviteToFamilyResolver(null, { input }, mockContext)
-      ).rejects.toThrow("This user is already registered and in another family");
+      ).rejects.toThrow(
+        "This user is already registered and in another family"
+      );
 
       expect(generateAccessToken).not.toHaveBeenCalled();
       expect(sendFamilyInvitationEmail).not.toHaveBeenCalled();
@@ -471,7 +476,9 @@ describe("inviteToFamily resolver", () => {
       Family.findById.mockResolvedValue(mockFamily);
       User.findOne.mockResolvedValue(null);
       generateAccessToken.mockReturnValue("token");
-      sendFamilyInvitationEmail.mockRejectedValue(new Error("Email service down"));
+      sendFamilyInvitationEmail.mockRejectedValue(
+        new Error("Email service down")
+      );
 
       // Should still return true even if email fails (graceful degradation)
       const result = await inviteToFamilyResolver(null, { input }, mockContext);
