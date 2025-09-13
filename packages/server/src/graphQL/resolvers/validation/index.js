@@ -34,6 +34,9 @@ const getUsersSchema = require("./getUsersSchema");
 const registerSchema = require("./registerSchema");
 const loginSchema = require("./loginSchema");
 const refreshTokenSchema = require("./refreshTokenSchema");
+const verifyEmailSchema = require("./verifyEmailSchema");
+const sendVerificationEmailSchema = require("./sendVerificationEmailSchema");
+const requestPasswordResetSchema = require("./requestPasswordResetSchema");
 const resetPasswordSchema = require("./resetPasswordSchema");
 const changePasswordSchema = require("./changePasswordSchema");
 
@@ -78,6 +81,9 @@ module.exports = {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
+  verifyEmailSchema,
+  sendVerificationEmailSchema,
+  requestPasswordResetSchema,
   resetPasswordSchema,
   changePasswordSchema,
 
