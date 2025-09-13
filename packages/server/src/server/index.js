@@ -26,7 +26,7 @@ module.exports = createYoga({
     };
 
     // Enhance context with authentication
-    return enhanceContextWithAuth(params.request, baseContext);
+    return enhanceContextWithAuth(params, baseContext);
   },
   schema: createSchema({
     typeDefs,

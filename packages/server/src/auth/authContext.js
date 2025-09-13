@@ -6,12 +6,12 @@ const { User, Family } = require("../database/schemas");
  * Auth context enhancer for GraphQL Yoga
  * Replaces Express middleware approach
  */
-async function enhanceContextWithAuth(context) {
-  const { request } = context;
+async function enhanceContextWithAuth(params, baseContext) {
+  const { request } = params;
 
-  // Extract token from request headers
-  const authHeader =
-    request.headers.authorization || request.headers.Authorization;
+  // Extract token from request headers - safely handle missing headers
+  const headers = request?.headers || {};
+  const authHeader = headers.authorization || headers.Authorization;
 
   let authContext = {
     isAuthenticated: false,
@@ -28,7 +28,7 @@ async function enhanceContextWithAuth(context) {
 
   // If no auth header, return unauthenticated context
   if (!authHeader) {
-    return { ...context, auth: authContext };
+    return { ...baseContext, auth: authContext };
   }
 
   try {
@@ -88,7 +88,7 @@ async function enhanceContextWithAuth(context) {
     };
   }
 
-  return { ...context, auth: authContext };
+  return { ...baseContext, auth: authContext };
 }
 
 /**
@@ -198,7 +198,7 @@ function requireSelfOrAdmin(context, userId) {
   const auth = requireAuth(context);
 
   // User can access their own data
-  if (auth.user._id.toString() === userId.toString()) {
+  if (userId && auth.user._id.toString() === userId.toString()) {
     return auth;
   }
 

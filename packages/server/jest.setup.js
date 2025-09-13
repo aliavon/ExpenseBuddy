@@ -64,6 +64,7 @@ global.createMockId = () => new mongoose.Types.ObjectId().toString();
 
 // Create mock user for testing
 global.createMockUser = (overrides = {}) => ({
+  _id: new mongoose.Types.ObjectId(),
   id: new mongoose.Types.ObjectId().toString(),
   email: "test@example.com",
   firstName: "Test",

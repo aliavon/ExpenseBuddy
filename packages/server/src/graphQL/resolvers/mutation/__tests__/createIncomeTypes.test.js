@@ -2,7 +2,7 @@ const createIncomeTypes = require("../createIncomeTypes");
 const IncomeType = require("../../../../database/schemas/IncomeType");
 
 describe("createIncomeTypes resolver", () => {
-  const mockContext = createMockContext();
+  const mockContext = global.createMockContext();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -93,17 +93,22 @@ describe("createIncomeTypes resolver", () => {
 
     await createIncomeTypes(null, args, mockContext);
 
-    expect(mockContext.logger.info).toHaveBeenCalledWith(
-      { count: 2 },
-      "Successfully added income types"
+    expect(mockContext.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 2,
+        userId: mockContext.auth.user.id,
+        familyId: mockContext.auth.user.familyId,
+      },
+      "Successfully added family income types"
     );
   });
 
   it("should handle database errors gracefully", async () => {
-    // Create a duplicate income type first
+    // Create a duplicate income type first with same familyId
     await IncomeType.create({
       name: "Salary",
       description: "Existing salary",
+      familyId: mockContext.auth.user.familyId,
     });
 
     const args = {
@@ -166,5 +171,29 @@ describe("createIncomeTypes resolver", () => {
     const result = await createIncomeTypes(null, args, mockContext);
 
     expect(result[0].description).toBe(longDescription);
+  });
+
+  it("should allow duplicate income type names in different families", async () => {
+    const mockContext1 = global.createMockContext();
+    const mockContext2 = global.createMockContext(); // Different family
+
+    const args = {
+      incomeTypes: [{ name: "Salary", description: "Monthly salary" }],
+    };
+
+    const result1 = await createIncomeTypes(null, args, mockContext1);
+    const result2 = await createIncomeTypes(null, args, mockContext2);
+
+    expect(result1[0].name).toBe("Salary");
+    expect(result2[0].name).toBe("Salary");
+    expect(result1[0].familyId.toString()).toBe(
+      mockContext1.auth.user.familyId
+    );
+    expect(result2[0].familyId.toString()).toBe(
+      mockContext2.auth.user.familyId
+    );
+    expect(result1[0].familyId.toString()).not.toBe(
+      result2[0].familyId.toString()
+    );
   });
 });

@@ -16,15 +16,22 @@ describe("updateFamilyIncomes mutation", () => {
     ...overrides,
   });
 
-  const createFamilyIncomeInDB = async (data = {}) => {
-    const incomeData = createFamilyIncomeData(data);
+  const createFamilyIncomeInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const incomeData = createFamilyIncomeData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const income = new FamilyIncome(incomeData);
     return await income.save();
   };
 
   it("should update single family income successfully", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     const updates = [
       {
@@ -43,16 +50,21 @@ describe("updateFamilyIncomes mutation", () => {
       income.contributorId.toString()
     ); // unchanged
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully updated FamilyIncome records"
+      {
+        count: 1,
+        modifiedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family income records"
     );
   });
 
   it("should update multiple family incomes successfully", async () => {
-    const income1 = await createFamilyIncomeInDB({ amount: 1000 });
-    const income2 = await createFamilyIncomeInDB({ amount: 2000 });
-    const income3 = await createFamilyIncomeInDB({ amount: 3000 });
     const context = global.createMockContext();
+    const income1 = await createFamilyIncomeInDB({ amount: 1000 }, context);
+    const income2 = await createFamilyIncomeInDB({ amount: 2000 }, context);
+    const income3 = await createFamilyIncomeInDB({ amount: 3000 }, context);
 
     const updates = [
       { id: income1._id, amount: 1500 },
@@ -80,8 +92,13 @@ describe("updateFamilyIncomes mutation", () => {
     expect(updatedIncome3.note).toBe("Updated note");
 
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully updated FamilyIncome records"
+      {
+        count: 3,
+        modifiedCount: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family income records"
     );
   });
 
@@ -92,14 +109,19 @@ describe("updateFamilyIncomes mutation", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully updated FamilyIncome records"
+      {
+        count: 0,
+        modifiedCount: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family income records"
     );
   });
 
   it("should update all family income fields", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     const updates = [
       {
@@ -123,13 +145,13 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should update only specified fields", async () => {
+    const context = global.createMockContext();
     const originalData = {
       amount: 1000,
       periodicity: "MONTHLY",
       note: "Original note",
     };
-    const income = await createFamilyIncomeInDB(originalData);
-    const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB(originalData, context);
 
     const updates = [
       {
@@ -146,12 +168,13 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle updates with all periodicities", async () => {
+    const context = global.createMockContext();
     const incomes = await Promise.all([
-      createFamilyIncomeInDB({ periodicity: "MONTHLY" }),
-      createFamilyIncomeInDB({ periodicity: "MONTHLY" }),
-      createFamilyIncomeInDB({ periodicity: "MONTHLY" }),
-      createFamilyIncomeInDB({ periodicity: "MONTHLY" }),
-      createFamilyIncomeInDB({ periodicity: "MONTHLY" }),
+      createFamilyIncomeInDB({ periodicity: "MONTHLY" }, context),
+      createFamilyIncomeInDB({ periodicity: "MONTHLY" }, context),
+      createFamilyIncomeInDB({ periodicity: "MONTHLY" }, context),
+      createFamilyIncomeInDB({ periodicity: "MONTHLY" }, context),
+      createFamilyIncomeInDB({ periodicity: "MONTHLY" }, context),
     ]);
 
     const updates = [
@@ -161,8 +184,6 @@ describe("updateFamilyIncomes mutation", () => {
       { id: incomes[3]._id, periodicity: "YEARLY" },
       { id: incomes[4]._id, periodicity: "ONE_TIME" },
     ];
-
-    const context = global.createMockContext();
 
     const result = await updateFamilyIncomes(null, { updates }, context);
 
@@ -178,8 +199,8 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle decimal amounts", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     const updates = [
       {
@@ -194,8 +215,8 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle special characters in notes", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     const updates = [
       {
@@ -210,9 +231,10 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle large batch updates", async () => {
+    const context = global.createMockContext();
     const incomes = [];
     for (let i = 1; i <= 20; i++) {
-      incomes.push(await createFamilyIncomeInDB({ amount: i * 100 }));
+      incomes.push(await createFamilyIncomeInDB({ amount: i * 100 }, context));
     }
 
     const updates = incomes.map((income) => ({
@@ -220,16 +242,19 @@ describe("updateFamilyIncomes mutation", () => {
       amount: income.amount * 2,
     }));
 
-    const context = global.createMockContext();
-
     const result = await updateFamilyIncomes(null, { updates }, context);
 
     expect(result).toHaveLength(20);
     expect(result.find((r) => r.amount === 200)).toBeTruthy(); // 100 * 2
     expect(result.find((r) => r.amount === 4000)).toBeTruthy(); // 2000 * 2
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 20 },
-      "Successfully updated FamilyIncome records"
+      {
+        count: 20,
+        modifiedCount: 20,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family income records"
     );
   });
 
@@ -248,15 +273,23 @@ describe("updateFamilyIncomes mutation", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully updated FamilyIncome records"
+      {
+        count: 0,
+        modifiedCount: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family income records"
     );
   });
 
   it("should handle mixed existing and non-existing IDs", async () => {
-    const existingIncome = await createFamilyIncomeInDB({ amount: 1000 });
-    const nonExistentId = global.createMockId();
     const context = global.createMockContext();
+    const existingIncome = await createFamilyIncomeInDB(
+      { amount: 1000 },
+      context
+    );
+    const nonExistentId = global.createMockId();
 
     const updates = [
       { id: existingIncome._id, amount: 2000 },
@@ -268,14 +301,19 @@ describe("updateFamilyIncomes mutation", () => {
     expect(result).toHaveLength(1);
     expect(result[0].amount).toBe(2000);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully updated FamilyIncome records"
+      {
+        count: 1,
+        modifiedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family income records"
     );
   });
 
   it("should handle database errors gracefully", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     // Mock FamilyIncome.bulkWrite to throw an error
     const originalBulkWrite = FamilyIncome.bulkWrite;
@@ -299,8 +337,8 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should persist changes in database", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     const updates = [
       {
@@ -319,8 +357,8 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle negative amounts (MongoDB validation may not apply in bulkWrite)", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     const updates = [
       {
@@ -337,8 +375,8 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle invalid periodicity (MongoDB validation may not apply in bulkWrite)", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     const updates = [
       {
@@ -355,8 +393,8 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle date updates correctly", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
     const newDate = new Date("2025-06-15T10:30:00Z");
 
     const updates = [
@@ -372,8 +410,8 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle ObjectId string format", async () => {
-    const income = await createFamilyIncomeInDB();
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB({}, context);
 
     const updates = [
       {
@@ -388,8 +426,11 @@ describe("updateFamilyIncomes mutation", () => {
   });
 
   it("should handle null note updates", async () => {
-    const income = await createFamilyIncomeInDB({ note: "Original note" });
     const context = global.createMockContext();
+    const income = await createFamilyIncomeInDB(
+      { note: "Original note" },
+      context
+    );
 
     const updates = [
       {

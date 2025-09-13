@@ -11,23 +11,34 @@ describe("updateUser mutation", () => {
   const createUserData = (overrides = {}) => ({
     firstName: "John",
     lastName: "Doe",
+    email: "John@example.com",
+    password: "password123",
     ...overrides,
   });
 
-  const createUserInDB = async (data = {}) => {
-    const userData = createUserData(data);
+  const createUserInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const userData = createUserData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const user = new User(userData);
     return await user.save();
   };
 
   it("should update user successfully", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
     const updateData = {
       id: user._id,
       firstName: "Jane",
       lastName: "Smith",
+      email: "Jane@example.com",
+      password: "password123",
     };
 
     const result = await updateUser(null, { user: updateData }, context);
@@ -35,20 +46,27 @@ describe("updateUser mutation", () => {
     expect(result.firstName).toBe("Jane");
     expect(result.lastName).toBe("Smith");
     expect(result._id.toString()).toBe(user._id.toString());
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { id: result._id.toString() },
-      "Successfully updated user"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        id: result._id.toString(),
+        updatedBy: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family user"
     );
   });
 
   it("should update only specified fields", async () => {
-    const user = await createUserInDB({
-      firstName: "John",
-      middleName: "William",
-      lastName: "Doe",
-      isVerified: false,
-    });
     const context = global.createMockContext();
+    const user = await createUserInDB(
+      {
+        firstName: "John",
+        middleName: "William",
+        lastName: "Doe",
+        isVerified: false,
+      },
+      context
+    );
 
     const updateData = {
       id: user._id,
@@ -64,8 +82,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should update all fields", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
     const updateData = {
       id: user._id,
@@ -84,8 +102,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle special characters in names", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
     const updateData = {
       id: user._id,
@@ -102,8 +120,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle unicode characters", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
     const updateData = {
       id: user._id,
@@ -118,8 +136,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle emoji in names", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
     const updateData = {
       id: user._id,
@@ -134,8 +152,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle empty middleName", async () => {
-    const user = await createUserInDB({ middleName: "William" });
     const context = global.createMockContext();
+    const user = await createUserInDB({ middleName: "William" }, context);
 
     const updateData = {
       id: user._id,
@@ -148,8 +166,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle null middleName", async () => {
-    const user = await createUserInDB({ middleName: "William" });
     const context = global.createMockContext();
+    const user = await createUserInDB({ middleName: "William" }, context);
 
     const updateData = {
       id: user._id,
@@ -162,8 +180,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should toggle isVerified status", async () => {
-    const user = await createUserInDB({ isVerified: false });
     const context = global.createMockContext();
+    const user = await createUserInDB({ isVerified: false }, context);
 
     const updateData = {
       id: user._id,
@@ -176,8 +194,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle very long names", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
     const longName = "A".repeat(100);
 
     const updateData = {
@@ -193,9 +211,9 @@ describe("updateUser mutation", () => {
   });
 
   it("should update timestamps correctly", async () => {
-    const user = await createUserInDB();
-    const originalUpdatedAt = user.updatedAt;
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
+    const originalUpdatedAt = user.updatedAt;
 
     // Wait a bit to ensure timestamp difference
     await new Promise((resolve) => setTimeout(resolve, 10));
@@ -250,12 +268,12 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle database errors gracefully", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
-    // Mock User.findByIdAndUpdate to throw an error
-    const originalFindByIdAndUpdate = User.findByIdAndUpdate;
-    User.findByIdAndUpdate = jest
+    // Mock User.findOneAndUpdate to throw an error
+    const originalFindOneAndUpdate = User.findOneAndUpdate;
+    User.findOneAndUpdate = jest
       .fn()
       .mockRejectedValue(new Error("Database connection failed"));
 
@@ -269,17 +287,19 @@ describe("updateUser mutation", () => {
     ).rejects.toThrow("Database connection failed");
 
     // Restore original method
-    User.findByIdAndUpdate = originalFindByIdAndUpdate;
+    User.findOneAndUpdate = originalFindOneAndUpdate;
   });
 
   it("should persist changes in database", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
     const updateData = {
       id: user._id,
       firstName: "Updated",
       lastName: "Name",
+      email: "Updated@example.com",
+      password: "password123",
     };
 
     await updateUser(null, { user: updateData }, context);
@@ -291,13 +311,16 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle partial updates without affecting other fields", async () => {
-    const user = await createUserInDB({
-      firstName: "John",
-      middleName: "William",
-      lastName: "Doe",
-      isVerified: true,
-    });
     const context = global.createMockContext();
+    const user = await createUserInDB(
+      {
+        firstName: "John",
+        middleName: "William",
+        lastName: "Doe",
+        isVerified: true,
+      },
+      context
+    );
 
     const updateData = {
       id: user._id,
@@ -313,8 +336,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle multiple consecutive updates", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
     // First update
     const firstUpdate = {
@@ -343,8 +366,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle ObjectId string format", async () => {
-    const user = await createUserInDB();
     const context = global.createMockContext();
+    const user = await createUserInDB({}, context);
 
     const updateData = {
       id: user._id.toString(), // string format instead of ObjectId
@@ -357,8 +380,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should handle boolean values correctly", async () => {
-    const user = await createUserInDB({ isVerified: false });
     const context = global.createMockContext();
+    const user = await createUserInDB({ isVerified: false }, context);
 
     // Test setting to true
     const updateToTrue = {
@@ -386,8 +409,8 @@ describe("updateUser mutation", () => {
   });
 
   it("should return updated document with new: true option", async () => {
-    const user = await createUserInDB({ firstName: "Original" });
     const context = global.createMockContext();
+    const user = await createUserInDB({ firstName: "Original" }, context);
 
     const updateData = {
       id: user._id,

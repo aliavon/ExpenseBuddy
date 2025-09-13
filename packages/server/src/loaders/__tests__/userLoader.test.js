@@ -18,6 +18,8 @@ describe("userLoader", () => {
     const user = await User.create({
       firstName: "John",
       lastName: "Doe",
+      email: "john@example.com",
+      password: "password123",
     });
 
     const result = await userLoader.load(user._id);
@@ -27,9 +29,24 @@ describe("userLoader", () => {
 
   it("should load multiple users in batch", async () => {
     const users = await User.create([
-      { firstName: "John", lastName: "Doe" },
-      { firstName: "Jane", lastName: "Smith" },
-      { firstName: "Bob", lastName: "Wilson" },
+      {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+        password: "password123",
+      },
+      {
+        firstName: "Jane",
+        lastName: "Smith",
+        email: "jane@example.com",
+        password: "password123",
+      },
+      {
+        firstName: "Bob",
+        lastName: "Wilson",
+        email: "bob@example.com",
+        password: "password123",
+      },
     ]);
 
     const ids = users.map((u) => u._id);
@@ -51,6 +68,8 @@ describe("userLoader", () => {
     const user = await User.create({
       firstName: "John",
       lastName: "Doe",
+      email: "john@example.com",
+      password: "password123",
     });
     const nonExistentId = global.createMockId();
 

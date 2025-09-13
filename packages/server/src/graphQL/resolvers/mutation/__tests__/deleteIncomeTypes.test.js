@@ -2,6 +2,7 @@ const deleteIncomeTypes = require("../deleteIncomeTypes");
 const { IncomeType, FamilyIncome } = require("../../../../database/schemas");
 const { GraphQLError } = require("graphql");
 const ERROR_CODES = require("../../../../constants/errorCodes");
+const mongoose = require("mongoose");
 
 describe("deleteIncomeTypes mutation", () => {
   beforeEach(async () => {
@@ -20,27 +21,40 @@ describe("deleteIncomeTypes mutation", () => {
     };
   };
 
-  const createIncomeTypeInDB = async (data = {}) => {
-    const incomeTypeData = createIncomeTypeData(data);
+  const createIncomeTypeInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const incomeTypeData = createIncomeTypeData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const incomeType = new IncomeType(incomeTypeData);
     return await incomeType.save();
   };
 
-  const createFamilyIncomeInDB = async (typeId, overrides = {}) => {
+  const createFamilyIncomeInDB = async (
+    typeId,
+    context = global.createMockContext(),
+    overrides = {}
+  ) => {
     const familyIncome = new FamilyIncome({
       typeId,
       amount: 5000,
       date: new Date(),
       contributorId: global.createMockId(),
       currencyId: global.createMockId(),
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
       ...overrides,
     });
     return await familyIncome.save();
   };
 
   it("should delete single income type successfully", async () => {
-    const incomeType = await createIncomeTypeInDB();
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
 
     const result = await deleteIncomeTypes(
       null,
@@ -54,17 +68,25 @@ describe("deleteIncomeTypes mutation", () => {
     const deletedIncomeType = await IncomeType.findById(incomeType._id);
     expect(deletedIncomeType).toBeNull();
 
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully deleted income types"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 1,
+        deletedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family income types"
     );
   });
 
   it("should delete multiple income types successfully", async () => {
-    const incomeType1 = await createIncomeTypeInDB({ name: "Salary" });
-    const incomeType2 = await createIncomeTypeInDB({ name: "Bonus" });
-    const incomeType3 = await createIncomeTypeInDB({ name: "Freelance" });
     const context = global.createMockContext();
+    const incomeType1 = await createIncomeTypeInDB({ name: "Salary" }, context);
+    const incomeType2 = await createIncomeTypeInDB({ name: "Bonus" }, context);
+    const incomeType3 = await createIncomeTypeInDB(
+      { name: "Freelance" },
+      context
+    );
 
     const ids = [incomeType1._id, incomeType2._id, incomeType3._id];
 
@@ -76,9 +98,14 @@ describe("deleteIncomeTypes mutation", () => {
     const remainingIncomeTypes = await IncomeType.find({ _id: { $in: ids } });
     expect(remainingIncomeTypes).toHaveLength(0);
 
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully deleted income types"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 3,
+        deletedCount: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family income types"
     );
   });
 
@@ -88,16 +115,21 @@ describe("deleteIncomeTypes mutation", () => {
     const result = await deleteIncomeTypes(null, { ids: [] }, context);
 
     expect(result).toEqual([]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully deleted income types"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 0,
+        deletedCount: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family income types"
     );
   });
 
   it("should throw error when income type is used in FamilyIncome records", async () => {
-    const incomeType = await createIncomeTypeInDB();
-    await createFamilyIncomeInDB(incomeType._id);
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
+    await createFamilyIncomeInDB(incomeType._id, context);
 
     await expect(
       deleteIncomeTypes(null, { ids: [incomeType._id] }, context)
@@ -125,9 +157,9 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should delete income types when no FamilyIncome references exist", async () => {
-    const incomeType1 = await createIncomeTypeInDB();
-    const incomeType2 = await createIncomeTypeInDB();
     const context = global.createMockContext();
+    const incomeType1 = await createIncomeTypeInDB({}, context);
+    const incomeType2 = await createIncomeTypeInDB({}, context);
 
     const result = await deleteIncomeTypes(
       null,
@@ -144,11 +176,11 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should handle multiple FamilyIncome references to same income type", async () => {
-    const incomeType = await createIncomeTypeInDB();
-    await createFamilyIncomeInDB(incomeType._id, { amount: 1000 });
-    await createFamilyIncomeInDB(incomeType._id, { amount: 2000 });
-    await createFamilyIncomeInDB(incomeType._id, { amount: 3000 });
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
+    await createFamilyIncomeInDB(incomeType._id, context, { amount: 1000 });
+    await createFamilyIncomeInDB(incomeType._id, context, { amount: 2000 });
+    await createFamilyIncomeInDB(incomeType._id, context, { amount: 3000 });
 
     await expect(
       deleteIncomeTypes(null, { ids: [incomeType._id] }, context)
@@ -160,10 +192,10 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should handle mixed income types - some in use, some not", async () => {
-    const incomeType1 = await createIncomeTypeInDB(); // will be used
-    const incomeType2 = await createIncomeTypeInDB(); // will not be used
-    await createFamilyIncomeInDB(incomeType1._id);
     const context = global.createMockContext();
+    const incomeType1 = await createIncomeTypeInDB({}, context); // will be used
+    const incomeType2 = await createIncomeTypeInDB({}, context); // will not be used
+    await createFamilyIncomeInDB(incomeType1._id, context);
 
     await expect(
       deleteIncomeTypes(
@@ -191,16 +223,21 @@ describe("deleteIncomeTypes mutation", () => {
     );
 
     expect(result).toEqual([nonExistentId]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully deleted income types"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 1,
+        deletedCount: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family income types"
     );
   });
 
   it("should handle mixed existing and non-existing IDs", async () => {
-    const existingIncomeType = await createIncomeTypeInDB();
-    const nonExistentId = global.createMockId();
     const context = global.createMockContext();
+    const existingIncomeType = await createIncomeTypeInDB({}, context);
+    const nonExistentId = global.createMockId();
 
     const result = await deleteIncomeTypes(
       null,
@@ -214,17 +251,22 @@ describe("deleteIncomeTypes mutation", () => {
     const deletedIncomeType = await IncomeType.findById(existingIncomeType._id);
     expect(deletedIncomeType).toBeNull();
 
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 2 },
-      "Successfully deleted income types"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 2,
+        deletedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family income types"
     );
   });
 
   it("should preserve order of IDs in result", async () => {
     const incomeType1 = await createIncomeTypeInDB();
     const incomeType2 = await createIncomeTypeInDB();
-    const incomeType3 = await createIncomeTypeInDB();
     const context = global.createMockContext();
+    const incomeType3 = await createIncomeTypeInDB({}, context);
 
     const ids = [incomeType3._id, incomeType1._id, incomeType2._id];
 
@@ -234,13 +276,15 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should handle large batch deletion", async () => {
+    const context = global.createMockContext();
     const incomeTypes = [];
     for (let i = 1; i <= 20; i++) {
-      incomeTypes.push(await createIncomeTypeInDB({ name: `Type ${i}` }));
+      incomeTypes.push(
+        await createIncomeTypeInDB({ name: `Type ${i}` }, context)
+      );
     }
 
     const ids = incomeTypes.map((incomeType) => incomeType._id);
-    const context = global.createMockContext();
 
     const result = await deleteIncomeTypes(null, { ids }, context);
 
@@ -250,15 +294,20 @@ describe("deleteIncomeTypes mutation", () => {
     const remainingIncomeTypes = await IncomeType.find({ _id: { $in: ids } });
     expect(remainingIncomeTypes).toHaveLength(0);
 
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 20 },
-      "Successfully deleted income types"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 20,
+        deletedCount: 20,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family income types"
     );
   });
 
   it("should handle duplicate IDs in input", async () => {
-    const incomeType = await createIncomeTypeInDB();
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
 
     const ids = [incomeType._id, incomeType._id, incomeType._id];
 
@@ -270,18 +319,29 @@ describe("deleteIncomeTypes mutation", () => {
     const deletedIncomeType = await IncomeType.findById(incomeType._id);
     expect(deletedIncomeType).toBeNull();
 
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully deleted income types"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 3,
+        deletedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family income types"
     );
   });
 
   it("should not affect other income types during deletion", async () => {
-    const incomeTypeToDelete = await createIncomeTypeInDB({
-      name: "To Delete",
-    });
-    const incomeTypeToKeep = await createIncomeTypeInDB({ name: "To Keep" });
     const context = global.createMockContext();
+    const incomeTypeToDelete = await createIncomeTypeInDB(
+      {
+        name: "To Delete",
+      },
+      context
+    );
+    const incomeTypeToKeep = await createIncomeTypeInDB(
+      { name: "To Keep" },
+      context
+    );
 
     await deleteIncomeTypes(null, { ids: [incomeTypeToDelete._id] }, context);
 
@@ -296,8 +356,8 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should handle database errors gracefully during FamilyIncome count", async () => {
-    const incomeType = await createIncomeTypeInDB();
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
 
     // Mock FamilyIncome.countDocuments to throw an error
     const originalCountDocuments = FamilyIncome.countDocuments;
@@ -314,8 +374,8 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should handle database errors gracefully during income type deletion", async () => {
-    const incomeType = await createIncomeTypeInDB();
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
 
     // Mock IncomeType.deleteMany to throw an error
     const originalDeleteMany = IncomeType.deleteMany;
@@ -332,8 +392,8 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should check FamilyIncome usage before deletion", async () => {
-    const incomeType = await createIncomeTypeInDB();
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
 
     // Spy on FamilyIncome.countDocuments to verify it's called
     const countSpy = jest.spyOn(FamilyIncome, "countDocuments");
@@ -342,14 +402,15 @@ describe("deleteIncomeTypes mutation", () => {
 
     expect(countSpy).toHaveBeenCalledWith({
       typeId: { $in: [incomeType._id] },
+      familyId: new mongoose.Types.ObjectId(context.auth.user.familyId),
     });
 
     countSpy.mockRestore();
   });
 
   it("should handle ObjectId strings and ObjectId objects", async () => {
-    const incomeType = await createIncomeTypeInDB();
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
 
     const result = await deleteIncomeTypes(
       null,
@@ -365,9 +426,9 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should return original IDs even after successful deletion", async () => {
-    const incomeType = await createIncomeTypeInDB();
-    const originalId = incomeType._id;
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB({}, context);
+    const originalId = incomeType._id;
 
     const result = await deleteIncomeTypes(
       null,
@@ -383,11 +444,14 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should handle income types with special characters", async () => {
-    const incomeType = await createIncomeTypeInDB({
-      name: "Salaire & Bonus",
-      description: "Paiement mensuel - très important!",
-    });
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB(
+      {
+        name: "Salaire & Bonus",
+        description: "Paiement mensuel - très important!",
+      },
+      context
+    );
 
     const result = await deleteIncomeTypes(
       null,
@@ -403,11 +467,14 @@ describe("deleteIncomeTypes mutation", () => {
   });
 
   it("should handle income types with emoji", async () => {
-    const incomeType = await createIncomeTypeInDB({
-      name: "Salary 💰",
-      description: "Monthly income 🎉",
-    });
     const context = global.createMockContext();
+    const incomeType = await createIncomeTypeInDB(
+      {
+        name: "Salary 💰",
+        description: "Monthly income 🎉",
+      },
+      context
+    );
 
     const result = await deleteIncomeTypes(
       null,

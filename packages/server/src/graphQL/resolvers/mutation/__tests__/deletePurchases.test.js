@@ -15,15 +15,22 @@ describe("deletePurchases mutation", () => {
     ...overrides,
   });
 
-  const createPurchaseInDB = async (data = {}) => {
-    const purchaseData = createPurchaseData(data);
+  const createPurchaseInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const purchaseData = createPurchaseData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const purchase = new Purchase(purchaseData);
     return await purchase.save();
   };
 
   it("should delete single purchase successfully", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     const result = await deletePurchases(
       null,
@@ -32,9 +39,14 @@ describe("deletePurchases mutation", () => {
     );
 
     expect(result).toEqual([purchase._id]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 1,
+        deletedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
 
     // Verify purchase was actually deleted
@@ -43,19 +55,24 @@ describe("deletePurchases mutation", () => {
   });
 
   it("should delete multiple purchases successfully", async () => {
-    const purchase1 = await createPurchaseInDB({ quantity: 1 });
-    const purchase2 = await createPurchaseInDB({ quantity: 2 });
-    const purchase3 = await createPurchaseInDB({ quantity: 3 });
     const context = global.createMockContext();
+    const purchase1 = await createPurchaseInDB({ quantity: 1 }, context);
+    const purchase2 = await createPurchaseInDB({ quantity: 2 }, context);
+    const purchase3 = await createPurchaseInDB({ quantity: 3 }, context);
 
     const ids = [purchase1._id, purchase2._id, purchase3._id];
 
     const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 3,
+        deletedCount: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
 
     // Verify all purchases were actually deleted
@@ -69,9 +86,14 @@ describe("deletePurchases mutation", () => {
     const result = await deletePurchases(null, { ids: [] }, context);
 
     expect(result).toEqual([]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 0,
+        deletedCount: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
   });
 
@@ -85,26 +107,42 @@ describe("deletePurchases mutation", () => {
     const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 2 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 2,
+        deletedCount: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
   });
 
   it("should handle mixed existing and non-existing IDs", async () => {
-    const existingPurchase1 = await createPurchaseInDB({ quantity: 1 });
-    const existingPurchase2 = await createPurchaseInDB({ quantity: 2 });
-    const nonExistentId = global.createMockId();
     const context = global.createMockContext();
+    const existingPurchase1 = await createPurchaseInDB(
+      { quantity: 1 },
+      context
+    );
+    const existingPurchase2 = await createPurchaseInDB(
+      { quantity: 2 },
+      context
+    );
+    const nonExistentId = global.createMockId();
 
     const ids = [existingPurchase1._id, nonExistentId, existingPurchase2._id];
 
     const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 3,
+        deletedCount: 2,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
 
     // Verify existing purchases were deleted
@@ -117,8 +155,8 @@ describe("deletePurchases mutation", () => {
   it("should preserve order of IDs in result", async () => {
     const purchase1 = await createPurchaseInDB();
     const purchase2 = await createPurchaseInDB();
-    const purchase3 = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase3 = await createPurchaseInDB({}, context);
 
     const ids = [purchase3._id, purchase1._id, purchase2._id];
 
@@ -128,20 +166,25 @@ describe("deletePurchases mutation", () => {
   });
 
   it("should handle large batch deletion", async () => {
+    const context = global.createMockContext();
     const purchases = [];
     for (let i = 1; i <= 50; i++) {
-      purchases.push(await createPurchaseInDB({ quantity: i }));
+      purchases.push(await createPurchaseInDB({ quantity: i }, context));
     }
 
     const ids = purchases.map((p) => p._id);
-    const context = global.createMockContext();
 
     const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 50 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 50,
+        deletedCount: 50,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
 
     // Verify all purchases were deleted
@@ -150,17 +193,22 @@ describe("deletePurchases mutation", () => {
   });
 
   it("should handle duplicate IDs in input", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     const ids = [purchase._id, purchase._id, purchase._id];
 
     const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 3,
+        deletedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
 
     // Verify purchase was deleted (only once, despite multiple IDs)
@@ -169,10 +217,10 @@ describe("deletePurchases mutation", () => {
   });
 
   it("should not affect other purchases", async () => {
-    const purchaseToDelete = await createPurchaseInDB({ quantity: 1 });
-    const purchaseToKeep1 = await createPurchaseInDB({ quantity: 2 });
-    const purchaseToKeep2 = await createPurchaseInDB({ quantity: 3 });
     const context = global.createMockContext();
+    const purchaseToDelete = await createPurchaseInDB({ quantity: 1 }, context);
+    const purchaseToKeep1 = await createPurchaseInDB({ quantity: 2 }, context);
+    const purchaseToKeep2 = await createPurchaseInDB({ quantity: 3 }, context);
 
     await deletePurchases(null, { ids: [purchaseToDelete._id] }, context);
 
@@ -189,26 +237,35 @@ describe("deletePurchases mutation", () => {
   });
 
   it("should handle deletion of purchases with different data types", async () => {
+    const context = global.createMockContext();
     const purchases = [
-      await createPurchaseInDB({
-        quantity: 1.5,
-        price: 10.99,
-        note: "Test item 1",
-      }),
-      await createPurchaseInDB({
-        quantity: 2,
-        price: 20.0,
-        discount: 2.5,
-      }),
-      await createPurchaseInDB({
-        quantity: 3.75,
-        unit: "lbs",
-        date: new Date("2024-12-25"),
-      }),
+      await createPurchaseInDB(
+        {
+          quantity: 1.5,
+          price: 10.99,
+          note: "Test item 1",
+        },
+        context
+      ),
+      await createPurchaseInDB(
+        {
+          quantity: 2,
+          price: 20.0,
+          discount: 2.5,
+        },
+        context
+      ),
+      await createPurchaseInDB(
+        {
+          quantity: 3.75,
+          unit: "lbs",
+          date: new Date("2024-12-25"),
+        },
+        context
+      ),
     ];
 
     const ids = purchases.map((p) => p._id);
-    const context = global.createMockContext();
 
     const result = await deletePurchases(null, { ids }, context);
 
@@ -222,8 +279,8 @@ describe("deletePurchases mutation", () => {
   });
 
   it("should handle database errors gracefully", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     // Mock Purchase.deleteMany to throw an error
     const originalDeleteMany = Purchase.deleteMany;
@@ -241,9 +298,12 @@ describe("deletePurchases mutation", () => {
 
   it("should handle very large ID arrays", async () => {
     // Create a large array of IDs (some existing, some not)
+    const context = global.createMockContext();
     const existingPurchases = [];
     for (let i = 0; i < 10; i++) {
-      existingPurchases.push(await createPurchaseInDB({ quantity: i + 1 }));
+      existingPurchases.push(
+        await createPurchaseInDB({ quantity: i + 1 }, context)
+      );
     }
 
     const ids = [];
@@ -254,15 +314,18 @@ describe("deletePurchases mutation", () => {
       ids.push(global.createMockId());
     }
 
-    const context = global.createMockContext();
-
     const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toEqual(ids);
     expect(result).toHaveLength(110);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 110 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 110,
+        deletedCount: 10,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
 
     // Verify existing purchases were deleted
@@ -273,9 +336,9 @@ describe("deletePurchases mutation", () => {
   });
 
   it("should handle ObjectId strings and ObjectId objects", async () => {
-    const purchase1 = await createPurchaseInDB();
-    const purchase2 = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase1 = await createPurchaseInDB({}, context);
+    const purchase2 = await createPurchaseInDB({}, context);
 
     // Mix string and ObjectId formats
     const ids = [
@@ -286,9 +349,14 @@ describe("deletePurchases mutation", () => {
     const result = await deletePurchases(null, { ids }, context);
 
     expect(result).toHaveLength(2);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 2 },
-      "Successfully deleted purchases"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        requestedCount: 2,
+        deletedCount: 2,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully deleted family purchases"
     );
 
     // Verify both were deleted

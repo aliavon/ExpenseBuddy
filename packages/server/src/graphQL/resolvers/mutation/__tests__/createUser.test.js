@@ -9,6 +9,12 @@ describe("createUser mutation", () => {
   const createUserData = (overrides = {}) => ({
     firstName: "John",
     lastName: "Doe",
+    email:
+      overrides.email ||
+      `user${Date.now()}.${Math.random()
+        .toString(36)
+        .substr(2, 9)}@example.com`,
+    password: "securePassword123",
     ...overrides,
   });
 
@@ -26,8 +32,12 @@ describe("createUser mutation", () => {
     expect(result).toHaveProperty("createdAt");
     expect(result).toHaveProperty("updatedAt");
     expect(context.logger.info).toHaveBeenCalledWith(
-      { id: result._id.toString() },
-      "Successfully created user"
+      {
+        id: result._id.toString(),
+        familyId: context.auth.user.familyId,
+        createdBy: context.auth.user.id,
+      },
+      "Successfully created family user"
     );
   });
 
@@ -105,6 +115,8 @@ describe("createUser mutation", () => {
     const userData = createUserData({
       firstName: "John2",
       lastName: "Doe3rd",
+      email: "John2@example.com",
+      password: "password123",
     });
     const context = global.createMockContext();
 

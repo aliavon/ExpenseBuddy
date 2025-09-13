@@ -17,14 +17,22 @@ describe("editItemsCategory mutation", () => {
     };
   };
 
-  const createItemInDB = async (data = {}) => {
-    const itemData = createItemData(data);
+  const createItemInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const itemData = createItemData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const item = new Item(itemData);
     return await item.save();
   };
 
   it("should update category for single item successfully", async () => {
     const context = global.createMockContext();
+    await createItemInDB({ name: "Apple", category: "Old Category" }, context);
 
     const result = await editItemsCategory(
       null,
@@ -35,17 +43,22 @@ describe("editItemsCategory mutation", () => {
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("Apple");
     expect(result[0].category).toBe("Fruits");
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully updated items category"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+        modifiedCount: 1,
+      },
+      "Successfully updated family items category"
     );
   });
 
   it("should update category for multiple items successfully", async () => {
-    await createItemInDB({ name: "Apple", category: "Old Category" });
-    await createItemInDB({ name: "Banana", category: "Old Category" });
-    await createItemInDB({ name: "Orange", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB({ name: "Apple", category: "Old Category" }, context);
+    await createItemInDB({ name: "Banana", category: "Old Category" }, context);
+    await createItemInDB({ name: "Orange", category: "Old Category" }, context);
 
     const result = await editItemsCategory(
       null,
@@ -58,9 +71,14 @@ describe("editItemsCategory mutation", () => {
       expect(item.category).toBe("Fruits");
       expect(["Apple", "Banana", "Orange"]).toContain(item.name);
     });
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully updated items category"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+        modifiedCount: 3,
+      },
+      "Successfully updated family items category"
     );
   });
 
@@ -74,9 +92,14 @@ describe("editItemsCategory mutation", () => {
     );
 
     expect(result).toEqual([]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully updated items category"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+        modifiedCount: 0,
+      },
+      "Successfully updated family items category"
     );
   });
 
@@ -90,15 +113,23 @@ describe("editItemsCategory mutation", () => {
     );
 
     expect(result).toEqual([]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully updated items category"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+        modifiedCount: 0,
+      },
+      "Successfully updated family items category"
     );
   });
 
   it("should handle mixed existing and non-existing item names", async () => {
-    await createItemInDB({ name: "Existing Item", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Existing Item", category: "Old Category" },
+      context
+    );
 
     const result = await editItemsCategory(
       null,
@@ -112,15 +143,23 @@ describe("editItemsCategory mutation", () => {
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("Existing Item");
     expect(result[0].category).toBe("New Category");
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully updated items category"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+        modifiedCount: 1,
+      },
+      "Successfully updated family items category"
     );
   });
 
   it("should update category to empty string", async () => {
-    await createItemInDB({ name: "Test Item", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Test Item", category: "Old Category" },
+      context
+    );
 
     const result = await editItemsCategory(
       null,
@@ -132,11 +171,14 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle special characters in item names and categories", async () => {
-    await createItemInDB({
-      name: "Café & Croissant",
-      category: "Old Category",
-    });
     const context = global.createMockContext();
+    await createItemInDB(
+      {
+        name: "Café & Croissant",
+        category: "Old Category",
+      },
+      context
+    );
 
     const result = await editItemsCategory(
       null,
@@ -152,8 +194,8 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle unicode characters", async () => {
-    await createItemInDB({ name: "苹果", category: "旧类别" });
     const context = global.createMockContext();
+    await createItemInDB({ name: "苹果", category: "旧类别" }, context);
 
     const result = await editItemsCategory(
       null,
@@ -166,8 +208,11 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle emoji in item names and categories", async () => {
-    await createItemInDB({ name: "Apple 🍎", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Apple 🍎", category: "Old Category" },
+      context
+    );
 
     const result = await editItemsCategory(
       null,
@@ -180,14 +225,13 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle large batch updates", async () => {
+    const context = global.createMockContext();
     const itemNames = [];
     for (let i = 1; i <= 20; i++) {
       const name = `Item ${i}`;
       itemNames.push(name);
-      await createItemInDB({ name, category: "Old Category" });
+      await createItemInDB({ name, category: "Old Category" }, context);
     }
-
-    const context = global.createMockContext();
 
     const result = await editItemsCategory(
       null,
@@ -199,15 +243,23 @@ describe("editItemsCategory mutation", () => {
     result.forEach((item) => {
       expect(item.category).toBe("New Category");
     });
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 20 },
-      "Successfully updated items category"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 20,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+        modifiedCount: 20,
+      },
+      "Successfully updated family items category"
     );
   });
 
   it("should persist changes in database", async () => {
-    await createItemInDB({ name: "Persistent Item", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Persistent Item", category: "Old Category" },
+      context
+    );
 
     await editItemsCategory(
       null,
@@ -221,9 +273,15 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should not affect items with different names", async () => {
-    await createItemInDB({ name: "Item to Update", category: "Old Category" });
-    await createItemInDB({ name: "Item to Keep", category: "Keep Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Item to Update", category: "Old Category" },
+      context
+    );
+    await createItemInDB(
+      { name: "Item to Keep", category: "Keep Category" },
+      context
+    );
 
     await editItemsCategory(
       null,
@@ -240,8 +298,11 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle duplicate item names in input", async () => {
-    await createItemInDB({ name: "Duplicate Item", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Duplicate Item", category: "Old Category" },
+      context
+    );
 
     const result = await editItemsCategory(
       null,
@@ -258,10 +319,10 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle very long item names and categories", async () => {
+    const context = global.createMockContext();
     const longName = "A".repeat(200);
     const longCategory = "B".repeat(200);
-    await createItemInDB({ name: longName, category: "Old Category" });
-    const context = global.createMockContext();
+    await createItemInDB({ name: longName, category: "Old Category" }, context);
 
     const result = await editItemsCategory(
       null,
@@ -274,8 +335,11 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle database errors gracefully during update", async () => {
-    await createItemInDB({ name: "Test Item", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Test Item", category: "Old Category" },
+      context
+    );
 
     // Mock Item.updateMany to throw an error
     const originalUpdateMany = Item.updateMany;
@@ -296,8 +360,11 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle database errors gracefully during find", async () => {
-    await createItemInDB({ name: "Test Item", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Test Item", category: "Old Category" },
+      context
+    );
 
     // Mock Item.find to throw an error
     const originalFind = Item.find;
@@ -318,9 +385,9 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle case-sensitive item names", async () => {
-    await createItemInDB({ name: "Apple", category: "Old Category" });
-    await createItemInDB({ name: "apple", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB({ name: "Apple", category: "Old Category" }, context);
+    await createItemInDB({ name: "apple", category: "Old Category" }, context);
 
     const result = await editItemsCategory(
       null,
@@ -338,10 +405,10 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should return items in consistent order", async () => {
-    await createItemInDB({ name: "Zebra", category: "Old Category" });
-    await createItemInDB({ name: "Apple", category: "Old Category" });
-    await createItemInDB({ name: "Banana", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB({ name: "Zebra", category: "Old Category" }, context);
+    await createItemInDB({ name: "Apple", category: "Old Category" }, context);
+    await createItemInDB({ name: "Banana", category: "Old Category" }, context);
 
     const result = await editItemsCategory(
       null,
@@ -358,8 +425,11 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle null newCategory value", async () => {
-    await createItemInDB({ name: "Test Item", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Test Item", category: "Old Category" },
+      context
+    );
 
     const result = await editItemsCategory(
       null,
@@ -371,8 +441,11 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle items with existing empty categories", async () => {
-    await createItemInDB({ name: "Empty Category Item", category: "" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "Empty Category Item", category: "" },
+      context
+    );
 
     const result = await editItemsCategory(
       null,
@@ -385,8 +458,11 @@ describe("editItemsCategory mutation", () => {
   });
 
   it("should handle whitespace in item names", async () => {
-    await createItemInDB({ name: "  Spaced Item  ", category: "Old Category" });
     const context = global.createMockContext();
+    await createItemInDB(
+      { name: "  Spaced Item  ", category: "Old Category" },
+      context
+    );
 
     const result = await editItemsCategory(
       null,

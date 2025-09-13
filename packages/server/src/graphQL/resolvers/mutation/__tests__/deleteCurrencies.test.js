@@ -21,8 +21,15 @@ describe("deleteCurrencies mutation", () => {
     };
   };
 
-  const createCurrencyInDB = async (data = {}) => {
-    const currencyData = createCurrencyData(data);
+  const createCurrencyInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const currencyData = createCurrencyData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const currency = new Currency(currencyData);
     return await currency.save();
   };
@@ -37,15 +44,22 @@ describe("deleteCurrencies mutation", () => {
     ...overrides,
   });
 
-  const createFamilyIncomeInDB = async (data = {}) => {
-    const incomeData = createFamilyIncomeData(data);
+  const createFamilyIncomeInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const incomeData = createFamilyIncomeData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const income = new FamilyIncome(incomeData);
     return await income.save();
   };
 
   it("should delete single currency successfully", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const result = await deleteCurrencies(
       null,
@@ -54,8 +68,8 @@ describe("deleteCurrencies mutation", () => {
     );
 
     expect(result).toEqual([currency._id]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      { requestedCount: 1, deletedCount: 1, userId: context.auth.user.id },
       "Successfully deleted currencies"
     );
 
@@ -65,18 +79,18 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should delete multiple currencies successfully", async () => {
-    const currency1 = await createCurrencyInDB({ code: "USD" });
-    const currency2 = await createCurrencyInDB({ code: "EUR" });
-    const currency3 = await createCurrencyInDB({ code: "GBP" });
     const context = global.createMockContext();
+    const currency1 = await createCurrencyInDB({ code: "USD" }, context);
+    const currency2 = await createCurrencyInDB({ code: "EUR" }, context);
+    const currency3 = await createCurrencyInDB({ code: "GBP" }, context);
 
     const ids = [currency1._id, currency2._id, currency3._id];
 
     const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      { requestedCount: 3, deletedCount: 3, userId: context.auth.user.id },
       "Successfully deleted currencies"
     );
 
@@ -91,8 +105,8 @@ describe("deleteCurrencies mutation", () => {
     const result = await deleteCurrencies(null, { ids: [] }, context);
 
     expect(result).toEqual([]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      { requestedCount: 0, deletedCount: 0, userId: context.auth.user.id },
       "Successfully deleted currencies"
     );
   });
@@ -184,13 +198,12 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should handle mixed currencies - some in use, some not", async () => {
-    const usedCurrency = await createCurrencyInDB({ code: "USD" });
-    const unusedCurrency = await createCurrencyInDB({ code: "EUR" });
+    const context = global.createMockContext();
+    const usedCurrency = await createCurrencyInDB({ code: "USD" }, context);
+    const unusedCurrency = await createCurrencyInDB({ code: "EUR" }, context);
 
     // Create FamilyIncome record referencing only one currency
-    await createFamilyIncomeInDB({ currencyId: usedCurrency._id });
-
-    const context = global.createMockContext();
+    await createFamilyIncomeInDB({ currencyId: usedCurrency._id }, context);
 
     // Should fail because one currency is in use
     await expect(
@@ -220,25 +233,31 @@ describe("deleteCurrencies mutation", () => {
     const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 2 },
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      { requestedCount: 2, deletedCount: 0, userId: context.auth.user.id },
       "Successfully deleted currencies"
     );
   });
 
   it("should handle mixed existing and non-existing IDs", async () => {
-    const existingCurrency1 = await createCurrencyInDB({ code: "USD" });
-    const existingCurrency2 = await createCurrencyInDB({ code: "EUR" });
-    const nonExistentId = global.createMockId();
     const context = global.createMockContext();
+    const existingCurrency1 = await createCurrencyInDB(
+      { code: "USD" },
+      context
+    );
+    const existingCurrency2 = await createCurrencyInDB(
+      { code: "EUR" },
+      context
+    );
+    const nonExistentId = global.createMockId();
 
     const ids = [existingCurrency1._id, nonExistentId, existingCurrency2._id];
 
     const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      { requestedCount: 3, deletedCount: 2, userId: context.auth.user.id },
       "Successfully deleted currencies"
     );
 
@@ -250,10 +269,10 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should preserve order of IDs in result", async () => {
-    const currency1 = await createCurrencyInDB({ code: "USD" });
-    const currency2 = await createCurrencyInDB({ code: "EUR" });
-    const currency3 = await createCurrencyInDB({ code: "GBP" });
     const context = global.createMockContext();
+    const currency1 = await createCurrencyInDB({ code: "USD" }, context);
+    const currency2 = await createCurrencyInDB({ code: "EUR" }, context);
+    const currency3 = await createCurrencyInDB({ code: "GBP" }, context);
 
     const ids = [currency3._id, currency1._id, currency2._id];
 
@@ -263,24 +282,27 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should handle large batch deletion", async () => {
+    const context = global.createMockContext();
     const currencies = [];
     for (let i = 1; i <= 50; i++) {
       currencies.push(
-        await createCurrencyInDB({
-          code: `CUR${i}`,
-          name: `Currency ${i}`,
-        })
+        await createCurrencyInDB(
+          {
+            code: `CUR${i}`,
+            name: `Currency ${i}`,
+          },
+          context
+        )
       );
     }
 
     const ids = currencies.map((currency) => currency._id);
-    const context = global.createMockContext();
 
     const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 50 },
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      { requestedCount: 50, deletedCount: 50, userId: context.auth.user.id },
       "Successfully deleted currencies"
     );
 
@@ -290,16 +312,16 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should handle duplicate IDs in input", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const ids = [currency._id, currency._id, currency._id];
 
     const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toEqual(ids);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      { requestedCount: 3, deletedCount: 1, userId: context.auth.user.id },
       "Successfully deleted currencies"
     );
 
@@ -309,10 +331,16 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should not affect other currencies during deletion", async () => {
-    const currencyToDelete = await createCurrencyInDB({ code: "DEL" });
-    const currencyToKeep1 = await createCurrencyInDB({ code: "KEEP1" });
-    const currencyToKeep2 = await createCurrencyInDB({ code: "KEEP2" });
     const context = global.createMockContext();
+    const currencyToDelete = await createCurrencyInDB({ code: "DEL" }, context);
+    const currencyToKeep1 = await createCurrencyInDB(
+      { code: "KEEP1" },
+      context
+    );
+    const currencyToKeep2 = await createCurrencyInDB(
+      { code: "KEEP2" },
+      context
+    );
 
     await deleteCurrencies(null, { ids: [currencyToDelete._id] }, context);
 
@@ -329,8 +357,8 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should handle database errors gracefully during FamilyIncome count", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     // Mock FamilyIncome.countDocuments to throw an error
     const originalCountDocuments = FamilyIncome.countDocuments;
@@ -347,8 +375,8 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should handle database errors gracefully during currency deletion", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     // Mock Currency.deleteMany to throw an error
     const originalDeleteMany = Currency.deleteMany;
@@ -365,8 +393,8 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should check FamilyIncome usage before deletion", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     // Mock Currency.deleteMany to verify it's not called when currency is in use
     const originalDeleteMany = Currency.deleteMany;
@@ -390,9 +418,9 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should handle ObjectId strings and ObjectId objects", async () => {
-    const currency1 = await createCurrencyInDB({ code: "USD" });
-    const currency2 = await createCurrencyInDB({ code: "EUR" });
     const context = global.createMockContext();
+    const currency1 = await createCurrencyInDB({ code: "USD" }, context);
+    const currency2 = await createCurrencyInDB({ code: "EUR" }, context);
 
     // Mix string and ObjectId formats
     const ids = [
@@ -403,8 +431,8 @@ describe("deleteCurrencies mutation", () => {
     const result = await deleteCurrencies(null, { ids }, context);
 
     expect(result).toHaveLength(2);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 2 },
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      { requestedCount: 2, deletedCount: 2, userId: context.auth.user.id },
       "Successfully deleted currencies"
     );
 
@@ -427,12 +455,15 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should handle currencies with special characters", async () => {
-    const currency = await createCurrencyInDB({
-      name: "Yen Japonais",
-      code: "JPY",
-      symbol: "¥",
-    });
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB(
+      {
+        name: "Yen Japonais",
+        code: "JPY",
+        symbol: "¥",
+      },
+      context
+    );
 
     const result = await deleteCurrencies(
       null,
@@ -448,11 +479,14 @@ describe("deleteCurrencies mutation", () => {
   });
 
   it("should handle currencies with emoji", async () => {
-    const currency = await createCurrencyInDB({
-      name: "Fun Coin 🎉",
-      symbol: "🪙",
-    });
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB(
+      {
+        name: "Fun Coin 🎉",
+        symbol: "🪙",
+      },
+      context
+    );
 
     const result = await deleteCurrencies(
       null,

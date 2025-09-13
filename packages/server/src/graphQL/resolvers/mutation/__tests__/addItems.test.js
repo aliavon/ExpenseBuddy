@@ -28,8 +28,12 @@ describe("addItems mutation", () => {
     expect(result[0].category).toBe("Fruits");
     expect(result[0]._id).toBeDefined();
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully added items"
+      {
+        count: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully added family items"
     );
   });
 
@@ -51,8 +55,12 @@ describe("addItems mutation", () => {
     expect(result[1].category).toBe("Bakery");
     expect(result[2].category).toBe("Dairy");
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully added items"
+      {
+        count: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully added family items"
     );
   });
 
@@ -63,8 +71,12 @@ describe("addItems mutation", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully added items"
+      {
+        count: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully added family items"
     );
   });
 
@@ -151,8 +163,12 @@ describe("addItems mutation", () => {
     expect(result[0].name).toBe("Item 1");
     expect(result[49].name).toBe("Item 50");
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 50 },
-      "Successfully added items"
+      {
+        count: 50,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully added family items"
     );
   });
 
@@ -221,20 +237,57 @@ describe("addItems mutation", () => {
     expect(result[0].category).toBe(longCategory);
   });
 
-  it("should handle duplicate item names", async () => {
+  it("should handle duplicate item names in different families", async () => {
+    const context1 = global.createMockContext();
+    const context2 = global.createMockContext(); // Different family
+
+    // Create item with same name in family 1
+    const result1 = await addItems(
+      null,
+      {
+        items: [{ name: "Duplicate Item", category: "Category 1" }],
+      },
+      context1
+    );
+
+    // Should be able to create item with same name in family 2
+    const result2 = await addItems(
+      null,
+      {
+        items: [{ name: "Duplicate Item", category: "Category 2" }],
+      },
+      context2
+    );
+
+    expect(result1[0].name).toBe("Duplicate Item");
+    expect(result2[0].name).toBe("Duplicate Item");
+    expect(result1[0].familyId.toString()).toBe(context1.auth.user.familyId);
+    expect(result2[0].familyId.toString()).toBe(context2.auth.user.familyId);
+    expect(result1[0].familyId.toString()).not.toBe(
+      result2[0].familyId.toString()
+    );
+  });
+
+  it("should handle duplicate item names in same family", async () => {
     const context = global.createMockContext();
-    const items = [
-      createItemData({ name: "Duplicate Item", category: "Category 1" }),
-      createItemData({ name: "Duplicate Item", category: "Category 2" }),
-    ];
 
-    const result = await addItems(null, { items }, context);
+    // First item
+    await addItems(
+      null,
+      { items: [{ name: "Same Name", category: "Category 1" }] },
+      context
+    );
 
-    expect(result).toHaveLength(2);
-    expect(result[0].name).toBe("Duplicate Item");
-    expect(result[1].name).toBe("Duplicate Item");
-    expect(result[0].category).toBe("Category 1");
-    expect(result[1].category).toBe("Category 2");
+    // Try to create another item with same name in same family - should fail
+    await expect(
+      addItems(
+        null,
+        {
+          items: [{ name: "Same Name", category: "Category 2" }],
+        },
+        context
+      )
+    ).rejects.toThrow();
   });
 
   it("should handle null category values", async () => {

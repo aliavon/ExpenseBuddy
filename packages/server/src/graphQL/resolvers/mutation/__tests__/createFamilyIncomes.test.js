@@ -38,9 +38,13 @@ describe("createFamilyIncomes mutation", () => {
     expect(result[0].periodicity).toBe("MONTHLY");
     expect(result[0].date).toEqual(new Date("2024-01-15"));
     expect(result[0]).toHaveProperty("_id");
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully created FamilyIncome records"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully created family income records"
     );
   });
 
@@ -65,9 +69,13 @@ describe("createFamilyIncomes mutation", () => {
     expect(result[1].periodicity).toBe("WEEKLY");
     expect(result[2].amount).toBe(3000);
     expect(result[2].periodicity).toBe("DAILY");
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully created FamilyIncome records"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully created family income records"
     );
   });
 
@@ -81,9 +89,13 @@ describe("createFamilyIncomes mutation", () => {
     );
 
     expect(result).toEqual([]);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully created FamilyIncome records"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully created family income records"
     );
   });
 
@@ -233,9 +245,13 @@ describe("createFamilyIncomes mutation", () => {
     expect(result).toHaveLength(50);
     expect(result[0].amount).toBe(100);
     expect(result[49].amount).toBe(5000);
-    expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 50 },
-      "Successfully created FamilyIncome records"
+    expect(context.logger.info).toHaveBeenLastCalledWith(
+      {
+        count: 50,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully created family income records"
     );
   });
 

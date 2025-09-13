@@ -1,14 +1,24 @@
 const { GraphQLError } = require("graphql");
 const ERROR_CODES = require("../../../constants/errorCodes");
+const { requireAuth } = require("../../../auth");
+const mongoose = require("mongoose");
 
-module.exports = async (
-  _,
-  { ids },
-  { schemas: { Currency, FamilyIncome }, logger }
-) => {
+module.exports = async (_, { ids }, context) => {
+  const {
+    schemas: { Currency, FamilyIncome },
+    logger,
+  } = context;
+
+  // Require authentication (currencies are global system data)
+  const auth = requireAuth(context);
+
+  const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id));
+
+  // Check if any of these currencies are in use by any family
   const usedCount = await FamilyIncome.countDocuments({
-    currencyId: { $in: ids },
+    currencyId: { $in: objectIds },
   });
+
   if (usedCount > 0) {
     throw new GraphQLError(
       "One or more currencies are in use and cannot be deleted.",
@@ -16,7 +26,16 @@ module.exports = async (
     );
   }
 
-  await Currency.deleteMany({ _id: { $in: ids } });
-  logger.info({ count: ids.length }, "Successfully deleted currencies");
+  const deleteResult = await Currency.deleteMany({ _id: { $in: objectIds } });
+
+  logger.info(
+    {
+      requestedCount: ids.length,
+      deletedCount: deleteResult.deletedCount,
+      userId: auth.user.id,
+    },
+    "Successfully deleted currencies"
+  );
+
   return ids;
 };

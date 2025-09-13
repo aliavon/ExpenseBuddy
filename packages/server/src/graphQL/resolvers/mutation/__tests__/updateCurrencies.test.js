@@ -18,15 +18,22 @@ describe("updateCurrencies mutation", () => {
     };
   };
 
-  const createCurrencyInDB = async (data = {}) => {
-    const currencyData = createCurrencyData(data);
+  const createCurrencyInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const currencyData = createCurrencyData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const currency = new Currency(currencyData);
     return await currency.save();
   };
 
   it("should update single currency successfully", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -44,16 +51,16 @@ describe("updateCurrencies mutation", () => {
     expect(result[0].code).toBe("EUR");
     expect(result[0].symbol).toBe("€");
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
+      { count: 1, modifiedCount: 1, userId: context.auth.user.id },
       "Successfully updated currencies"
     );
   });
 
   it("should update multiple currencies successfully", async () => {
-    const currency1 = await createCurrencyInDB({ code: "USD" });
-    const currency2 = await createCurrencyInDB({ code: "EUR" });
-    const currency3 = await createCurrencyInDB({ code: "GBP" });
     const context = global.createMockContext();
+    const currency1 = await createCurrencyInDB({ code: "USD" }, context);
+    const currency2 = await createCurrencyInDB({ code: "EUR" }, context);
+    const currency3 = await createCurrencyInDB({ code: "GBP" }, context);
 
     const updates = [
       { id: currency1._id, name: "United States Dollar" },
@@ -81,7 +88,7 @@ describe("updateCurrencies mutation", () => {
     expect(updatedCurrency3.symbol).toBe("£");
 
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
+      { count: 3, modifiedCount: 3, userId: context.auth.user.id },
       "Successfully updated currencies"
     );
   });
@@ -93,7 +100,7 @@ describe("updateCurrencies mutation", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
+      { count: 0, modifiedCount: 0, userId: context.auth.user.id },
       "Successfully updated currencies"
     );
   });
@@ -122,8 +129,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle special characters in currency data", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -142,8 +149,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle unicode symbols", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -162,8 +169,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle emoji in currency data", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -205,7 +212,7 @@ describe("updateCurrencies mutation", () => {
     expect(result[0].name).toBe("Updated Currency 1");
     expect(result[19].name).toBe("Updated Currency 20");
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 20 },
+      { count: 20, modifiedCount: 20, userId: context.auth.user.id },
       "Successfully updated currencies"
     );
   });
@@ -225,15 +232,18 @@ describe("updateCurrencies mutation", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
+      { count: 0, modifiedCount: 0, userId: context.auth.user.id },
       "Successfully updated currencies"
     );
   });
 
   it("should handle mixed existing and non-existing IDs", async () => {
-    const existingCurrency = await createCurrencyInDB({ name: "Original" });
-    const nonExistentId = global.createMockId();
     const context = global.createMockContext();
+    const existingCurrency = await createCurrencyInDB(
+      { name: "Original" },
+      context
+    );
+    const nonExistentId = global.createMockId();
 
     const updates = [
       { id: existingCurrency._id, name: "Updated" },
@@ -245,14 +255,14 @@ describe("updateCurrencies mutation", () => {
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("Updated");
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
+      { count: 1, modifiedCount: 1, userId: context.auth.user.id },
       "Successfully updated currencies"
     );
   });
 
   it("should handle database errors gracefully", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     // Mock Currency.bulkWrite to throw an error
     const originalBulkWrite = Currency.bulkWrite;
@@ -276,8 +286,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should persist changes in database", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -296,8 +306,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle ObjectId string format", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -312,8 +322,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle very long currency names", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
     const longName = "A".repeat(200);
 
     const updates = [
@@ -329,8 +339,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle currency codes with different cases", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -345,8 +355,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle empty string values", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -365,8 +375,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle null values", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     const updates = [
       {
@@ -383,8 +393,8 @@ describe("updateCurrencies mutation", () => {
   });
 
   it("should handle multiple updates to same currency", async () => {
-    const currency = await createCurrencyInDB();
     const context = global.createMockContext();
+    const currency = await createCurrencyInDB({}, context);
 
     // First update
     const firstUpdates = [

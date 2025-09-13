@@ -15,15 +15,22 @@ describe("updatePurchases mutation", () => {
     ...overrides,
   });
 
-  const createPurchaseInDB = async (data = {}) => {
-    const purchaseData = createPurchaseData(data);
+  const createPurchaseInDB = async (
+    data = {},
+    context = global.createMockContext()
+  ) => {
+    const purchaseData = createPurchaseData({
+      familyId: context.auth.user.familyId,
+      createdByUserId: context.auth.user.id,
+      ...data,
+    });
     const purchase = new Purchase(purchaseData);
     return await purchase.save();
   };
 
   it("should update single purchase successfully", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     const updates = [
       {
@@ -40,16 +47,30 @@ describe("updatePurchases mutation", () => {
     expect(result[0].price).toBe(25.99);
     expect(result[0].unit).toBe("kg"); // unchanged field
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully updated purchases"
+      {
+        count: 1,
+        modifiedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family purchases"
     );
   });
 
   it("should update multiple purchases successfully", async () => {
-    const purchase1 = await createPurchaseInDB({ quantity: 1, price: 10 });
-    const purchase2 = await createPurchaseInDB({ quantity: 2, price: 20 });
-    const purchase3 = await createPurchaseInDB({ quantity: 3, price: 30 });
     const context = global.createMockContext();
+    const purchase1 = await createPurchaseInDB(
+      { quantity: 1, price: 10 },
+      context
+    );
+    const purchase2 = await createPurchaseInDB(
+      { quantity: 2, price: 20 },
+      context
+    );
+    const purchase3 = await createPurchaseInDB(
+      { quantity: 3, price: 30 },
+      context
+    );
 
     const updates = [
       { id: purchase1._id, quantity: 10 },
@@ -79,8 +100,13 @@ describe("updatePurchases mutation", () => {
     expect(updatedPurchase3.price).toBe(300);
 
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 3 },
-      "Successfully updated purchases"
+      {
+        count: 3,
+        modifiedCount: 3,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family purchases"
     );
   });
 
@@ -91,14 +117,19 @@ describe("updatePurchases mutation", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully updated purchases"
+      {
+        count: 0,
+        modifiedCount: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family purchases"
     );
   });
 
   it("should update all purchase fields", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     const updates = [
       {
@@ -124,14 +155,14 @@ describe("updatePurchases mutation", () => {
   });
 
   it("should update only specified fields", async () => {
+    const context = global.createMockContext();
     const originalData = {
       quantity: 5,
       unit: "kg",
       price: 50.0,
       note: "Original note",
     };
-    const purchase = await createPurchaseInDB(originalData);
-    const context = global.createMockContext();
+    const purchase = await createPurchaseInDB(originalData, context);
 
     const updates = [
       {
@@ -149,8 +180,8 @@ describe("updatePurchases mutation", () => {
   });
 
   it("should handle updates with decimal values", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     const updates = [
       {
@@ -169,8 +200,8 @@ describe("updatePurchases mutation", () => {
   });
 
   it("should handle updates with zero values", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     const updates = [
       {
@@ -187,8 +218,8 @@ describe("updatePurchases mutation", () => {
   });
 
   it("should handle updates with special characters", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     const updates = [
       {
@@ -205,9 +236,10 @@ describe("updatePurchases mutation", () => {
   });
 
   it("should handle large batch updates", async () => {
+    const context = global.createMockContext();
     const purchases = [];
     for (let i = 1; i <= 20; i++) {
-      purchases.push(await createPurchaseInDB({ quantity: i }));
+      purchases.push(await createPurchaseInDB({ quantity: i }, context));
     }
 
     const updates = purchases.map((purchase) => ({
@@ -215,25 +247,31 @@ describe("updatePurchases mutation", () => {
       quantity: purchase.quantity * 2,
     }));
 
-    const context = global.createMockContext();
-
     const result = await updatePurchases(null, { updates }, context);
 
     expect(result).toHaveLength(20);
     expect(result[0].quantity).toBe(2);
     expect(result[19].quantity).toBe(40);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 20 },
-      "Successfully updated purchases"
+      {
+        count: 20,
+        modifiedCount: 20,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family purchases"
     );
   });
 
   it("should handle updates with null/undefined values", async () => {
-    const purchase = await createPurchaseInDB({
-      note: "Original note",
-      discount: 5.0,
-    });
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB(
+      {
+        note: "Original note",
+        discount: 5.0,
+      },
+      context
+    );
 
     const updates = [
       {
@@ -251,17 +289,16 @@ describe("updatePurchases mutation", () => {
   });
 
   it("should return updated purchases in correct order", async () => {
-    const purchase1 = await createPurchaseInDB({ quantity: 1 });
-    const purchase2 = await createPurchaseInDB({ quantity: 2 });
-    const purchase3 = await createPurchaseInDB({ quantity: 3 });
+    const context = global.createMockContext();
+    const purchase1 = await createPurchaseInDB({ quantity: 1 }, context);
+    const purchase2 = await createPurchaseInDB({ quantity: 2 }, context);
+    const purchase3 = await createPurchaseInDB({ quantity: 3 }, context);
 
     const updates = [
       { id: purchase3._id, quantity: 30 },
       { id: purchase1._id, quantity: 10 },
       { id: purchase2._id, quantity: 20 },
     ];
-
-    const context = global.createMockContext();
 
     const result = await updatePurchases(null, { updates }, context);
 
@@ -286,15 +323,20 @@ describe("updatePurchases mutation", () => {
 
     expect(result).toEqual([]);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 0 },
-      "Successfully updated purchases"
+      {
+        count: 0,
+        modifiedCount: 0,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family purchases"
     );
   });
 
   it("should handle mixed existing and non-existing IDs", async () => {
-    const existingPurchase = await createPurchaseInDB({ quantity: 5 });
-    const nonExistentId = global.createMockId();
     const context = global.createMockContext();
+    const existingPurchase = await createPurchaseInDB({ quantity: 5 }, context);
+    const nonExistentId = global.createMockId();
 
     const updates = [
       { id: existingPurchase._id, quantity: 50 },
@@ -306,14 +348,19 @@ describe("updatePurchases mutation", () => {
     expect(result).toHaveLength(1);
     expect(result[0].quantity).toBe(50);
     expect(context.logger.info).toHaveBeenCalledWith(
-      { count: 1 },
-      "Successfully updated purchases"
+      {
+        count: 1,
+        modifiedCount: 1,
+        userId: context.auth.user.id,
+        familyId: context.auth.user.familyId,
+      },
+      "Successfully updated family purchases"
     );
   });
 
   it("should handle database errors gracefully", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     // Mock Purchase.bulkWrite to throw an error
     const originalBulkWrite = Purchase.bulkWrite;
@@ -337,8 +384,8 @@ describe("updatePurchases mutation", () => {
   });
 
   it("should handle updates with very large numbers", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
 
     const updates = [
       {
@@ -355,8 +402,8 @@ describe("updatePurchases mutation", () => {
   });
 
   it("should handle date updates correctly", async () => {
-    const purchase = await createPurchaseInDB();
     const context = global.createMockContext();
+    const purchase = await createPurchaseInDB({}, context);
     const newDate = new Date("2025-06-15T10:30:00Z");
 
     const updates = [
