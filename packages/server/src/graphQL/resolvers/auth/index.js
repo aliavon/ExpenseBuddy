@@ -7,6 +7,13 @@ const sendVerificationEmail = require("./sendVerificationEmail");
 const requestPasswordReset = require("./requestPasswordReset");
 const resetPassword = require("./resetPassword");
 const changePassword = require("./changePassword");
+const createFamily = require("./createFamily");
+const updateFamily = require("./updateFamily");
+const joinFamilyByCode = require("./joinFamilyByCode");
+const leaveFamilyIfNotOwner = require("./leaveFamily"); // Use schema name
+const inviteToFamily = require("./inviteToFamily");
+const removeFamilyMember = require("./removeFamilyMember");
+const updateMemberRole = require("./updateMemberRole");
 
 module.exports = {
   register,
@@ -18,4 +25,11 @@ module.exports = {
   requestPasswordReset,
   resetPassword,
   changePassword,
+  createFamily,
+  updateFamily,
+  joinFamilyByCode,
+  leaveFamilyIfNotOwner, // Schema uses this name
+  inviteToFamily,
+  removeFamilyMember,
+  updateMemberRole,
 };

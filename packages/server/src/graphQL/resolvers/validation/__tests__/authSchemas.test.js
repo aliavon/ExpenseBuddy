@@ -7,6 +7,9 @@ const {
   createFamilySchema,
   updateFamilySchema,
   joinFamilyByCodeSchema,
+  inviteToFamilySchema,
+  removeFamilyMemberSchema,
+  updateMemberRoleSchema,
 } = require("../index");
 
 describe("Authentication Validation Schemas", () => {
@@ -418,7 +421,7 @@ describe("Authentication Validation Schemas", () => {
 
   describe("edge cases", () => {
     it("should handle missing input object", () => {
-      const schemas = [
+      const inputWrapperSchemas = [
         registerSchema,
         loginSchema,
         refreshTokenSchema,
@@ -429,15 +432,28 @@ describe("Authentication Validation Schemas", () => {
         joinFamilyByCodeSchema,
       ];
 
-      schemas.forEach((schema) => {
+      inputWrapperSchemas.forEach((schema) => {
         const { error } = schema.validate({});
         expect(error).toBeDefined();
         expect(error.details[0].message).toBe('"input" is required');
       });
+
+      // Direct input schemas
+      const directInputSchemas = [
+        inviteToFamilySchema,
+        removeFamilyMemberSchema,
+        updateMemberRoleSchema,
+      ];
+
+      directInputSchemas.forEach((schema) => {
+        const { error } = schema.validate({});
+        expect(error).toBeDefined();
+        expect(error.details[0].path[0]).toMatch(/(email|userId)/);
+      });
     });
 
     it("should handle null input", () => {
-      const schemas = [
+      const inputWrapperSchemas = [
         registerSchema,
         loginSchema,
         refreshTokenSchema,
@@ -448,10 +464,24 @@ describe("Authentication Validation Schemas", () => {
         joinFamilyByCodeSchema,
       ];
 
-      schemas.forEach((schema) => {
+      inputWrapperSchemas.forEach((schema) => {
         const { error } = schema.validate({ input: null });
         expect(error).toBeDefined();
         expect(error.details[0].message).toBe('"input" must be of type object');
+      });
+
+      // Direct input schemas don't have input wrapper
+      const directInputSchemas = [
+        { schema: inviteToFamilySchema, nullField: { email: null, role: "MEMBER" } },
+        { schema: removeFamilyMemberSchema, nullField: { userId: null } },
+        { schema: updateMemberRoleSchema, nullField: { userId: null, role: "MEMBER" } },
+      ];
+
+      directInputSchemas.forEach(({ schema, nullField }) => {
+        const { error } = schema.validate(nullField);
+        expect(error).toBeDefined();
+        // Should have error about required field
+        expect(error.details[0].message).toMatch(/(must be a string|is required)/);
       });
     });
   });

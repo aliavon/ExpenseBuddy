@@ -44,6 +44,9 @@ const changePasswordSchema = require("./changePasswordSchema");
 const createFamilySchema = require("./createFamilySchema");
 const updateFamilySchema = require("./updateFamilySchema");
 const joinFamilyByCodeSchema = require("./joinFamilyByCodeSchema");
+const inviteToFamilySchema = require("./inviteToFamilySchema");
+const removeFamilyMemberSchema = require("./removeFamilyMemberSchema");
+const updateMemberRoleSchema = require("./updateMemberRoleSchema");
 
 const withValidation = require("./withValidation");
 const withValidationCurried = require("./withValidationCurried");
@@ -91,6 +94,9 @@ module.exports = {
   createFamilySchema,
   updateFamilySchema,
   joinFamilyByCodeSchema,
+  inviteToFamilySchema,
+  removeFamilyMemberSchema,
+  updateMemberRoleSchema,
 
   withValidation,
   withValidationCurried,
