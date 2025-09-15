@@ -1,10 +1,10 @@
 const { verifyEmailResolver } = require("../verifyEmail");
-const { verifyToken } = require("../../../../auth/jwtUtils");
+const { verifyVerificationToken } = require("../../../../auth/jwtUtils");
 const { User } = require("../../../../database/schemas");
 
 // Mock external dependencies
 jest.mock("../../../../auth/jwtUtils", () => ({
-  verifyToken: jest.fn(),
+  verifyVerificationToken: jest.fn(),
 }));
 
 jest.mock("../../../../database/schemas", () => ({
@@ -43,17 +43,14 @@ describe("verifyEmail resolver", () => {
         emailVerificationExpires: null,
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyVerificationToken.mockReturnValue(mockDecodedToken);
       User.findOne.mockResolvedValue(mockUser);
       User.findByIdAndUpdate.mockResolvedValue(mockUpdatedUser);
 
       const result = await verifyEmailResolver(null, { token });
 
       expect(result).toBe(true);
-      expect(verifyToken).toHaveBeenCalledWith(
-        token,
-        process.env.JWT_ACCESS_SECRET
-      );
+      expect(verifyVerificationToken).toHaveBeenCalledWith(token);
       expect(User.findOne).toHaveBeenCalledWith({
         _id: "user-id",
         emailVerificationToken: token,
@@ -76,7 +73,7 @@ describe("verifyEmail resolver", () => {
     it("should throw error for invalid token", async () => {
       const token = "invalid-token";
 
-      verifyToken.mockImplementation(() => {
+      verifyVerificationToken.mockImplementation(() => {
         const error = new Error("Invalid token");
         error.name = "JsonWebTokenError";
         throw error;
@@ -86,17 +83,14 @@ describe("verifyEmail resolver", () => {
         "Invalid or expired verification token"
       );
 
-      expect(verifyToken).toHaveBeenCalledWith(
-        token,
-        process.env.JWT_ACCESS_SECRET
-      );
+      expect(verifyVerificationToken).toHaveBeenCalledWith(token);
       expect(User.findOne).not.toHaveBeenCalled();
     });
 
     it("should throw error for expired token", async () => {
       const token = "expired-token";
 
-      verifyToken.mockImplementation(() => {
+      verifyVerificationToken.mockImplementation(() => {
         const error = new Error("Token expired");
         error.name = "TokenExpiredError";
         throw error;
@@ -110,7 +104,7 @@ describe("verifyEmail resolver", () => {
     it("should throw error for malformed token", async () => {
       const token = "malformed.token";
 
-      verifyToken.mockImplementation(() => {
+      verifyVerificationToken.mockImplementation(() => {
         const error = new Error("Malformed token");
         error.name = "JsonWebTokenError";
         throw error;
@@ -131,7 +125,7 @@ describe("verifyEmail resolver", () => {
         type: "email_verification",
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyVerificationToken.mockReturnValue(mockDecodedToken);
       User.findOne.mockResolvedValue(null);
 
       await expect(verifyEmailResolver(null, { token })).rejects.toThrow(
@@ -154,7 +148,7 @@ describe("verifyEmail resolver", () => {
         type: "email_verification",
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyVerificationToken.mockReturnValue(mockDecodedToken);
       User.findOne.mockResolvedValue(null); // No user found with isActive: true
 
       await expect(verifyEmailResolver(null, { token })).rejects.toThrow(
@@ -178,7 +172,7 @@ describe("verifyEmail resolver", () => {
         emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyVerificationToken.mockReturnValue(mockDecodedToken);
       User.findOne.mockResolvedValue(mockUser);
 
       const result = await verifyEmailResolver(null, { token });
@@ -198,7 +192,7 @@ describe("verifyEmail resolver", () => {
         type: "email_verification",
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyVerificationToken.mockReturnValue(mockDecodedToken);
       User.findOne.mockRejectedValue(new Error("Database connection error"));
 
       await expect(verifyEmailResolver(null, { token })).rejects.toThrow(
@@ -222,7 +216,7 @@ describe("verifyEmail resolver", () => {
         emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyVerificationToken.mockReturnValue(mockDecodedToken);
       User.findOne.mockResolvedValue(mockUser);
       User.findByIdAndUpdate.mockRejectedValue(
         new Error("Database update error")

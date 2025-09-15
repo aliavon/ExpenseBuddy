@@ -1,9 +1,6 @@
 const { GraphQLError } = require("graphql");
 const bcrypt = require("bcryptjs");
-const {
-  generateAccessToken,
-  generateRefreshToken,
-} = require("../../../auth/jwtUtils");
+const { generateVerificationToken } = require("../../../auth/jwtUtils");
 const { sendVerificationEmail } = require("../../../auth/emailService");
 const { User, Family, Currency } = require("../../../database/schemas");
 const { withValidationCurried, registerSchema } = require("../validation");
@@ -40,7 +37,7 @@ async function register(parent, args) {
   let familyId = null;
   let roleInFamily = "MEMBER";
 
-  // Handle family logic
+  // Handle family logic (optional)
   if (invitationToken) {
     // TODO: Implement JWT invitation token validation
     // For now, create new family
@@ -93,14 +90,8 @@ async function register(parent, args) {
 
     familyId = newFamily._id;
     roleInFamily = "OWNER";
-  } else {
-    throw new GraphQLError(
-      "Must provide familyName, inviteCode, or invitationToken",
-      {
-        extensions: { code: ERROR_CODES.MISSING_FAMILY_INFO },
-      }
-    );
   }
+  // If no family information provided, create user without family (familyId = null)
 
   // Create user
   const user = await User.create({
@@ -117,25 +108,34 @@ async function register(parent, args) {
   });
 
   // Update family ownerId if user is owner
-  if (roleInFamily === "OWNER") {
+  if (roleInFamily === "OWNER" && familyId) {
     await Family.findByIdAndUpdate(familyId, { ownerId: user._id });
   }
 
-  // Generate JWT tokens
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  // Generate email verification token
+  const verificationToken = generateVerificationToken({
+    userId: user._id,
+    email: user.email,
+  });
+
+  // Save verification token to user
+  await User.findByIdAndUpdate(user._id, {
+    emailVerificationToken: verificationToken,
+    emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+  });
 
   // Send verification email (don't block registration if it fails)
   try {
-    await sendVerificationEmail(email, "temp-token", firstName);
+    await sendVerificationEmail(email, verificationToken, firstName);
   } catch (error) {
     console.warn("Failed to send verification email:", error.message);
+    // Still return success - user can request new verification email later
   }
 
   return {
-    accessToken,
-    refreshToken,
-    user,
+    success: true,
+    message:
+      "Registration successful! Please check your email to activate your account.",
   };
 }
 

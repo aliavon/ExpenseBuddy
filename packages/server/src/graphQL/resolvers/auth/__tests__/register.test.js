@@ -1,9 +1,6 @@
 const bcrypt = require("bcryptjs");
 const { registerResolver: register } = require("../register");
-const {
-  generateAccessToken,
-  generateRefreshToken,
-} = require("../../../../auth/jwtUtils");
+const { generateVerificationToken } = require("../../../../auth/jwtUtils");
 const { sendVerificationEmail } = require("../../../../auth/emailService");
 const { User, Family, Currency } = require("../../../../database/schemas");
 
@@ -17,6 +14,7 @@ jest.mock("../../../../database/schemas", () => ({
   User: {
     findOne: jest.fn(),
     create: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
   },
   Family: {
     create: jest.fn(),
@@ -40,8 +38,7 @@ describe("register resolver", () => {
     bcrypt.hash = jest.fn().mockResolvedValue("hashedPassword");
 
     // Mock JWT generation
-    generateAccessToken.mockReturnValue("access-token");
-    generateRefreshToken.mockReturnValue("refresh-token");
+    generateVerificationToken.mockReturnValue("verification-token");
 
     // Mock email service
     sendVerificationEmail.mockResolvedValue(true);
@@ -77,6 +74,7 @@ describe("register resolver", () => {
       Family.create.mockResolvedValue(mockFamily);
       User.create.mockResolvedValue(mockUser);
       Family.findByIdAndUpdate.mockResolvedValue(mockFamily);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
 
       const result = await register(null, { input }, mockContext);
 
@@ -110,19 +108,26 @@ describe("register resolver", () => {
         ownerId: "user-id",
       });
 
-      expect(generateAccessToken).toHaveBeenCalledWith(mockUser);
-      expect(generateRefreshToken).toHaveBeenCalledWith(mockUser);
+      expect(generateVerificationToken).toHaveBeenCalledWith({
+        userId: "user-id",
+        email: "john@example.com",
+      });
+
+      expect(User.findByIdAndUpdate).toHaveBeenCalledWith("user-id", {
+        emailVerificationToken: "verification-token",
+        emailVerificationExpires: expect.any(Date),
+      });
 
       expect(sendVerificationEmail).toHaveBeenCalledWith(
         "john@example.com",
-        "temp-token",
+        "verification-token",
         "John"
       );
 
       expect(result).toEqual({
-        accessToken: "access-token",
-        refreshToken: "refresh-token",
-        user: mockUser,
+        success: true,
+        message:
+          "Registration successful! Please check your email to activate your account.",
       });
     });
   });
@@ -155,6 +160,7 @@ describe("register resolver", () => {
       User.findOne.mockResolvedValue(null);
       Family.findOne.mockResolvedValue(mockFamily);
       User.create.mockResolvedValue(mockUser);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
 
       const result = await register(null, { input }, mockContext);
 
@@ -176,7 +182,27 @@ describe("register resolver", () => {
         isActive: true,
       });
 
-      expect(result.user.roleInFamily).toBe("MEMBER");
+      expect(generateVerificationToken).toHaveBeenCalledWith({
+        userId: "user-id",
+        email: "jane@example.com",
+      });
+
+      expect(User.findByIdAndUpdate).toHaveBeenCalledWith("user-id", {
+        emailVerificationToken: "verification-token",
+        emailVerificationExpires: expect.any(Date),
+      });
+
+      expect(sendVerificationEmail).toHaveBeenCalledWith(
+        "jane@example.com",
+        "verification-token",
+        "Jane"
+      );
+
+      expect(result).toEqual({
+        success: true,
+        message:
+          "Registration successful! Please check your email to activate your account.",
+      });
     });
   });
 
@@ -243,7 +269,7 @@ describe("register resolver", () => {
       expect(User.create).not.toHaveBeenCalled();
     });
 
-    it("should throw error if no family info provided", async () => {
+    it("should register user without family successfully", async () => {
       const input = {
         firstName: "John",
         lastName: "Doe",
@@ -252,14 +278,58 @@ describe("register resolver", () => {
         // No familyName, inviteCode, or invitationToken
       };
 
-      User.findOne.mockResolvedValue(null);
+      const mockUser = {
+        _id: "user-id",
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+        familyId: null,
+        roleInFamily: "MEMBER",
+      };
 
-      await expect(register(null, { input }, mockContext)).rejects.toThrow(
-        "Must provide familyName, inviteCode, or invitationToken"
+      User.findOne.mockResolvedValue(null);
+      User.create.mockResolvedValue(mockUser);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
+
+      const result = await register(null, { input }, mockContext);
+
+      expect(User.create).toHaveBeenCalledWith({
+        firstName: "John",
+        lastName: "Doe",
+        middleName: "",
+        email: "john@example.com",
+        password: "hashedPassword",
+        familyId: null,
+        roleInFamily: "MEMBER",
+        isEmailVerified: false,
+        isVerified: false,
+        isActive: true,
+      });
+
+      expect(Family.create).not.toHaveBeenCalled();
+      expect(Family.findByIdAndUpdate).not.toHaveBeenCalled();
+
+      expect(generateVerificationToken).toHaveBeenCalledWith({
+        userId: "user-id",
+        email: "john@example.com",
+      });
+
+      expect(User.findByIdAndUpdate).toHaveBeenCalledWith("user-id", {
+        emailVerificationToken: "verification-token",
+        emailVerificationExpires: expect.any(Date),
+      });
+
+      expect(sendVerificationEmail).toHaveBeenCalledWith(
+        "john@example.com",
+        "verification-token",
+        "John"
       );
 
-      expect(User.create).not.toHaveBeenCalled();
-      expect(Family.create).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        success: true,
+        message:
+          "Registration successful! Please check your email to activate your account.",
+      });
     });
 
     it("should continue if email verification fails", async () => {
@@ -284,6 +354,7 @@ describe("register resolver", () => {
       Family.create.mockResolvedValue(mockFamily);
       User.create.mockResolvedValue(mockUser);
       Family.findByIdAndUpdate.mockResolvedValue(mockFamily);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
 
       // Email service fails
       sendVerificationEmail.mockRejectedValue(new Error("SMTP error"));
@@ -295,8 +366,11 @@ describe("register resolver", () => {
         "Failed to send verification email:",
         "SMTP error"
       );
-      expect(result).toBeDefined();
-      expect(result.user).toEqual(mockUser);
+      expect(result).toEqual({
+        success: true,
+        message:
+          "Registration successful! Please check your email to activate your account.",
+      });
 
       consoleWarnSpy.mockRestore();
     });

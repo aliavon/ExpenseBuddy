@@ -1,5 +1,5 @@
 const { GraphQLError } = require("graphql");
-const { verifyToken } = require("../../../auth/jwtUtils");
+const { verifyVerificationToken } = require("../../../auth/jwtUtils");
 const { User } = require("../../../database/schemas");
 const { withValidationCurried, verifyEmailSchema } = require("../validation");
 const { withErrorHandlingCurried } = require("../error-handling");
@@ -12,8 +12,8 @@ async function verifyEmail(parent, args) {
   const { token } = args;
 
   try {
-    // Verify JWT token
-    const decodedToken = verifyToken(token, process.env.JWT_ACCESS_SECRET);
+    // Verify JWT verification token
+    const decodedToken = verifyVerificationToken(token);
 
     if (!decodedToken || !decodedToken.userId) {
       throw new GraphQLError("Invalid or expired verification token", {

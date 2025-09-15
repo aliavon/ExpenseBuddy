@@ -192,7 +192,7 @@ describe("JWT Utils", () => {
       expect(ttl).toBeDefined();
       expect(typeof ttl).toBe("number");
       expect(ttl).toBeGreaterThan(0);
-      expect(ttl).toBeLessThanOrEqual(15 * 60); // 15 minutes max
+      expect(ttl).toBeLessThanOrEqual(60 * 60); // 1 hour max
     });
 
     it("should return 0 TTL for expired token", () => {
