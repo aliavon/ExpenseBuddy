@@ -20,7 +20,9 @@ async function login(parent, args) {
   const user = await User.findOne({
     email: email.toLowerCase(),
     isActive: true,
-  }).populate("familyId");
+  })
+    .select("+password")
+    .populate("familyId");
 
   if (!user) {
     throw new GraphQLError("Invalid email or password", {

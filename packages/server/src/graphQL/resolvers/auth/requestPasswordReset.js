@@ -1,5 +1,5 @@
 const { GraphQLError } = require("graphql");
-const { generateAccessToken } = require("../../../auth/jwtUtils");
+const { generatePasswordResetToken } = require("../../../auth/jwtUtils");
 const { sendPasswordResetEmail } = require("../../../auth/emailService");
 const { User } = require("../../../database/schemas");
 const {
@@ -28,7 +28,7 @@ async function requestReset(parent, args) {
     }
 
     // Generate password reset token
-    const resetToken = generateAccessToken({
+    const resetToken = generatePasswordResetToken({
       userId: user._id,
       email: user.email,
       type: "password_reset",
@@ -52,6 +52,18 @@ async function requestReset(parent, args) {
       await sendPasswordResetEmail(email, resetToken, user.firstName);
     } catch (emailError) {
       console.warn("Failed to send password reset email:", emailError.message);
+
+      // For development: log the reset link to console
+      if (process.env.NODE_ENV !== "production") {
+        const resetLink = `${
+          process.env.CLIENT_URL || "http://localhost:3000"
+        }/auth/reset/${resetToken}`;
+        console.log("\n🔗 PASSWORD RESET LINK (Development Mode):");
+        console.log(`User: ${email}`);
+        console.log(`Reset Link: ${resetLink}`);
+        console.log("Copy this link to test password reset\n");
+      }
+
       // Continue execution - token is saved in DB, user can still reset if they have the token
     }
 

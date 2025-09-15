@@ -1,87 +1,66 @@
 const { GraphQLError } = require("graphql");
 const bcrypt = require("bcryptjs");
-const { verifyToken } = require("../../../auth/jwtUtils");
+const { verifyPasswordResetToken } = require("../../../auth/jwtUtils");
 const { User } = require("../../../database/schemas");
 const { withValidationCurried, resetPasswordSchema } = require("../validation");
 const { withErrorHandlingCurried } = require("../error-handling");
-const ERROR_CODES = require("../../../constants/errorCodes");
 
 /**
  * Reset user password with reset token
  */
 async function resetPass(parent, args) {
-  const { token, newPassword } = args;
+  const { token, newPassword } = args.input;
 
   try {
+    // Clean token from invisible characters that might be added during copy/paste
+    const cleanToken = token.trim().replace(/[\u200B-\u200D\uFEFF\u00A0]/g, "");
+
     // Verify JWT token
-    const decodedToken = verifyToken(token, process.env.JWT_ACCESS_SECRET);
+    const decodedToken = verifyPasswordResetToken(cleanToken);
 
     if (
       !decodedToken ||
       !decodedToken.userId ||
       decodedToken.type !== "password_reset"
     ) {
-      throw new GraphQLError("Invalid or expired reset token", {
-        extensions: { code: ERROR_CODES.INVALID_TOKEN },
+      throw new GraphQLError("Invalid password reset token", {
+        extensions: { code: "PASSWORD_RESET_FAILED" },
       });
     }
 
-    // Find user with matching reset token
-    const user = await User.findOne({
-      _id: decodedToken.userId,
-      passwordResetToken: token,
-      passwordResetExpires: { $gt: new Date() },
-      isActive: true,
-    });
+    // Find user by token data
+    const user = await User.findById(decodedToken.userId);
 
-    if (!user) {
-      throw new GraphQLError("Invalid or expired reset token", {
-        extensions: { code: ERROR_CODES.INVALID_TOKEN },
+    if (!user || !user.isActive) {
+      throw new GraphQLError("Invalid password reset token", {
+        extensions: { code: "PASSWORD_RESET_FAILED" },
       });
     }
 
     // Hash the new password
-    const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Update user password and clear reset tokens
-    await User.findByIdAndUpdate(
-      user._id,
-      {
-        password: hashedPassword,
-        passwordResetToken: null,
-        passwordResetExpires: null,
-      },
-      { new: true }
-    );
+    // Update user's password
+    await User.findByIdAndUpdate(user._id, {
+      password: hashedPassword,
+      updatedAt: new Date(),
+    });
 
     return true;
   } catch (error) {
-    // Handle JWT errors
-    if (
-      error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
-    ) {
-      throw new GraphQLError("Invalid or expired reset token", {
-        extensions: { code: ERROR_CODES.INVALID_TOKEN },
-      });
-    }
-
-    // Re-throw GraphQL errors
     if (error instanceof GraphQLError) {
       throw error;
     }
 
-    // Handle all other errors
     throw new GraphQLError("Password reset failed", {
-      extensions: { code: ERROR_CODES.PASSWORD_RESET_FAILED },
+      extensions: { code: "PASSWORD_RESET_FAILED" },
     });
   }
 }
 
 // Export wrapped function as default
 const wrappedResetPassword = withErrorHandlingCurried({
-  errorCode: ERROR_CODES.PASSWORD_RESET_FAILED,
+  errorCode: "PASSWORD_RESET_FAILED",
   errorMessage: "Password reset failed",
 })(withValidationCurried(resetPasswordSchema)(resetPass));
 

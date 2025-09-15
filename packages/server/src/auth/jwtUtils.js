@@ -126,10 +126,12 @@ function verifyVerificationToken(token) {
  */
 function verifyPasswordResetToken(token) {
   try {
-    return jwt.verify(token, ACCESS_TOKEN_SECRET, {
+    const result = jwt.verify(token, ACCESS_TOKEN_SECRET, {
       issuer: "expense-buddy",
       audience: "expense-buddy-password-reset",
     });
+
+    return result;
   } catch (error) {
     throw new Error(`Invalid password reset token: ${error.message}`);
   }

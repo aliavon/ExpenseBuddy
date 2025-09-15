@@ -12,7 +12,7 @@ const ERROR_CODES = require("../../../constants/errorCodes");
  * Change user password (requires authentication)
  */
 async function changePass(parent, args, context) {
-  const { currentPassword, newPassword } = args;
+  const { currentPassword, newPassword } = args.input;
 
   try {
     // Check if user is authenticated

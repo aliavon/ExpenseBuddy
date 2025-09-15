@@ -22,7 +22,7 @@ let transporter = null;
  */
 function createTransporter() {
   if (!transporter) {
-    transporter = nodemailer.createTransporter(EMAIL_CONFIG);
+    transporter = nodemailer.createTransport(EMAIL_CONFIG);
   }
   return transporter;
 }
