@@ -154,19 +154,37 @@ export const AuthProvider = ({ children }) => {
     },
   });
 
-  // Login function
-  const login = async (email, password) => {
+  // Login function - supports both traditional login and post-registration login
+  const login = async (email, password, preAuthData = null) => {
     try {
       setError(null);
-      await loginMutation({
-        variables: {
-          input: {
-            email,
-            password,
+      
+      if (preAuthData) {
+        // Post-registration login with pre-authenticated data
+        const { accessToken, refreshToken, user } = preAuthData;
+        
+        // Save tokens
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        
+        // Update state
+        setUser(user);
+        setHasValidToken(true);
+        setIsLoading(false);
+        
+        return true;
+      } else {
+        // Traditional login
+        await loginMutation({
+          variables: {
+            input: {
+              email,
+              password,
+            },
           },
-        },
-      });
-      return true;
+        });
+        return true;
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

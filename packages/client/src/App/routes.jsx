@@ -6,6 +6,7 @@ import AddPurchasesComponent from '../components/AddPurchasesComponent';
 import ViewPurchasesComponent from '../components/ViewPurchasesComponent';
 import FamilyIncome from '../components/FamilyIncome';
 import LoginPage from '../pages/auth/LoginPage';
+import RegisterPage from '../pages/auth/RegisterPage';
 import RequestPasswordResetPage from '../pages/auth/RequestPasswordResetPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -29,6 +30,10 @@ const RootRoutes = () => {
         <Route
           path="/auth/login"
           element={<LoginPage />}
+        />
+        <Route
+          path="/auth/register"
+          element={<RegisterPage />}
         />
         <Route
           path="/auth/request-reset"

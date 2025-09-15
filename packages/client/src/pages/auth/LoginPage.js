@@ -158,6 +158,20 @@ const LoginPage = () => {
                       Forgot your password?
                     </Link>
                   </ParagraphMedium>
+                  <ParagraphMedium marginTop="scale300">
+                    Don't have an account?{' '}
+                    <Link
+                      to="/auth/register"
+                      style={{
+                        color: '#0070f3',
+                        textDecoration: 'none',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Create Account
+                    </Link>
+                  </ParagraphMedium>
                 </Block>
               </form>
             )}

@@ -13,3 +13,24 @@ export const RESET_PASSWORD = gql`
     resetPassword(input: $input)
   }
 `;
+
+export const REGISTER_MUTATION = gql`
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
+      accessToken
+      refreshToken
+      user {
+        id
+        firstName
+        lastName
+        email
+        familyId {
+          id
+          name
+          description
+        }
+        roleInFamily
+      }
+    }
+  }
+`;
