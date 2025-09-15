@@ -11,7 +11,16 @@ async function enhanceContextWithAuth(params, baseContext) {
 
   // Extract token from request headers - safely handle missing headers
   const headers = request?.headers || {};
-  const authHeader = headers.authorization || headers.Authorization;
+
+  // Headers might be a Headers object, need to use .get() method
+  let authHeader;
+  if (typeof headers.get === "function") {
+    // Headers object (GraphQL Yoga 4.x)
+    authHeader = headers.get("authorization") || headers.get("Authorization");
+  } else {
+    // Plain object
+    authHeader = headers.authorization || headers.Authorization;
+  }
 
   let authContext = {
     isAuthenticated: false,

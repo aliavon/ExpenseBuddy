@@ -18,7 +18,7 @@ async function me(parent, args, context) {
 
   // Get full user info with family populated
   const user = await User.findOne({
-    _id: auth.user.id,
+    _id: auth.user._id,
     isActive: true,
   }).populate("familyId");
 

@@ -50,13 +50,26 @@ async function login(parent, args) {
   await user.save();
 
   // Generate JWT tokens
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  const tokenPayload = {
+    userId: user._id.toString(),
+    email: user.email,
+    familyId: user.familyId,
+    roleInFamily: user.roleInFamily,
+  };
+  const accessToken = generateAccessToken(tokenPayload);
+  const refreshToken = generateRefreshToken(tokenPayload);
+
+  // Create user object for GraphQL response (familyId should be ID, not populated object)
+  const userForResponse = {
+    ...user.toObject(),
+    id: user._id.toString(), // GraphQL expects 'id', not '_id'
+    familyId: user.familyId ? user.familyId._id : null,
+  };
 
   return {
     accessToken,
     refreshToken,
-    user,
+    user: userForResponse,
   };
 }
 
