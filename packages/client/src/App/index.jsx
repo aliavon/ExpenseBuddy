@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Routes from './routes';
 
 const App = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <Block
@@ -15,8 +15,8 @@ const App = () => {
       width="100%"
       height="100vh"
     >
-      {/* Show navigation only for authenticated users */}
-      {isAuthenticated && <SideNav />}
+      {/* Show navigation only for authenticated users with family */}
+      {isAuthenticated && user?.familyId && <SideNav />}
       <Routes />
     </Block>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Navigation } from 'baseui/side-navigation';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Block } from 'baseui/block';
@@ -8,6 +8,7 @@ import { Avatar } from 'baseui/avatar';
 import { toaster } from 'baseui/toast';
 
 import { useAuth } from '../../contexts/AuthContext';
+import UserProfile from '../profile/UserProfile';
 
 const navItems = [
   {
@@ -26,6 +27,7 @@ const SideNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleNavChange = ({ event, item }) => {
     event.preventDefault();
@@ -54,7 +56,7 @@ const SideNav = () => {
       display="flex"
       flexDirection="column"
     >
-      {/* User info section */}
+      {/* User info section - clickable */}
       <Block
         padding="scale600"
         borderBottom="1px solid"
@@ -64,12 +66,24 @@ const SideNav = () => {
           display="flex"
           alignItems="center"
           marginBottom="scale400"
+          onClick={() => setIsProfileOpen(true)}
+          style={{
+            cursor: 'pointer',
+            ':hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            },
+          }}
+          padding="scale300"
+          borderRadius="scale200"
+          $hover={{
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+          }}
         >
           <Avatar
             name={user ? `${user.firstName} ${user.lastName}` : 'User'}
             size="scale1000"
           />
-          <Block marginLeft="scale400">
+          <Block marginLeft="scale400" flex="1">
             <LabelMedium>
               {user ? `${user.firstName} ${user.lastName}` : 'Loading...'}
             </LabelMedium>
@@ -80,20 +94,11 @@ const SideNav = () => {
               {user?.roleInFamily || ''}
             </ParagraphSmall>
           </Block>
+          <ParagraphSmall color="contentSecondary">
+            ⚙️
+          </ParagraphSmall>
         </Block>
 
-        <Button
-          onClick={handleLogout}
-          size={SIZE.compact}
-          kind="secondary"
-          overrides={{
-            Root: {
-              style: { width: '100%' },
-            },
-          }}
-        >
-          Logout
-        </Button>
       </Block>
 
       {/* Navigation */}
@@ -104,6 +109,12 @@ const SideNav = () => {
           onChange={handleNavChange}
         />
       </Block>
+
+      {/* User Profile Sidebar */}
+      <UserProfile
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
     </Block>
   );
 };

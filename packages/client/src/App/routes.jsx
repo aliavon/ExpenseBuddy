@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Block } from 'baseui/block';
 
 import AddPurchasesComponent from '../components/AddPurchasesComponent';
@@ -9,11 +9,31 @@ import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import RequestPasswordResetPage from '../pages/auth/RequestPasswordResetPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
+import VerifyEmailPage from '../pages/auth/VerifyEmailPage';
+import FamilySetupPage from '../pages/family/FamilySetupPage';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
 
 const RootRoutes = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Programmatic redirect for users without familyId
+  useEffect(() => {
+    if (isAuthenticated && user && (!user.familyId || user.familyId === null)) {
+      // Only redirect if we're not already on auth or family-setup pages
+      const currentPath = location.pathname;
+      if (!currentPath.startsWith('/auth') && currentPath !== '/family-setup') {
+        navigate('/family-setup', { replace: true });
+      }
+    }
+  }, [
+    isAuthenticated,
+    user,
+    navigate,
+    location,
+  ]);
 
   return (
     <Block
@@ -42,6 +62,19 @@ const RootRoutes = () => {
         <Route
           path="/auth/reset/:token"
           element={<ResetPasswordPage />}
+        />
+        <Route
+          path="/auth/verify-email"
+          element={<VerifyEmailPage />}
+        />
+        {/* Family Setup - protected but for users without family */}
+        <Route
+          path="/family-setup"
+          element={(
+            <ProtectedRoute>
+              <FamilySetupPage />
+            </ProtectedRoute>
+          )}
         />
 
         {/* Protected routes */}
@@ -74,15 +107,17 @@ const RootRoutes = () => {
         <Route
           path="/"
           element={
-            isAuthenticated ?
+            isAuthenticated ? (
               <Navigate
                 to="/add"
                 replace
-              /> :
+              />
+            ) : (
               <Navigate
                 to="/login"
                 replace
               />
+            )
           }
         />
 
