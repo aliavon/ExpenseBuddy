@@ -31,6 +31,15 @@ services:
       - APP_SERVER_PORT=${APP_SERVER_PORT}
       - DATABASE_HOST=mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server
       - REDIS_URL=redis://expenseBuddyRedis:6379
+      # Email Configuration
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - CLIENT_URL=${CLIENT_URL}
+      - APP_NAME=${APP_NAME}
     ports:
       - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
     depends_on:
