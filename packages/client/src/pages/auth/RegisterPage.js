@@ -7,11 +7,9 @@ import { Block } from 'baseui/block';
 import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
 import { Button, SIZE } from 'baseui/button';
-import { Radio, RadioGroup } from 'baseui/radio';
 import { HeadingXLarge, ParagraphMedium, LabelMedium } from 'baseui/typography';
 import { toaster } from 'baseui/toast';
 
-import { useAuth } from '../../contexts/AuthContext';
 import { REGISTER_MUTATION } from '../../gql/auth';
 
 // Validation schema
@@ -32,53 +30,22 @@ const validationSchema = Yup.object({
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password'), null], 'Passwords must match')
     .required('Please confirm your password'),
-  familyOption: Yup.string()
-    .oneOf(['create', 'join'], 'Please select an option')
-    .required('Please choose how to handle family'),
-  familyName: Yup.string()
-    .when('familyOption', {
-      is: 'create',
-      then: (schema) => schema.required('Family name is required').min(2, 'Minimum 2 characters'),
-      otherwise: (schema) => schema
-    }),
-  inviteCode: Yup.string()
-    .when('familyOption', {
-      is: 'join',
-      then: (schema) => schema.required('Invite code is required').min(3, 'Invalid invite code'),
-      otherwise: (schema) => schema
-    }),
 });
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const [registerUser] = useMutation(REGISTER_MUTATION, {
-    onCompleted: async (data) => {
-      try {
-        // Use the auth context login to save tokens and set user state
-        await login(data.register.user.email, null, {
-          accessToken: data.register.accessToken,
-          refreshToken: data.register.refreshToken,
-          user: data.register.user,
-        });
-
-        toaster.positive('Registration successful! Welcome to ExpenseBuddy!');
-        navigate('/add'); // Redirect to main page
-      } catch (error) {
-        console.error('Post-registration login error:', error);
-        toaster.negative('Registration completed but login failed. Please try logging in manually.');
-        navigate('/auth/login');
-      }
+    onCompleted: data => {
+      toaster.positive(data.register.message || 'Registration successful! Please check your email to activate your account.');
+      navigate('/auth/login');
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Registration error:', error);
-      
+
       if (error.message.includes('already exists')) {
         toaster.negative('User with this email already exists. Try logging in instead.');
-      } else if (error.message.includes('invite code')) {
-        toaster.negative('Invalid invite code. Please check and try again.');
       } else {
         toaster.negative('Registration failed. Please try again.');
       }
@@ -89,25 +56,15 @@ const RegisterPage = () => {
     try {
       setIsLoading(true);
 
-      // Prepare registration input based on family option
-      const registrationInput = {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        middleName: values.middleName || '',
-        email: values.email,
-        password: values.password,
-      };
-
-      // Add family-specific fields
-      if (values.familyOption === 'create') {
-        registrationInput.familyName = values.familyName;
-      } else if (values.familyOption === 'join') {
-        registrationInput.inviteCode = values.inviteCode;
-      }
-
       await registerUser({
         variables: {
-          input: registrationInput,
+          input: {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            middleName: values.middleName || '',
+            email: values.email,
+            password: values.password,
+          },
         },
       });
     } catch (error) {
@@ -116,8 +73,6 @@ const RegisterPage = () => {
       // Set specific field errors for better UX
       if (error.message.includes('already exists')) {
         setFieldError('email', 'User with this email already exists');
-      } else if (error.message.includes('invite code')) {
-        setFieldError('inviteCode', 'Invalid or expired invite code');
       }
     } finally {
       setIsLoading(false);
@@ -148,10 +103,10 @@ const RegisterPage = () => {
             textAlign="center"
           >
             <HeadingXLarge marginBottom="scale400">
-              Join ExpenseBuddy
+              Create Account
             </HeadingXLarge>
             <ParagraphMedium color="contentSecondary">
-              Create your account and start tracking expenses with your family
+              Join ExpenseBuddy and start managing your expenses
             </ParagraphMedium>
           </Block>
 
@@ -164,9 +119,6 @@ const RegisterPage = () => {
               email: '',
               password: '',
               confirmPassword: '',
-              familyOption: 'create',
-              familyName: '',
-              inviteCode: '',
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
@@ -178,14 +130,13 @@ const RegisterPage = () => {
               handleChange,
               handleBlur,
               handleSubmit: formikSubmit,
-              setFieldValue,
               isSubmitting,
             }) => (
               <form onSubmit={formikSubmit}>
                 {/* Personal Information */}
                 <Block marginBottom="scale600">
                   <LabelMedium marginBottom="scale400">Personal Information</LabelMedium>
-                  
+
                   <FormControl
                     label="First Name"
                     error={touched.firstName && errors.firstName ? errors.firstName : null}
@@ -238,7 +189,7 @@ const RegisterPage = () => {
                 {/* Account Information */}
                 <Block marginBottom="scale600">
                   <LabelMedium marginBottom="scale400">Account Information</LabelMedium>
-                  
+
                   <FormControl
                     label="Email Address"
                     error={touched.email && errors.email ? errors.email : null}
@@ -291,69 +242,6 @@ const RegisterPage = () => {
                   </FormControl>
                 </Block>
 
-                {/* Family Setup */}
-                <Block marginBottom="scale600">
-                  <LabelMedium marginBottom="scale400">Family Setup</LabelMedium>
-                  
-                  <FormControl
-                    error={touched.familyOption && errors.familyOption ? errors.familyOption : null}
-                  >
-                    <RadioGroup
-                      name="familyOption"
-                      value={values.familyOption}
-                      onChange={(e) => {
-                        setFieldValue('familyOption', e.target.value);
-                        // Clear related fields when switching
-                        setFieldValue('familyName', '');
-                        setFieldValue('inviteCode', '');
-                      }}
-                      disabled={isLoading}
-                    >
-                      <Radio value="create">
-                        Create a new family
-                      </Radio>
-                      <Radio value="join">
-                        Join an existing family with invite code
-                      </Radio>
-                    </RadioGroup>
-                  </FormControl>
-
-                  {/* Conditional family fields */}
-                  {values.familyOption === 'create' && (
-                    <FormControl
-                      label="Family Name"
-                      error={touched.familyName && errors.familyName ? errors.familyName : null}
-                    >
-                      <Input
-                        name="familyName"
-                        placeholder="Enter your family name (e.g., Smith Family)"
-                        value={values.familyName}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={touched.familyName && !!errors.familyName}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                  )}
-
-                  {values.familyOption === 'join' && (
-                    <FormControl
-                      label="Invite Code"
-                      error={touched.inviteCode && errors.inviteCode ? errors.inviteCode : null}
-                    >
-                      <Input
-                        name="inviteCode"
-                        placeholder="Enter the invite code shared by your family"
-                        value={values.inviteCode}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={touched.inviteCode && !!errors.inviteCode}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                  )}
-                </Block>
-
                 <Block marginTop="scale600">
                   <Button
                     type="submit"
@@ -368,7 +256,8 @@ const RegisterPage = () => {
 
                 <Block textAlign="center" marginTop="scale600">
                   <ParagraphMedium>
-                    Already have an account?{' '}
+                    Already have an account?
+                    {' '}
                     <Link
                       to="/auth/login"
                       style={{

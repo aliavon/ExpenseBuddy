@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }) => {
   });
 
   // Query to get current user (only if there's a valid token)
-  const { loading: userLoading } = useQuery(ME_QUERY, {
+  const { loading: userLoading, refetch: refetchUser } = useQuery(ME_QUERY, {
     skip: !hasValidToken,
     errorPolicy: 'all',
     onCompleted: data => {
@@ -158,20 +158,20 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, preAuthData = null) => {
     try {
       setError(null);
-      
+
       if (preAuthData) {
         // Post-registration login with pre-authenticated data
         const { accessToken, refreshToken, user } = preAuthData;
-        
+
         // Save tokens
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
-        
+
         // Update state
         setUser(user);
         setHasValidToken(true);
         setIsLoading(false);
-        
+
         return true;
       } else {
         // Traditional login
@@ -243,6 +243,7 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     login,
     logout,
+    refetchUser,
     error,
   };
 

@@ -159,7 +159,8 @@ const LoginPage = () => {
                     </Link>
                   </ParagraphMedium>
                   <ParagraphMedium marginTop="scale300">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?
+                    {' '}
                     <Link
                       to="/auth/register"
                       style={{

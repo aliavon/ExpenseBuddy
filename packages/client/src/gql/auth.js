@@ -17,20 +17,14 @@ export const RESET_PASSWORD = gql`
 export const REGISTER_MUTATION = gql`
   mutation Register($input: RegisterInput!) {
     register(input: $input) {
-      accessToken
-      refreshToken
-      user {
-        id
-        firstName
-        lastName
-        email
-        familyId {
-          id
-          name
-          description
-        }
-        roleInFamily
-      }
+      success
+      message
     }
+  }
+`;
+
+export const VERIFY_EMAIL_MUTATION = gql`
+  mutation VerifyEmail($token: String!) {
+    verifyEmail(token: $token)
   }
 `;
