@@ -1,6 +1,6 @@
 
-import {useMemo} from 'react';
-import {useQuery, gql} from '@apollo/client';
+import { useMemo } from 'react';
+import { useQuery, gql } from '@apollo/client';
 
 export const QUERY_TYPES = gql`
   query Types {
@@ -12,7 +12,7 @@ export const QUERY_TYPES = gql`
 `;
 
 const useBundleTypesOptions = () => {
-  const {data, loading, error, refetch} = useQuery(QUERY_TYPES);
+  const { data, loading, error, refetch } = useQuery(QUERY_TYPES);
 
   const typesOptions = useMemo(() => [...(data?.types || [])], [data]);
 

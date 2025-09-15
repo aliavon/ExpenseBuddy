@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   ModalHeader,
@@ -6,13 +6,13 @@ import {
   ModalFooter,
   ModalButton,
 } from 'baseui/modal';
-import {useMutation} from '@apollo/client';
-import {toaster} from 'baseui/toast';
+import { useMutation } from '@apollo/client';
+import { toaster } from 'baseui/toast';
 
-import {EDIT_ITEMS_CATEGORY_MUTATION} from '../../gql';
+import { EDIT_ITEMS_CATEGORY_MUTATION } from '../../gql';
 import CategorySelect from '../form/category-select';
 
-const EditItemCategoryModal = ({isOpen, onClose, items, clearSelection}) => {
+const EditItemCategoryModal = ({ isOpen, onClose, items, clearSelection }) => {
   const [newCategory, setNewCategory] = useState(() => items && items.length === 1 ? items[0].category : '');
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const EditItemCategoryModal = ({isOpen, onClose, items, clearSelection}) => {
     items.length > 1 && !cancel && clearSelection();
   };
 
-  const [editItemsCategory, {loading}] = useMutation(
+  const [editItemsCategory, { loading }] = useMutation(
     EDIT_ITEMS_CATEGORY_MUTATION,
     {
       onCompleted: data => {
@@ -38,7 +38,7 @@ const EditItemCategoryModal = ({isOpen, onClose, items, clearSelection}) => {
             : '';
         toaster.positive(
           `Category updated to ${updatedCategory}`,
-          {autoHideDuration: 3000}
+          { autoHideDuration: 3000 }
         );
         getHandleClose(false)();
       },

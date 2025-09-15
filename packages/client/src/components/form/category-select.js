@@ -1,12 +1,12 @@
-import React, {useState} from 'react';
-import {useQuery} from '@apollo/client';
-import {Select} from 'baseui/select';
+import React, { useState } from 'react';
+import { useQuery } from '@apollo/client';
+import { Select } from 'baseui/select';
 
-import {GET_CATEGORIES} from '../../gql';
+import { GET_CATEGORIES } from '../../gql';
 
-const CategorySelect = ({value, onChange, ...restProps}) => {
+const CategorySelect = ({ value, onChange, ...restProps }) => {
   const [options, setOptions] = useState([]);
-  const {loading, error} = useQuery(GET_CATEGORIES, {
+  const { loading, error } = useQuery(GET_CATEGORIES, {
     fetchPolicy: 'cache-and-network',
     onCompleted: data => {
       const categories = data.getCategories || [];

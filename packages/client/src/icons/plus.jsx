@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {Icon} from 'baseui/icon';
+import { Icon } from 'baseui/icon';
 
-import {SvgOverrides} from './overrides';
+import { SvgOverrides } from './overrides';
 
 function Plus(props, ref) {
-  const {title = 'Plus', size = 24, color, ...restProps} = props;
+  const { title = 'Plus', size = 24, color, ...restProps } = props;
 
   return (
     <Icon

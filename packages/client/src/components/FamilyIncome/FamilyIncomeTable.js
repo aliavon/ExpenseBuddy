@@ -12,10 +12,10 @@ import {
   Pagination,
 } from '@mui/material';
 
-const FamilyIncomeTable = ({data, totalPages, currentPage, onSortChange, onPageChange}) => {
+const FamilyIncomeTable = ({ data, totalPages, currentPage, onSortChange, onPageChange }) => {
   const handleSort = field => {
     // For simplicity, assume toggling sort order is handled in the parent.
-    onSortChange({sortBy: field});
+    onSortChange({ sortBy: field });
   };
 
   return (

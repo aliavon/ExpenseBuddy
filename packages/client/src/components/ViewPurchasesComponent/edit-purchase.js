@@ -1,18 +1,18 @@
-import React, {useState} from 'react';
-import {Input} from 'baseui/input';
-import {Button} from 'baseui/button';
-import {Textarea} from 'baseui/textarea';
-import {DatePicker} from 'baseui/datepicker';
-import {useMutation} from '@apollo/client';
-import {LabelLarge} from 'baseui/typography';
-import {Block} from 'baseui/block';
-import {toaster} from 'baseui/toast';
+import React, { useState } from 'react';
+import { Input } from 'baseui/input';
+import { Button } from 'baseui/button';
+import { Textarea } from 'baseui/textarea';
+import { DatePicker } from 'baseui/datepicker';
+import { useMutation } from '@apollo/client';
+import { LabelLarge } from 'baseui/typography';
+import { Block } from 'baseui/block';
+import { toaster } from 'baseui/toast';
 
-import {UPDATE_PURCHASE_DATA} from '../../gql';
+import { UPDATE_PURCHASE_DATA } from '../../gql';
 
-const EditPurchase = ({initialData, onClose}) => {
+const EditPurchase = ({ initialData, onClose }) => {
   const [formData, setFormData] = useState(initialData);
-  const [updatePurchase, {loading}] = useMutation(UPDATE_PURCHASE_DATA, {
+  const [updatePurchase, { loading }] = useMutation(UPDATE_PURCHASE_DATA, {
     onCompleted: () => {
       toaster.positive('Purchase updated successfully!');
       onClose?.();
@@ -31,7 +31,7 @@ const EditPurchase = ({initialData, onClose}) => {
 
   const handleSave = async () => {
     // eslint-disable-next-line no-unused-vars
-    const {item, ...form} = formData;
+    const { item, ...form } = formData;
     await updatePurchase({
       variables: {
         purchase: {
@@ -93,7 +93,7 @@ const EditPurchase = ({initialData, onClose}) => {
       {/* Date */}
       <DatePicker
         value={new Date(parseInt(formData.date, 10))}
-        onChange={({date}) => handleChange('date', date.getTime().toString())}
+        onChange={({ date }) => handleChange('date', date.getTime().toString())}
       />
 
       {/* Note */}

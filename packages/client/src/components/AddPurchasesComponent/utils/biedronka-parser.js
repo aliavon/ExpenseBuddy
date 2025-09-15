@@ -2,8 +2,8 @@
 
 const biedronkaParse = async file => {
   const worker = await Tesseract.createWorker(Tesseract.languages.POL);
-  await worker.setParameters({preserve_interword_spaces: '1'});
-  const {data: {text}} = await worker.recognize(file);
+  await worker.setParameters({ preserve_interword_spaces: '1' });
+  const { data: { text } } = await worker.recognize(file);
   await worker.terminate();
 
   // parse Date

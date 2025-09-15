@@ -1,5 +1,5 @@
 import React from 'react';
-import {MockedProvider} from '@apollo/client/testing';
+import { MockedProvider } from '@apollo/client/testing';
 
 // Common test utilities for hooks testing
 
@@ -9,7 +9,7 @@ export const createMockProvider = (mocks = [], options = {}) => {
     ...options,
   };
 
-  return ({children}) => (
+  return ({ children }) => (
     <MockedProvider
       mocks={mocks}
       {...defaultOptions}
@@ -21,10 +21,10 @@ export const createMockProvider = (mocks = [], options = {}) => {
 
 export const createMockError = (message, code = 'GENERIC_ERROR') => ({
   message,
-  extensions: {code},
+  extensions: { code },
 });
 
-export const createNetworkError = (message = 'Network error') => ({networkError: new Error(message)});
+export const createNetworkError = (message = 'Network error') => ({ networkError: new Error(message) });
 
 export const createLoadingMock = (request, result, delay = 100) => ({
   ...request,
@@ -78,7 +78,7 @@ export const waitForAsync = (ms = 0) => new Promise(resolve => setTimeout(resolv
 // Helper to create multiple mocks
 export const createMultipleMocks = (baseRequest, results) => results.map(result => ({
   request: baseRequest,
-  result: {data: result},
+  result: { data: result },
 }));
 
 // Mock GraphQL operations

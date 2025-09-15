@@ -1,3 +1,3 @@
 
-export {Skeleton} from './skeleton';
+export { Skeleton } from './skeleton';
 export * from './constants';

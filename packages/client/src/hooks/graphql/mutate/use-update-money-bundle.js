@@ -1,4 +1,4 @@
-import {useMutation, gql} from '@apollo/client';
+import { useMutation, gql } from '@apollo/client';
 
 const UPDATE_MONEY_BUNDLE_MUTATION = gql`
   mutation updateMoneyBundle(
@@ -28,10 +28,10 @@ const UPDATE_MONEY_BUNDLE_MUTATION = gql`
   }
 `;
 
-const useUpdateMoneyBundle = ({onCompleted}) => {
-  const [mutate, {error, loading}] =useMutation(UPDATE_MONEY_BUNDLE_MUTATION, {onCompleted});
+const useUpdateMoneyBundle = ({ onCompleted }) => {
+  const [mutate, { error, loading }] =useMutation(UPDATE_MONEY_BUNDLE_MUTATION, { onCompleted });
 
-  const updateMoneyBundle = variables => mutate({variables});
+  const updateMoneyBundle = variables => mutate({ variables });
 
   return {
     updateMoneyBundle,
@@ -40,5 +40,5 @@ const useUpdateMoneyBundle = ({onCompleted}) => {
   };
 };
 
-export {UPDATE_MONEY_BUNDLE_MUTATION};
+export { UPDATE_MONEY_BUNDLE_MUTATION };
 export default useUpdateMoneyBundle;

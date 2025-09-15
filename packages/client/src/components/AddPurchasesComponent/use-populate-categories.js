@@ -1,14 +1,14 @@
-import {useCallback, useState} from 'react';
-import {useLazyQuery} from '@apollo/client';
-import {toaster} from 'baseui/toast';
+import { useCallback, useState } from 'react';
+import { useLazyQuery } from '@apollo/client';
+import { toaster } from 'baseui/toast';
 
-import {GET_ITEMS_BY_NAMES_QUERY} from '../../gql';
+import { GET_ITEMS_BY_NAMES_QUERY } from '../../gql';
 
 export const usePopulateCategories = () => {
   const [loading, setLoading] = useState(false);
   const [getItems] = useLazyQuery(GET_ITEMS_BY_NAMES_QUERY);
 
-  const populateCategories = useCallback(({purchases, setPurchases}) => {
+  const populateCategories = useCallback(({ purchases, setPurchases }) => {
     setLoading(true);
 
     const uniqueNamesMap = {};
@@ -18,7 +18,7 @@ export const usePopulateCategories = () => {
       }
     });
     getItems({
-      variables: {names: Object.keys(uniqueNamesMap)},
+      variables: { names: Object.keys(uniqueNamesMap) },
       onError: e => {
         console.error('Error saving purchases:', e);
         setLoading(false);
@@ -32,18 +32,18 @@ export const usePopulateCategories = () => {
         });
 
         setPurchases(purchases => [...purchases].map(p => {
-          const newP = {...p};
+          const newP = { ...p };
           if (!newP.category && uniqueNamesMap[newP.name]) {
             newP.category = uniqueNamesMap[newP.name];
           }
           return newP;
         }));
-        toaster.positive(`${items.length? `${items.length} ` : ''}Categories populated!`, {autoHideDuration: 3000});
+        toaster.positive(`${items.length? `${items.length} ` : ''}Categories populated!`, { autoHideDuration: 3000 });
         setLoading(false);
       },
     });
 
   }, [getItems]);
 
-  return [populateCategories, {loading}];
+  return [populateCategories, { loading }];
 };

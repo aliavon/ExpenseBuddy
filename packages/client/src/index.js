@@ -1,27 +1,36 @@
 import React from 'react';
-import {createRoot} from 'react-dom/client';
-import {createUploadLink} from 'apollo-upload-client';
+import { createRoot } from 'react-dom/client';
+import { createUploadLink } from 'apollo-upload-client';
+import { from, ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
 
-import {ApolloProvider, ApolloClient, InMemoryCache} from '@apollo/client';
-import {BrowserRouter} from 'react-router-dom';
-import {Client as Styletron} from 'styletron-engine-monolithic';
-import {Provider as StyletronProvider} from 'styletron-react';
-import {LightTheme, BaseProvider, styled} from 'baseui';
-import {ToasterContainer, PLACEMENT} from 'baseui/toast';
+import { BrowserRouter } from 'react-router-dom';
+import { Client as Styletron } from 'styletron-engine-monolithic';
+import { Provider as StyletronProvider } from 'styletron-react';
+import { LightTheme, BaseProvider, styled } from 'baseui';
+import { ToasterContainer, PLACEMENT } from 'baseui/toast';
 
 import App from './App';
+import authLink from './apollo/authLink';
+import { AuthProvider } from './contexts/AuthContext';
 import 'reset-css';
 
 import * as serviceWorker from './serviceWorker';
 
+// Create upload link
+const uploadLink = createUploadLink({
+  // uri: `${process.env.REACT_APP_MACHINE_IP || 'http://172.16.11.62'}:${process.env.APP_SERVER_PORT || 8000}`,
+  // uri: `${process.env.REACT_APP_MACHINE_IP || 'http://localhost'}:${process.env.REACT_APP_SERVER_PORT || 8000}/graphql`,
+  uri: `${'http://localhost'}:${process.env.REACT_APP_SERVER_PORT || 8000}/graphql`,
+  headers: { 'Apollo-Require-Preflight': 'true' },
+});
+
+// Combine auth link and upload link
+const link = from([authLink, uploadLink]);
+
 const cache = new InMemoryCache();
 const client = new ApolloClient({
   cache: cache,
-  link: createUploadLink({
-    // uri: `${process.env.REACT_APP_MACHINE_IP || 'http://172.16.11.62'}:${process.env.APP_SERVER_PORT || 8000}`,
-    uri: `${process.env.REACT_APP_MACHINE_IP || 'http://localhost'}:${process.env.APP_SERVER_PORT || 8000}/graphql`,
-    headers: {'Apollo-Require-Preflight': 'true'},
-  }),
+  link: link,
 });
 
 const engine = new Styletron();
@@ -41,13 +50,15 @@ root.render(
     <BrowserRouter>
       <StyletronProvider value={engine}>
         <BaseProvider theme={LightTheme}>
-          <Centered>
-            <App />
-          </Centered>
-          <ToasterContainer
-            autoHideDuration={5000}
-            placement={PLACEMENT.topRight}
-          />
+          <AuthProvider>
+            <Centered>
+              <App />
+            </Centered>
+            <ToasterContainer
+              autoHideDuration={5000}
+              placement={PLACEMENT.topRight}
+            />
+          </AuthProvider>
         </BaseProvider>
       </StyletronProvider>
     </BrowserRouter>

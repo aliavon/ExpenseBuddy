@@ -1,4 +1,4 @@
-import {gql} from '@apollo/client';
+import { gql } from '@apollo/client';
 
 export const ADD_PURCHASES_QUERY = gql`
   mutation AddPurchasesQuery($purchases: [PurchaseInput!]!) {

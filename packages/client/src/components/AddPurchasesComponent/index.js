@@ -1,26 +1,26 @@
-import React, {useState} from 'react';
-import {Input, SIZE as INPUT_SIZE} from 'baseui/input';
-import {Select} from 'baseui/select';
-import {Button, SIZE, SHAPE} from 'baseui/button';
-import {FileUploader} from 'baseui/file-uploader';
-import {Block} from 'baseui/block';
-import {LabelMedium, LabelLarge, ParagraphSmall} from 'baseui/typography';
-import {toaster} from 'baseui/toast';
+import React, { useState } from 'react';
+import { Input, SIZE as INPUT_SIZE } from 'baseui/input';
+import { Select } from 'baseui/select';
+import { Button, SIZE, SHAPE } from 'baseui/button';
+import { FileUploader } from 'baseui/file-uploader';
+import { Block } from 'baseui/block';
+import { LabelMedium, LabelLarge, ParagraphSmall } from 'baseui/typography';
+import { toaster } from 'baseui/toast';
 
 import CategorySelect from '../form/category-select';
 import NameSelect from '../form/name-select';
 import Preloader from './preloader';
-import {lidlParser, biedronkaParser, csvParser, auchanParser} from './utils';
-import {getEmptyPurchase, fileUploadOptions, FILE_UPLOAD_TYPE, FILE_TYPES_TO_UPLOAD} from './constants';
-import {useSavePurchases} from './use-save-purchases';
-import {usePopulateCategories} from './use-populate-categories';
+import { lidlParser, biedronkaParser, csvParser, auchanParser } from './utils';
+import { getEmptyPurchase, fileUploadOptions, FILE_UPLOAD_TYPE, FILE_TYPES_TO_UPLOAD } from './constants';
+import { useSavePurchases } from './use-save-purchases';
+import { usePopulateCategories } from './use-populate-categories';
 
 const AddPurchasesComponent = () => {
   const [purchases, setPurchases] = useState([getEmptyPurchase()]);
   const [csvType, setCsvType] = useState([fileUploadOptions[0]]);
   const [isFileParsing, setIsFileParsing] = useState(false);
-  const [savePurchases, {loading}] = useSavePurchases();
-  const [populateCategories, {loading: guessing}] = usePopulateCategories();
+  const [savePurchases, { loading }] = useSavePurchases();
+  const [populateCategories, { loading: guessing }] = usePopulateCategories();
 
   const getHandleAddRow = (rowData = getEmptyPurchase(), index) => () => {
     if (typeof index === 'number') {
@@ -44,7 +44,7 @@ const AddPurchasesComponent = () => {
 
   const handleInputChange = (field, value, index) => {
     setPurchases(prev => {
-      let newItem = {...prev[index]};
+      let newItem = { ...prev[index] };
       newItem[field] = value;
       let newArr = [...prev];
       newArr[index] = newItem;
@@ -81,7 +81,7 @@ const AddPurchasesComponent = () => {
 
   const handleSave = async () => {
     try {
-      await savePurchases({purchases});
+      await savePurchases({ purchases });
       setPurchases([getEmptyPurchase()]);
     } catch (error) {
       console.error('Error saving purchases:', error);
@@ -95,7 +95,7 @@ const AddPurchasesComponent = () => {
     });
   };
   const totalSpending = purchases?.reduce((sum, purchase) => sum + purchase.price, 0) || 0;
-  const isSomeCategoryEmpty = !!purchases.find(({category}) => !category);
+  const isSomeCategoryEmpty = !!purchases.find(({ category }) => !category);
 
   return (
     <Block

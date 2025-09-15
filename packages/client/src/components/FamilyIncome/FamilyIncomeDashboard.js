@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import {Box, Paper} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Paper } from '@mui/material';
 // import {useQuery, gql} from '@apollo/client';
 import FamilyIncomeFilters from './FamilyIncomeFilters';
 import FamilyIncomeTable from './FamilyIncomeTable';
-import {filterAndSortMockData} from './mockData';
+import { filterAndSortMockData } from './mockData';
 
 // const GET_FAMILY_INCOME_RECORDS = gql`
 //   query GetFamilyIncomeRecords($filters: FamilyIncomeFiltersInput, $pagination: PaginationInput!, $sort: SortInput) {

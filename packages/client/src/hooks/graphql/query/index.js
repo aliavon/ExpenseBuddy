@@ -3,4 +3,4 @@ import useMoneySummary from './use-money-summary';
 import useBundleTypesOptions from './use-bundle-types-options';
 import useFeed from './use-feed';
 
-export {useMoneyBundles, useMoneySummary, useBundleTypesOptions, useFeed};
+export { useMoneyBundles, useMoneySummary, useBundleTypesOptions, useFeed };

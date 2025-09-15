@@ -1,6 +1,6 @@
 
-import {useMemo} from 'react';
-import {useQuery, gql} from '@apollo/client';
+import { useMemo } from 'react';
+import { useQuery, gql } from '@apollo/client';
 
 export const QUERY_MONEY_SUMMARY = gql`
   query MoneySummary {
@@ -12,7 +12,7 @@ export const QUERY_MONEY_SUMMARY = gql`
 `;
 
 const useMoneySummary = () => {
-  const {data, loading, error, refetch} = useQuery(QUERY_MONEY_SUMMARY, {notifyOnNetworkStatusChange: true});
+  const { data, loading, error, refetch } = useQuery(QUERY_MONEY_SUMMARY, { notifyOnNetworkStatusChange: true });
 
   const summary = useMemo(() => ([...(data?.summary || [])]), [data]);
 

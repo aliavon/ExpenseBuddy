@@ -1,9 +1,9 @@
-import React, {useState, useMemo} from 'react';
-import {gql, useQuery, NetworkStatus} from '@apollo/client';
-import {FormControl} from 'baseui/form-control';
-import {DatePicker} from 'baseui/datepicker';
-import {Block} from 'baseui/block';
-import {LabelMedium, LabelLarge} from 'baseui/typography';
+import React, { useState, useMemo } from 'react';
+import { gql, useQuery, NetworkStatus } from '@apollo/client';
+import { FormControl } from 'baseui/form-control';
+import { DatePicker } from 'baseui/datepicker';
+import { Block } from 'baseui/block';
+import { LabelMedium, LabelLarge } from 'baseui/typography';
 
 import Table from './table-data';
 
@@ -40,11 +40,12 @@ const ViewPurchasesComponent = () => {
   const [dateRange, setDateRange] = useState(() => {
     let date = new Date();
     date.setDate(1);
+    date.setMonth(0);
     date.setHours(0, 0, 0, 0);
     return [date, new Date()];
   });
 
-  const {data, loading, networkStatus} = useQuery(GET_PURCHASES_BY_DATE, {
+  const { data, loading, networkStatus } = useQuery(GET_PURCHASES_BY_DATE, {
     variables: {
       startDate: dateRange[0]?.toISOString() || new Date().toISOString(),
       endDate: dateRange[1]?.toISOString() || new Date().toISOString(),
@@ -72,7 +73,7 @@ const ViewPurchasesComponent = () => {
       <FormControl label="Select Date Range">
         <DatePicker
           value={dateRange}
-          onChange={({date}) => setDateRange(Array.isArray(date) ? date : [date])}
+          onChange={({ date }) => setDateRange(Array.isArray(date) ? date : [date])}
           range
         />
       </FormControl>

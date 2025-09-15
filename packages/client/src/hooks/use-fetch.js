@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
 import useLazyFetch from './use-lazy-fetch';
 
@@ -7,7 +7,7 @@ export default function useFetch(url, options) {
 
   useEffect(() => {
     const abortController = new AbortController();
-    const {signal} = abortController;
+    const { signal } = abortController;
 
     getData(url, {
       ...options,

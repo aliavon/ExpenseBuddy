@@ -1,4 +1,4 @@
-import {useState, useCallback} from 'react';
+import { useState, useCallback } from 'react';
 
 export default function useLazyFetch(_url, _options = {}) {
   const [loading, setLoading] = useState(false);

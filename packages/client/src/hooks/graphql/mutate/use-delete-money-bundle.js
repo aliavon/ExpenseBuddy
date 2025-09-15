@@ -1,4 +1,4 @@
-import {useMutation, gql} from '@apollo/client';
+import { useMutation, gql } from '@apollo/client';
 
 const DELETE_MONEY_BUNDLE_MUTATION = gql`
   mutation deleteMoneyBundleMutation( $id: ID!) {
@@ -15,10 +15,10 @@ const DELETE_MONEY_BUNDLE_MUTATION = gql`
   }
 `;
 
-const useDeleteMoneyBundle = ({onCompleted}) => {
-  const [mutate, {error, loading}] = useMutation(DELETE_MONEY_BUNDLE_MUTATION, {onCompleted});
+const useDeleteMoneyBundle = ({ onCompleted }) => {
+  const [mutate, { error, loading }] = useMutation(DELETE_MONEY_BUNDLE_MUTATION, { onCompleted });
 
-  const deleteMoneyBundle = id => mutate({variables: {id}});
+  const deleteMoneyBundle = id => mutate({ variables: { id } });
 
   return {
     deleteMoneyBundle,
@@ -27,5 +27,5 @@ const useDeleteMoneyBundle = ({onCompleted}) => {
   };
 };
 
-export {DELETE_MONEY_BUNDLE_MUTATION};
+export { DELETE_MONEY_BUNDLE_MUTATION };
 export default useDeleteMoneyBundle;

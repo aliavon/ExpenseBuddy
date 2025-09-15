@@ -1,8 +1,8 @@
-import React, {useState, useMemo} from 'react';
-import {Grid, TextField, FormControl, InputLabel, Select, MenuItem, Button} from '@mui/material';
-import {mockFamilyIncomeData} from './mockData';
+import React, { useState, useMemo } from 'react';
+import { Grid, TextField, FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
+import { mockFamilyIncomeData } from './mockData';
 
-const FamilyIncomeFilters = ({onFilterChange}) => {
+const FamilyIncomeFilters = ({ onFilterChange }) => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [contributor, setContributor] = useState('');
@@ -71,7 +71,7 @@ const FamilyIncomeFilters = ({onFilterChange}) => {
           type="date"
           value={dateFrom}
           onChange={e => setDateFrom(e.target.value)}
-          InputLabelProps={{shrink: true}}
+          InputLabelProps={{ shrink: true }}
         />
       </Grid>
       <Grid
@@ -85,7 +85,7 @@ const FamilyIncomeFilters = ({onFilterChange}) => {
           type="date"
           value={dateTo}
           onChange={e => setDateTo(e.target.value)}
-          InputLabelProps={{shrink: true}}
+          InputLabelProps={{ shrink: true }}
         />
       </Grid>
       <Grid

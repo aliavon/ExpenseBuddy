@@ -12,8 +12,8 @@ module.exports = {
   ],
   coverageReporters: ['text', 'lcov', 'html'],
   coverageDirectory: '<rootDir>/../coverage',
-  moduleNameMapping: {'^@/(.*)$': '<rootDir>/$1'},
-  transform: {'^.+\\.(js|jsx)$': 'babel-jest'},
+  moduleNameMapping: { '^@/(.*)$': '<rootDir>/$1' },
+  transform: { '^.+\\.(js|jsx)$': 'babel-jest' },
   testTimeout: 10000,
   verbose: true,
 };

@@ -1,4 +1,4 @@
-import {gql} from '@apollo/client';
+import { gql } from '@apollo/client';
 
 export const GET_ITEMS_BY_CATEGORY_QUERY = gql`
   query GetItemsByCategory($category: String!) {

@@ -1,4 +1,4 @@
-import {getEmptyPurchase} from '../constants';
+import { getEmptyPurchase } from '../constants';
 
 function parseCSV(csvString) {
   const rows = [];

@@ -2,8 +2,8 @@
 
 const auchanParse = async file => {
   const worker = await Tesseract.createWorker(Tesseract.languages.POL);
-  await worker.setParameters({preserve_interword_spaces: '1'});
-  const {data: {text}} = await worker.recognize(file);
+  await worker.setParameters({ preserve_interword_spaces: '1' });
+  const { data: { text } } = await worker.recognize(file);
   await worker.terminate();
 
   // parse Date
@@ -24,8 +24,6 @@ const auchanParse = async file => {
   let croppedText = text.slice(text.indexOf(header));
   croppedText = croppedText.slice(0, croppedText.indexOf(footer));
   let [, ...rows] = croppedText.split('\n').map(row => row.split(/ {2,}/g));
-  console.log({rows});
-  console.log({croppedText});
   let parsedDataMap = {};
 
   // collect rows data
@@ -34,11 +32,9 @@ const auchanParse = async file => {
     if (row.length === 2) {
       let name, quantity, price, unit = 'pcs', discount = 0;
       [name] = row;
-      console.log({name});
       if (name.includes('Rabat')) {
         let realName = name.slice(6);
         if (parsedDataMap[realName].price) {
-          console.log({realName});
           let discountPrice = parseFloat(row[1].replace(',', '.').slice(1, -1));
           let discount = parseFloat((discountPrice * 100 / parsedDataMap[realName].price).toFixed(0));
           parsedDataMap[realName].price = parseFloat((parsedDataMap[realName].price - discountPrice).toFixed(2));
@@ -76,7 +72,6 @@ const auchanParse = async file => {
 
   }
 
-  console.log({parsedDataMap});
   return Object.values(parsedDataMap);
 };
 

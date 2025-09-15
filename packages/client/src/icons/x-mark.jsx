@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {Icon} from 'baseui/icon';
+import { Icon } from 'baseui/icon';
 
-import {SvgOverrides} from './overrides';
+import { SvgOverrides } from './overrides';
 
 function XMark(props, ref) {
-  const {title = 'XMark', size = 24, color, ...restProps} = props;
+  const { title = 'XMark', size = 24, color, ...restProps } = props;
 
   return (
     <Icon

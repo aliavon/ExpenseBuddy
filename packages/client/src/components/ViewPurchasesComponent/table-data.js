@@ -1,6 +1,6 @@
-import React, {useEffect, useState, useRef} from 'react';
-import {Block} from 'baseui/block';
-import {gql, useMutation} from '@apollo/client';
+import React, { useEffect, useState, useRef } from 'react';
+import { Block } from 'baseui/block';
+import { gql, useMutation } from '@apollo/client';
 import {
   StatefulDataTable,
   CategoricalColumn,
@@ -9,14 +9,14 @@ import {
   NUMERICAL_FORMATS,
   DatetimeColumn,
 } from 'baseui/data-table';
-import {toaster} from 'baseui/toast';
-import {Button, SIZE} from 'baseui/button';
-import {Drawer} from 'baseui/drawer';
-import {LabelMedium} from 'baseui/typography';
+import { toaster } from 'baseui/toast';
+import { Button, SIZE } from 'baseui/button';
+import { Drawer } from 'baseui/drawer';
+import { LabelMedium } from 'baseui/typography';
 // import {TableBuilder, TableBuilderColumn} from 'baseui/table-semantic';
 // todo: refactor to use TableBuilder
 
-import {Pencil, Tag} from '../../icons';
+import { Pencil, Tag } from '../../icons';
 import EditPurchase from './edit-purchase';
 import EditItemCategoryModal from './EditItemCategoryModal';
 
@@ -78,7 +78,7 @@ const DELETE_PURCHASES = gql`
   }
 `;
 
-export default function Table({data}) {
+export default function Table({ data }) {
   const ref = useRef();
   const [sum, setSum] = useState(0);
   const [editRow, setEditRow] = useState(null);
@@ -108,7 +108,7 @@ export default function Table({data}) {
   const batchActions = [
     {
       label: 'Delete selected',
-      onClick: async ({clearSelection, selection}) => {
+      onClick: async ({ clearSelection, selection }) => {
         const ids = selection.map(s => s.id);
         const toasterKey = toaster.warning(
           <Block>
@@ -118,11 +118,11 @@ export default function Table({data}) {
             <Button
               onClick={() => {
                 deletePurchases({
-                  variables: {ids},
+                  variables: { ids },
                   onCompleted: () => {
                     toaster.clear(toasterKey);
                     clearSelection();
-                    toaster.positive('Selected purchases deleted successfully!', {autoHideDuration: 3000});
+                    toaster.positive('Selected purchases deleted successfully!', { autoHideDuration: 3000 });
                   },
                 });
               }}
@@ -137,7 +137,7 @@ export default function Table({data}) {
       },
     }, {
       label: 'Edit Category',
-      onClick: async ({selection}) => {
+      onClick: async ({ selection }) => {
         setEditItems(selection.map(i => i.data.item));
       },
     },
@@ -146,7 +146,7 @@ export default function Table({data}) {
   const rowActions = [
     {
       label: 'Edit Purchase',
-      onClick: ({row: {data: {__typename, ...data}}}) => setEditRow(data),
+      onClick: ({ row: { data: { __typename, ...data } } }) => setEditRow(data),
       renderIcon: props => (
         <Pencil
           title="Edit Purchase"
@@ -155,7 +155,7 @@ export default function Table({data}) {
       ),
     }, {
       label: 'Edit Category',
-      onClick: ({row: {data}}) => setEditItems([data.item]),
+      onClick: ({ row: { data } }) => setEditItems([data.item]),
       renderIcon: props => (
         <Tag
           title="Edit Category"
@@ -202,7 +202,7 @@ export default function Table({data}) {
           {` ${sum.toFixed(2)} zł`}
         </LabelMedium>
         <StatefulDataTable
-          onSelectionChange={console.log}
+          onSelectionChange={() => {}}
           initialSortDirection="DESC"
           initialSortIndex={6} // Date index
           controlRef={ref}

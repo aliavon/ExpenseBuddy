@@ -1,4 +1,4 @@
-export {default as csvParser}from './csv-parser';
-export {default as lidlParser} from './lidl-parser';
-export {default as biedronkaParser} from './biedronka-parser';
-export {default as auchanParser} from './auchan-parser';
+export { default as csvParser }from './csv-parser';
+export { default as lidlParser } from './lidl-parser';
+export { default as biedronkaParser } from './biedronka-parser';
+export { default as auchanParser } from './auchan-parser';

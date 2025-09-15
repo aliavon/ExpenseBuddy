@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {Icon} from 'baseui/icon';
+import { Icon } from 'baseui/icon';
 
-import {SvgOverrides} from './overrides';
+import { SvgOverrides } from './overrides';
 
 function Tag(props, ref) {
-  const {title = 'Tag', size, color, ...restProps} = props;
+  const { title = 'Tag', size, color, ...restProps } = props;
 
   return (
     <Icon
