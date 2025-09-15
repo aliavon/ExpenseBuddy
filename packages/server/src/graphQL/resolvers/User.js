@@ -4,6 +4,10 @@
  */
 
 const UserResolver = {
+  id: (user) => {
+    return user.id || user._id;
+  },
+
   /**
    * Transform populated familyId to ID string for GraphQL
    * GraphQL schema expects: familyId: ID

@@ -2,6 +2,10 @@ const { User } = require("../../database/schemas");
 const userLoader = require("../../loaders/userLoader");
 
 const Family = {
+  id: (family) => {
+    return family.id || family._id;
+  },
+
   /**
    * Resolve family owner
    */

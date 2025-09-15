@@ -12,8 +12,9 @@ const updateFamily = require("./updateFamily");
 const joinFamilyByCode = require("./joinFamilyByCode");
 const leaveFamilyIfNotOwner = require("./leaveFamily"); // Use schema name
 const inviteToFamily = require("./inviteToFamily");
+const requestJoinFamily = require("./requestJoinFamily");
+const respondToJoinRequest = require("./respondToJoinRequest");
 const removeFamilyMember = require("./removeFamilyMember");
-const updateMemberRole = require("./updateMemberRole");
 
 module.exports = {
   register,
@@ -30,6 +31,7 @@ module.exports = {
   joinFamilyByCode,
   leaveFamilyIfNotOwner, // Schema uses this name
   inviteToFamily,
+  requestJoinFamily,
+  respondToJoinRequest,
   removeFamilyMember,
-  updateMemberRole,
 };

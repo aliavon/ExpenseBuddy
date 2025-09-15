@@ -124,7 +124,7 @@ async function sendVerificationEmail(to, verificationToken, firstName) {
  * Send password reset email
  */
 async function sendPasswordResetEmail(to, resetToken, firstName) {
-  const resetUrl = `${CLIENT_URL}/auth/reset-password?token=${resetToken}`;
+  const resetUrl = `${CLIENT_URL}/auth/reset/${resetToken}`;
 
   const mailOptions = {
     from: `"${APP_NAME}" <${FROM_EMAIL}>`,
@@ -336,11 +336,204 @@ async function sendTestEmail(to) {
   }
 }
 
+/**
+ * Send family join request email to family owner
+ */
+async function sendFamilyJoinRequestEmail(
+  to,
+  familyName,
+  requestingUser,
+  ownerFirstName
+) {
+  const mailOptions = {
+    from: `"${APP_NAME}" <${FROM_EMAIL}>`,
+    to,
+    subject: `${APP_NAME} - Request to Join Your Family`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+          .header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; line-height: 1.6; }
+          .button { 
+            display: inline-block; 
+            padding: 12px 24px; 
+            background-color: #2196F3; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            margin: 10px 0; 
+          }
+          .info-box { 
+            background-color: #E3F2FD; 
+            border-left: 4px solid #2196F3; 
+            padding: 15px; 
+            margin: 15px 0; 
+          }
+          .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Family Join Request</h1>
+          </div>
+          <div class="content">
+            <h2>Hi ${ownerFirstName},</h2>
+            <p>Someone would like to join your family on ${APP_NAME}!</p>
+            
+            <div class="info-box">
+              <strong>Requesting User:</strong><br>
+              Name: ${requestingUser.firstName} ${requestingUser.lastName}<br>
+              Email: ${requestingUser.email}<br>
+              <br>
+              <strong>Your Family:</strong> ${familyName}
+            </div>
+
+            <p>If you know this person and would like to add them to your family, please log in to ${APP_NAME} and send them a family invitation.</p>
+
+            <a href="${CLIENT_URL}/auth/login" class="button">Go to ${APP_NAME}</a>
+
+            <p><strong>Note:</strong> This is just a notification. The person cannot join your family until you send them an official invitation.</p>
+          </div>
+          <div class="footer">
+            <p>&copy; 2024 ${APP_NAME}. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    const transporter = createTransporter();
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Family join request sent to ${to} for family "${familyName}"`);
+    return result;
+  } catch (error) {
+    console.error("Error sending family join request email:", error);
+    throw new Error(`Failed to send join request email: ${error.message}`);
+  }
+}
+
+/**
+ * Send email notification to user about family join request response
+ */
+async function sendFamilyJoinResponseEmail(
+  to,
+  familyName,
+  isApproved,
+  responseMessage,
+  ownerName
+) {
+  const subject = isApproved
+    ? `${APP_NAME} - Welcome to ${familyName}!`
+    : `${APP_NAME} - Update on Your Family Request`;
+
+  const statusText = isApproved ? "approved" : "rejected";
+  const statusIcon = isApproved ? "✅" : "❌";
+  const statusColor = isApproved ? "#4CAF50" : "#f44336";
+
+  const mailOptions = {
+    from: `"${APP_NAME}" <${FROM_EMAIL}>`,
+    to,
+    subject,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+          .header { background-color: ${statusColor}; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; line-height: 1.6; }
+          .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+          }
+          .status-box {
+            background-color: ${isApproved ? "#E8F5E8" : "#FFEBEE"};
+            border-left: 4px solid ${statusColor};
+            padding: 15px;
+            margin: 15px 0;
+          }
+          .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>${statusIcon} Request ${
+      isApproved ? "Approved" : "Rejected"
+    }</h1>
+          </div>
+          <div class="content">
+            <h2>Hi there!</h2>
+            <p>We have an update on your request to join "${familyName}".</p>
+
+            <div class="status-box">
+              <strong>Status:</strong> Your request has been <strong>${statusText}</strong> by ${ownerName}.
+            </div>
+
+            ${
+              responseMessage
+                ? `
+              <div class="status-box">
+                <strong>Message from Family Owner:</strong><br>
+                "${responseMessage}"
+              </div>
+            `
+                : ""
+            }
+
+            ${
+              isApproved
+                ? `
+              <p>🎉 Congratulations! You are now a member of "${familyName}". You can start tracking expenses with your family right away.</p>
+              
+              <a href="${CLIENT_URL}/auth/login" class="button">Login to ${APP_NAME}</a>
+            `
+                : `
+              <p>Unfortunately, your request to join "${familyName}" was not approved at this time. You can try looking for other families or create your own.</p>
+              
+              <a href="${CLIENT_URL}/family-setup" class="button">Find Another Family</a>
+            `
+            }
+            
+          </div>
+          <div class="footer">
+            <p>&copy; 2024 ${APP_NAME}. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    const transporter = createTransporter();
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Family join response email sent to ${to} (${statusText})`);
+    return result;
+  } catch (error) {
+    console.error("Error sending family join response email:", error);
+    throw new Error(`Failed to send join response email: ${error.message}`);
+  }
+}
+
 module.exports = {
   verifyEmailConfig,
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendFamilyInvitationEmail,
+  sendFamilyJoinRequestEmail,
+  sendFamilyJoinResponseEmail,
   sendTestEmail,
 
   // Constants for testing
