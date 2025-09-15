@@ -18,7 +18,7 @@ jest.mock("redis", () => ({
 }));
 
 jest.mock("nodemailer", () => ({
-  createTransporter: jest.fn(() => ({
+  createTransport: jest.fn(() => ({
     verify: jest.fn().mockResolvedValue(true),
     sendMail: jest.fn().mockResolvedValue({ messageId: "test123" }),
   })),

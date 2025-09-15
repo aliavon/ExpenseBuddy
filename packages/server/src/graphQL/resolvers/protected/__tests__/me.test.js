@@ -31,7 +31,7 @@ describe("me resolver", () => {
         auth: {
           isAuthenticated: true,
           user: {
-            id: "user-id",
+            _id: "user-id",
             email: "john@example.com",
             familyId: "family-id",
           },
@@ -66,7 +66,7 @@ describe("me resolver", () => {
         auth: {
           isAuthenticated: true,
           user: {
-            id: "user-id",
+            _id: "user-id",
             email: "jane@example.com",
           },
         },
@@ -144,7 +144,7 @@ describe("me resolver", () => {
         auth: {
           isAuthenticated: true,
           user: {
-            id: "nonexistent-user-id",
+            _id: "nonexistent-user-id",
             email: "john@example.com",
           },
         },
@@ -167,7 +167,7 @@ describe("me resolver", () => {
         auth: {
           isAuthenticated: true,
           user: {
-            id: "deactivated-user-id",
+            _id: "deactivated-user-id",
             email: "john@example.com",
           },
         },
@@ -188,7 +188,7 @@ describe("me resolver", () => {
         auth: {
           isAuthenticated: true,
           user: {
-            id: "user-id",
+            _id: "user-id",
             email: "john@example.com",
           },
         },
@@ -208,7 +208,7 @@ describe("me resolver", () => {
         auth: {
           isAuthenticated: true,
           user: {
-            id: "user-id",
+            _id: "user-id",
             email: "john@example.com",
           },
         },
@@ -230,7 +230,7 @@ describe("me resolver", () => {
         auth: {
           isAuthenticated: true,
           user: {
-            id: "507f1f77bcf86cd799439011", // ObjectId format
+            _id: "507f1f77bcf86cd799439011", // ObjectId format
             email: "john@example.com",
           },
         },
@@ -275,7 +275,7 @@ describe("me resolver", () => {
         auth: {
           isAuthenticated: true,
           user: {
-            id: "user-id",
+            _id: "user-id",
             email: "john@example.com",
           },
         },

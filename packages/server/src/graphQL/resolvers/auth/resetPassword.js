@@ -53,7 +53,10 @@ async function resetPass(parent, args) {
     }
 
     // Handle JWT errors specifically
-    if (error.message && error.message.includes("Invalid password reset token")) {
+    if (
+      error.message &&
+      error.message.includes("Invalid password reset token")
+    ) {
       throw new GraphQLError("Invalid or expired reset token", {
         extensions: { code: "PASSWORD_RESET_FAILED" },
       });

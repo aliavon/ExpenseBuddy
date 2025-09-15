@@ -16,7 +16,7 @@ const mockTransporter = {
 };
 
 jest.mock("nodemailer", () => ({
-  createTransporter: jest.fn(() => mockTransporter),
+  createTransport: jest.fn(() => mockTransporter),
 }));
 
 // nodemailer is mocked above

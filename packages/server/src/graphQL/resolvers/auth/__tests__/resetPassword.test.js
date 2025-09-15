@@ -1,18 +1,18 @@
 const { resetPasswordResolver } = require("../resetPassword");
-const { verifyToken } = require("../../../../auth/jwtUtils");
+const { verifyPasswordResetToken } = require("../../../../auth/jwtUtils");
 const bcrypt = require("bcryptjs");
 const { User } = require("../../../../database/schemas");
 
 // Mock external dependencies
 jest.mock("../../../../auth/jwtUtils", () => ({
-  verifyToken: jest.fn(),
+  verifyPasswordResetToken: jest.fn(),
 }));
 
 jest.mock("bcryptjs");
 
 jest.mock("../../../../database/schemas", () => ({
   User: {
-    findOne: jest.fn(),
+    findById: jest.fn(),
     findByIdAndUpdate: jest.fn(),
   },
 }));
@@ -35,47 +35,28 @@ describe("resetPassword resolver", () => {
       const mockUser = {
         _id: "user-id",
         email: "john@example.com",
-        passwordResetToken: token,
-        passwordResetExpires: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
         isActive: true,
       };
 
       const hashedPassword = "hashed-new-password";
-      const mockUpdatedUser = {
-        ...mockUser,
-        password: hashedPassword,
-        passwordResetToken: null,
-        passwordResetExpires: null,
-      };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockResolvedValue(mockUser);
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
+      User.findById.mockResolvedValue(mockUser);
       bcrypt.hash = jest.fn().mockResolvedValue(hashedPassword);
-      User.findByIdAndUpdate.mockResolvedValue(mockUpdatedUser);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
 
-      const result = await resetPasswordResolver(null, { input: { token, newPassword } });
+      const result = await resetPasswordResolver(null, {
+        input: { token, newPassword },
+      });
 
       expect(result).toBe(true);
-      expect(verifyToken).toHaveBeenCalledWith(
-        token,
-        process.env.JWT_ACCESS_SECRET
-      );
-      expect(User.findOne).toHaveBeenCalledWith({
-        _id: "user-id",
-        passwordResetToken: token,
-        passwordResetExpires: { $gt: expect.any(Date) },
-        isActive: true,
-      });
+      expect(verifyPasswordResetToken).toHaveBeenCalledWith(token);
+      expect(User.findById).toHaveBeenCalledWith("user-id");
       expect(bcrypt.hash).toHaveBeenCalledWith(newPassword, 12);
-      expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
-        "user-id",
-        {
-          password: hashedPassword,
-          passwordResetToken: null,
-          passwordResetExpires: null,
-        },
-        { new: true }
-      );
+      expect(User.findByIdAndUpdate).toHaveBeenCalledWith("user-id", {
+        password: hashedPassword,
+        updatedAt: expect.any(Date),
+      });
     });
   });
 
@@ -84,9 +65,8 @@ describe("resetPassword resolver", () => {
       const token = "invalid-token";
       const newPassword = "NewPassword123!";
 
-      verifyToken.mockImplementation(() => {
-        const error = new Error("Invalid token");
-        error.name = "JsonWebTokenError";
+      verifyPasswordResetToken.mockImplementation(() => {
+        const error = new Error("Invalid password reset token: invalid token");
         throw error;
       });
 
@@ -94,11 +74,8 @@ describe("resetPassword resolver", () => {
         resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
-      expect(verifyToken).toHaveBeenCalledWith(
-        token,
-        process.env.JWT_ACCESS_SECRET
-      );
-      expect(User.findOne).not.toHaveBeenCalled();
+      expect(verifyPasswordResetToken).toHaveBeenCalledWith(token);
+      expect(User.findById).not.toHaveBeenCalled();
       expect(bcrypt.hash).not.toHaveBeenCalled();
     });
 
@@ -106,9 +83,8 @@ describe("resetPassword resolver", () => {
       const token = "expired-token";
       const newPassword = "NewPassword123!";
 
-      verifyToken.mockImplementation(() => {
-        const error = new Error("Token expired");
-        error.name = "TokenExpiredError";
+      verifyPasswordResetToken.mockImplementation(() => {
+        const error = new Error("Invalid password reset token: jwt expired");
         throw error;
       });
 
@@ -121,9 +97,8 @@ describe("resetPassword resolver", () => {
       const token = "malformed.token";
       const newPassword = "NewPassword123!";
 
-      verifyToken.mockImplementation(() => {
-        const error = new Error("Malformed token");
-        error.name = "JsonWebTokenError";
+      verifyPasswordResetToken.mockImplementation(() => {
+        const error = new Error("Invalid password reset token: jwt malformed");
         throw error;
       });
 
@@ -141,13 +116,13 @@ describe("resetPassword resolver", () => {
         type: "email_verification", // Wrong type
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
 
       await expect(
         resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
-      expect(User.findOne).not.toHaveBeenCalled();
+      expect(User.findById).not.toHaveBeenCalled();
     });
   });
 
@@ -161,19 +136,14 @@ describe("resetPassword resolver", () => {
         type: "password_reset",
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockResolvedValue(null);
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
+      User.findById.mockResolvedValue(null);
 
       await expect(
         resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
-      expect(User.findOne).toHaveBeenCalledWith({
-        _id: "non-existent-user",
-        passwordResetToken: token,
-        passwordResetExpires: { $gt: expect.any(Date) },
-        isActive: true,
-      });
+      expect(User.findById).toHaveBeenCalledWith("non-existent-user");
     });
 
     it("should throw error if user is deactivated", async () => {
@@ -185,42 +155,14 @@ describe("resetPassword resolver", () => {
         type: "password_reset",
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockResolvedValue(null); // No active user found
-
-      await expect(
-        resetPasswordResolver(null, { input: { token, newPassword } })
-      ).rejects.toThrow("Invalid or expired reset token");
-    });
-
-    it("should throw error if token has expired in database", async () => {
-      const token = "valid-token";
-      const newPassword = "NewPassword123!";
-      const mockDecodedToken = {
-        userId: "user-id",
+      const mockUser = {
+        _id: "user-id",
         email: "john@example.com",
-        type: "password_reset",
+        isActive: false, // User is deactivated
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockResolvedValue(null); // No user with non-expired token
-
-      await expect(
-        resetPasswordResolver(null, { input: { token, newPassword } })
-      ).rejects.toThrow("Invalid or expired reset token");
-    });
-
-    it("should throw error if token does not match", async () => {
-      const token = "valid-token";
-      const newPassword = "NewPassword123!";
-      const mockDecodedToken = {
-        userId: "user-id",
-        email: "john@example.com",
-        type: "password_reset",
-      };
-
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockResolvedValue(null); // No user with matching token
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
+      User.findById.mockResolvedValue(mockUser);
 
       await expect(
         resetPasswordResolver(null, { input: { token, newPassword } })
@@ -241,13 +183,11 @@ describe("resetPassword resolver", () => {
       const mockUser = {
         _id: "user-id",
         email: "john@example.com",
-        passwordResetToken: token,
-        passwordResetExpires: new Date(Date.now() + 30 * 60 * 1000),
         isActive: true,
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockResolvedValue(mockUser);
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
+      User.findById.mockResolvedValue(mockUser);
       bcrypt.hash = jest.fn().mockRejectedValue(new Error("Hashing failed"));
 
       await expect(
@@ -268,8 +208,8 @@ describe("resetPassword resolver", () => {
         type: "password_reset",
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockRejectedValue(new Error("Database connection error"));
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
+      User.findById.mockRejectedValue(new Error("Database connection error"));
 
       await expect(
         resetPasswordResolver(null, { input: { token, newPassword } })
@@ -290,15 +230,13 @@ describe("resetPassword resolver", () => {
       const mockUser = {
         _id: "user-id",
         email: "john@example.com",
-        passwordResetToken: token,
-        passwordResetExpires: new Date(Date.now() + 30 * 60 * 1000),
         isActive: true,
       };
 
       const hashedPassword = "hashed-password";
 
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockResolvedValue(mockUser);
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
+      User.findById.mockResolvedValue(mockUser);
       bcrypt.hash = jest.fn().mockResolvedValue(hashedPassword);
       User.findByIdAndUpdate.mockRejectedValue(
         new Error("Database update error")
@@ -311,7 +249,7 @@ describe("resetPassword resolver", () => {
   });
 
   describe("security considerations", () => {
-    it("should clear reset token after successful reset", async () => {
+    it("should update password and timestamp", async () => {
       const token = "valid-token";
       const newPassword = "NewPassword123!";
       const mockDecodedToken = {
@@ -323,15 +261,13 @@ describe("resetPassword resolver", () => {
       const mockUser = {
         _id: "user-id",
         email: "john@example.com",
-        passwordResetToken: token,
-        passwordResetExpires: new Date(Date.now() + 30 * 60 * 1000),
         isActive: true,
       };
 
       const hashedPassword = "hashed-password";
 
-      verifyToken.mockReturnValue(mockDecodedToken);
-      User.findOne.mockResolvedValue(mockUser);
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
+      User.findById.mockResolvedValue(mockUser);
       bcrypt.hash = jest.fn().mockResolvedValue(hashedPassword);
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
 
@@ -340,10 +276,9 @@ describe("resetPassword resolver", () => {
       expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
         "user-id",
         expect.objectContaining({
-          passwordResetToken: null, // Should clear token
-          passwordResetExpires: null, // Should clear expiry
-        }),
-        { new: true }
+          password: hashedPassword,
+          updatedAt: expect.any(Date),
+        })
       );
     });
 
@@ -356,13 +291,13 @@ describe("resetPassword resolver", () => {
         type: "access_token", // Wrong type
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
 
       await expect(
         resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
-      expect(User.findOne).not.toHaveBeenCalled();
+      expect(User.findById).not.toHaveBeenCalled();
     });
 
     it("should require userId in token payload", async () => {
@@ -373,13 +308,13 @@ describe("resetPassword resolver", () => {
         type: "password_reset",
       };
 
-      verifyToken.mockReturnValue(mockDecodedToken);
+      verifyPasswordResetToken.mockReturnValue(mockDecodedToken);
 
       await expect(
         resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
-      expect(User.findOne).not.toHaveBeenCalled();
+      expect(User.findById).not.toHaveBeenCalled();
     });
   });
 

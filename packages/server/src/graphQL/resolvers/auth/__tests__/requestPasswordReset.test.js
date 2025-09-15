@@ -1,11 +1,11 @@
 const { requestPasswordResetResolver } = require("../requestPasswordReset");
-const { generateAccessToken } = require("../../../../auth/jwtUtils");
+const { generatePasswordResetToken } = require("../../../../auth/jwtUtils");
 const { sendPasswordResetEmail } = require("../../../../auth/emailService");
 const { User } = require("../../../../database/schemas");
 
 // Mock external dependencies
 jest.mock("../../../../auth/jwtUtils", () => ({
-  generateAccessToken: jest.fn(),
+  generatePasswordResetToken: jest.fn(),
 }));
 
 jest.mock("../../../../auth/emailService", () => ({
@@ -38,7 +38,7 @@ describe("requestPasswordReset resolver", () => {
       const mockExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h from now
 
       User.findOne.mockResolvedValue(mockUser);
-      generateAccessToken.mockReturnValue(mockResetToken);
+      generatePasswordResetToken.mockReturnValue(mockResetToken);
       User.findByIdAndUpdate.mockResolvedValue({
         ...mockUser,
         passwordResetToken: mockResetToken,
@@ -53,7 +53,7 @@ describe("requestPasswordReset resolver", () => {
         email: email.toLowerCase(),
         isActive: true,
       });
-      expect(generateAccessToken).toHaveBeenCalledWith(
+      expect(generatePasswordResetToken).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: mockUser._id,
           email: mockUser.email,
@@ -85,7 +85,7 @@ describe("requestPasswordReset resolver", () => {
       };
 
       User.findOne.mockResolvedValue(mockUser);
-      generateAccessToken.mockReturnValue("token");
+      generatePasswordResetToken.mockReturnValue("token");
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
       sendPasswordResetEmail.mockResolvedValue(true);
 
@@ -112,7 +112,7 @@ describe("requestPasswordReset resolver", () => {
         email: email.toLowerCase(),
         isActive: true,
       });
-      expect(generateAccessToken).not.toHaveBeenCalled();
+      expect(generatePasswordResetToken).not.toHaveBeenCalled();
       expect(sendPasswordResetEmail).not.toHaveBeenCalled();
     });
 
@@ -138,7 +138,7 @@ describe("requestPasswordReset resolver", () => {
       };
 
       User.findOne.mockResolvedValue(mockUser);
-      generateAccessToken.mockReturnValue("token");
+      generatePasswordResetToken.mockReturnValue("token");
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
       sendPasswordResetEmail.mockRejectedValue(new Error("Email service down"));
 
@@ -159,7 +159,7 @@ describe("requestPasswordReset resolver", () => {
       };
 
       User.findOne.mockResolvedValue(mockUser);
-      generateAccessToken.mockReturnValue("token");
+      generatePasswordResetToken.mockReturnValue("token");
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
       sendPasswordResetEmail.mockRejectedValue(new Error("Timeout"));
 
@@ -179,7 +179,7 @@ describe("requestPasswordReset resolver", () => {
         requestPasswordResetResolver(null, { email })
       ).rejects.toThrow("Failed to request password reset");
 
-      expect(generateAccessToken).not.toHaveBeenCalled();
+      expect(generatePasswordResetToken).not.toHaveBeenCalled();
       expect(sendPasswordResetEmail).not.toHaveBeenCalled();
     });
 
@@ -193,7 +193,7 @@ describe("requestPasswordReset resolver", () => {
       };
 
       User.findOne.mockResolvedValue(mockUser);
-      generateAccessToken.mockReturnValue("token");
+      generatePasswordResetToken.mockReturnValue("token");
       User.findByIdAndUpdate.mockRejectedValue(
         new Error("Database update error")
       );
@@ -217,13 +217,13 @@ describe("requestPasswordReset resolver", () => {
       };
 
       User.findOne.mockResolvedValue(mockUser);
-      generateAccessToken.mockReturnValue("generated-token");
+      generatePasswordResetToken.mockReturnValue("generated-token");
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
       sendPasswordResetEmail.mockResolvedValue(true);
 
       await requestPasswordResetResolver(null, { email });
 
-      expect(generateAccessToken).toHaveBeenCalledWith({
+      expect(generatePasswordResetToken).toHaveBeenCalledWith({
         userId: mockUser._id,
         email: mockUser.email,
         type: "password_reset",
@@ -242,7 +242,7 @@ describe("requestPasswordReset resolver", () => {
       const timeBefore = Date.now();
 
       User.findOne.mockResolvedValue(mockUser);
-      generateAccessToken.mockReturnValue("token");
+      generatePasswordResetToken.mockReturnValue("token");
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
       sendPasswordResetEmail.mockResolvedValue(true);
 
@@ -291,7 +291,7 @@ describe("requestPasswordReset resolver", () => {
       };
 
       User.findOne.mockResolvedValue(mockUser);
-      generateAccessToken.mockReturnValue("new-token");
+      generatePasswordResetToken.mockReturnValue("new-token");
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
       sendPasswordResetEmail.mockResolvedValue(true);
 

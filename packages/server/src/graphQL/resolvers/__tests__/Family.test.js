@@ -6,7 +6,7 @@ const userLoader = require("../../../loaders/userLoader");
 jest.mock("../../../database/schemas", () => ({
   User: {
     find: jest.fn().mockReturnValue({
-      sort: jest.fn(),
+      sort: jest.fn().mockResolvedValue([]),
     }),
   },
 }));
@@ -24,7 +24,7 @@ describe("Family type resolver", () => {
 
     // Reset the mock query object
     mockUserQuery = {
-      sort: jest.fn(),
+      sort: jest.fn().mockResolvedValue([]),
     };
     User.find.mockReturnValue(mockUserQuery);
   });
@@ -186,7 +186,8 @@ describe("Family type resolver", () => {
         name: "Empty Family",
       };
 
-      User.find.mockResolvedValue([]);
+      mockUserQuery.sort.mockResolvedValue([]);
+      User.find.mockReturnValue(mockUserQuery);
 
       const result = await FamilyResolver.members(family);
 
