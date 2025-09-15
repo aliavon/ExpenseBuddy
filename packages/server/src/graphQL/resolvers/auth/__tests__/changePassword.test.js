@@ -47,7 +47,7 @@ describe("changePassword resolver", () => {
 
       const result = await changePasswordResolver(
         null,
-        { currentPassword, newPassword },
+        { input: { currentPassword, newPassword } },
         mockContext
       );
 
@@ -92,7 +92,7 @@ describe("changePassword resolver", () => {
 
       await changePasswordResolver(
         null,
-        { currentPassword, newPassword },
+        { input: { currentPassword, newPassword } },
         mockContext
       );
 
@@ -114,7 +114,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("You must be logged in to change password");
@@ -136,7 +136,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("You must be logged in to change password");
@@ -150,7 +150,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("You must be logged in to change password");
@@ -177,7 +177,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("User not found");
@@ -210,7 +210,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("Account is deactivated");
@@ -242,7 +242,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("Current password is incorrect");
@@ -279,7 +279,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("Password change failed");
@@ -312,7 +312,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("Password change failed");
@@ -341,7 +341,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("Password change failed");
@@ -375,7 +375,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("Password change failed");
@@ -405,7 +405,7 @@ describe("changePassword resolver", () => {
       await expect(
         changePasswordResolver(
           null,
-          { currentPassword, newPassword },
+          { input: { currentPassword, newPassword } },
           mockContext
         )
       ).rejects.toThrow("New password must be different from current password");
@@ -437,7 +437,7 @@ describe("changePassword resolver", () => {
 
       await changePasswordResolver(
         null,
-        { currentPassword, newPassword },
+        { input: { currentPassword, newPassword } },
         mockContext
       );
 

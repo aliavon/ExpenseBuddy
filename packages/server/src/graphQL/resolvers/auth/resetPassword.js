@@ -23,7 +23,7 @@ async function resetPass(parent, args) {
       !decodedToken.userId ||
       decodedToken.type !== "password_reset"
     ) {
-      throw new GraphQLError("Invalid password reset token", {
+      throw new GraphQLError("Invalid or expired reset token", {
         extensions: { code: "PASSWORD_RESET_FAILED" },
       });
     }
@@ -32,7 +32,7 @@ async function resetPass(parent, args) {
     const user = await User.findById(decodedToken.userId);
 
     if (!user || !user.isActive) {
-      throw new GraphQLError("Invalid password reset token", {
+      throw new GraphQLError("Invalid or expired reset token", {
         extensions: { code: "PASSWORD_RESET_FAILED" },
       });
     }
@@ -50,6 +50,13 @@ async function resetPass(parent, args) {
   } catch (error) {
     if (error instanceof GraphQLError) {
       throw error;
+    }
+
+    // Handle JWT errors specifically
+    if (error.message && error.message.includes("Invalid password reset token")) {
+      throw new GraphQLError("Invalid or expired reset token", {
+        extensions: { code: "PASSWORD_RESET_FAILED" },
+      });
     }
 
     throw new GraphQLError("Password reset failed", {

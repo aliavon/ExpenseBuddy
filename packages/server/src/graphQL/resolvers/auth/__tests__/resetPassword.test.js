@@ -53,7 +53,7 @@ describe("resetPassword resolver", () => {
       bcrypt.hash = jest.fn().mockResolvedValue(hashedPassword);
       User.findByIdAndUpdate.mockResolvedValue(mockUpdatedUser);
 
-      const result = await resetPasswordResolver(null, { token, newPassword });
+      const result = await resetPasswordResolver(null, { input: { token, newPassword } });
 
       expect(result).toBe(true);
       expect(verifyToken).toHaveBeenCalledWith(
@@ -91,7 +91,7 @@ describe("resetPassword resolver", () => {
       });
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
       expect(verifyToken).toHaveBeenCalledWith(
@@ -113,7 +113,7 @@ describe("resetPassword resolver", () => {
       });
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
     });
 
@@ -128,7 +128,7 @@ describe("resetPassword resolver", () => {
       });
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
     });
 
@@ -144,7 +144,7 @@ describe("resetPassword resolver", () => {
       verifyToken.mockReturnValue(mockDecodedToken);
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
       expect(User.findOne).not.toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe("resetPassword resolver", () => {
       User.findOne.mockResolvedValue(null);
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
       expect(User.findOne).toHaveBeenCalledWith({
@@ -189,7 +189,7 @@ describe("resetPassword resolver", () => {
       User.findOne.mockResolvedValue(null); // No active user found
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
     });
 
@@ -206,7 +206,7 @@ describe("resetPassword resolver", () => {
       User.findOne.mockResolvedValue(null); // No user with non-expired token
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
     });
 
@@ -223,7 +223,7 @@ describe("resetPassword resolver", () => {
       User.findOne.mockResolvedValue(null); // No user with matching token
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
     });
   });
@@ -251,7 +251,7 @@ describe("resetPassword resolver", () => {
       bcrypt.hash = jest.fn().mockRejectedValue(new Error("Hashing failed"));
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Password reset failed");
 
       expect(User.findByIdAndUpdate).not.toHaveBeenCalled();
@@ -272,7 +272,7 @@ describe("resetPassword resolver", () => {
       User.findOne.mockRejectedValue(new Error("Database connection error"));
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Password reset failed");
 
       expect(bcrypt.hash).not.toHaveBeenCalled();
@@ -305,7 +305,7 @@ describe("resetPassword resolver", () => {
       );
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Password reset failed");
     });
   });
@@ -335,7 +335,7 @@ describe("resetPassword resolver", () => {
       bcrypt.hash = jest.fn().mockResolvedValue(hashedPassword);
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
 
-      await resetPasswordResolver(null, { token, newPassword });
+      await resetPasswordResolver(null, { input: { token, newPassword } });
 
       expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
         "user-id",
@@ -359,7 +359,7 @@ describe("resetPassword resolver", () => {
       verifyToken.mockReturnValue(mockDecodedToken);
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
       expect(User.findOne).not.toHaveBeenCalled();
@@ -376,7 +376,7 @@ describe("resetPassword resolver", () => {
       verifyToken.mockReturnValue(mockDecodedToken);
 
       await expect(
-        resetPasswordResolver(null, { token, newPassword })
+        resetPasswordResolver(null, { input: { token, newPassword } })
       ).rejects.toThrow("Invalid or expired reset token");
 
       expect(User.findOne).not.toHaveBeenCalled();

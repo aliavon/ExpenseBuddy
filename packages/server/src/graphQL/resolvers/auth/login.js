@@ -60,8 +60,9 @@ async function login(parent, args) {
   const refreshToken = generateRefreshToken(tokenPayload);
 
   // Create user object for GraphQL response (familyId should be ID, not populated object)
+  const userPlain = typeof user.toObject === 'function' ? user.toObject() : user;
   const userForResponse = {
-    ...user.toObject(),
+    ...userPlain,
     id: user._id.toString(), // GraphQL expects 'id', not '_id'
     familyId: user.familyId ? user.familyId._id : null,
   };

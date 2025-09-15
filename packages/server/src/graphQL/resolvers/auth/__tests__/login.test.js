@@ -31,6 +31,7 @@ describe("login resolver", () => {
 
     // Reset the mock query object
     mockUserQuery = {
+      select: jest.fn().mockReturnThis(),
       populate: jest.fn(),
     };
     User.findOne.mockReturnValue(mockUserQuery);
@@ -75,13 +76,29 @@ describe("login resolver", () => {
       expect(mockUser.save).toHaveBeenCalled();
       expect(mockUser.lastLoginAt).toBeInstanceOf(Date);
 
-      expect(generateAccessToken).toHaveBeenCalledWith(mockUser);
-      expect(generateRefreshToken).toHaveBeenCalledWith(mockUser);
+      expect(generateAccessToken).toHaveBeenCalledWith({
+        userId: mockUser._id.toString(),
+        email: mockUser.email,
+        familyId: mockUser.familyId,
+        roleInFamily: mockUser.roleInFamily,
+      });
+      expect(generateRefreshToken).toHaveBeenCalledWith({
+        userId: mockUser._id.toString(),
+        email: mockUser.email,
+        familyId: mockUser.familyId,
+        roleInFamily: mockUser.roleInFamily,
+      });
 
       expect(result).toEqual({
         accessToken: "access-token",
         refreshToken: "refresh-token",
-        user: mockUser,
+        user: expect.objectContaining({
+          _id: mockUser._id,
+          email: mockUser.email,
+          isActive: mockUser.isActive,
+          id: mockUser._id.toString(),
+          familyId: null,
+        }),
       });
     });
   });
