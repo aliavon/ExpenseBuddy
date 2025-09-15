@@ -25,6 +25,10 @@ const getFamilyIncomeRecords = require("./getFamilyIncomeRecords");
 const getCurrencies = require("./getCurrencies");
 const getIncomeTypes = require("./getIncomeTypes");
 const getUsers = require("./getUsers");
+const searchFamilies = require("./searchFamilies");
+const myJoinRequests = require("./myJoinRequests");
+const incomingJoinRequests = require("./incomingJoinRequests");
+const familyMembers = require("./familyMembers");
 
 // Helper function to compose both validation and error handling wrappers.
 // It applies withValidationCurried first, then withErrorHandlingCurried.
@@ -89,6 +93,26 @@ const userResolvers = {
   getUsers: withCompose(defaultHandlerArgs.getUsers, getUsersSchema, getUsers),
 };
 
+// Family-related queries
+const familyResolvers = {
+  searchFamilies: withErrorHandling(searchFamilies, {
+    errorCode: "SEARCH_FAMILIES_FAILED",
+    errorMessage: "Failed to search families",
+  }),
+  myJoinRequests: withErrorHandling(myJoinRequests, {
+    errorCode: "GET_FAMILY_REQUESTS_FAILED",
+    errorMessage: "Failed to fetch family join requests",
+  }),
+  incomingJoinRequests: withErrorHandling(incomingJoinRequests, {
+    errorCode: "GET_FAMILY_REQUESTS_FAILED",
+    errorMessage: "Failed to fetch incoming family join requests",
+  }),
+  familyMembers: withErrorHandling(familyMembers, {
+    errorCode: "GET_FAMILY_MEMBERS_FAILED",
+    errorMessage: "Failed to fetch family members",
+  }),
+};
+
 // Export all grouped Query resolvers
 module.exports = {
   ...purchasesResolvers,
@@ -97,4 +121,5 @@ module.exports = {
   ...currencyResolvers,
   ...incomeTypeResolvers,
   ...userResolvers,
+  ...familyResolvers,
 };

@@ -3,6 +3,7 @@ const Query = require("./Query");
 const PurchaseResolver = require("./Purchase");
 const FamilyIncomeResolver = require("./FamilyIncome");
 const FamilyResolver = require("./Family");
+const FamilyJoinRequestResolver = require("./FamilyJoinRequest");
 const UserResolver = require("./User");
 const authResolvers = require("./auth");
 const protectedResolvers = require("./protected");
@@ -19,5 +20,6 @@ module.exports = {
   Purchase: PurchaseResolver,
   FamilyIncome: FamilyIncomeResolver,
   Family: FamilyResolver,
+  FamilyJoinRequest: FamilyJoinRequestResolver,
   User: UserResolver,
 };

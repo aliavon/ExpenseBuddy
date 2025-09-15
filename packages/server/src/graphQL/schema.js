@@ -11,6 +11,11 @@ module.exports = `
     user: User!
   }
 
+  type RegistrationPayload {
+    success: Boolean!
+    message: String!
+  }
+
   # Enum for family roles  
   enum FamilyRole {
     OWNER
@@ -26,6 +31,17 @@ module.exports = `
     
     # Get current user's family with all members
     myFamily: Family!
+    
+    # Search families by name (for joining)
+    searchFamilies(searchTerm: String!): [FamilySearchResult!]!
+
+    # Get user's family join requests
+    myJoinRequests: [FamilyJoinRequest!]!
+
+  # Get incoming join requests for user's owned families (family owner only)
+  incomingJoinRequests: [FamilyJoinRequest!]!
+  # Get family members (family owner only)
+  familyMembers: [User!]!
 
     # ----- Existing Queries -----
     
@@ -68,8 +84,8 @@ module.exports = `
   type Mutation {
     # ----- Authentication Mutations -----
     
-    # User registration with family creation or joining
-    register(input: RegisterInput!): AuthPayload!
+    # User registration with email verification
+    register(input: RegisterInput!): RegistrationPayload!
     
     # User login with email and password
     login(input: LoginInput!): AuthPayload!
@@ -98,9 +114,13 @@ module.exports = `
     # Family invitations (JWT-based)
     inviteToFamily(input: InviteFamilyInput!): Boolean!
     
-    # Member management (ADMIN/OWNER only)
+    # Request to join a family (sends email to owner)
+    requestJoinFamily(familyId: ID!): Boolean!
+
+    # Respond to a family join request (OWNER only)
+    respondToJoinRequest(input: RespondToJoinRequestInput!): FamilyJoinRequest!
+    # Remove family member (OWNER only)
     removeFamilyMember(userId: ID!): Boolean!
-    updateMemberRole(input: UpdateMemberRoleInput!): User!
 
     # ----- Existing Mutations -----
     
@@ -302,6 +322,37 @@ module.exports = `
     updatedAt: String!
   }
 
+  # Family search result for finding families to join
+  type FamilySearchResult {
+    id: ID!
+    name: String!
+    description: String
+    memberCount: Int!
+    owner: User!
+  }
+
+  # Enum for family join request status
+  enum FamilyJoinRequestStatus {
+    PENDING
+    APPROVED
+    REJECTED
+    CANCELLED
+  }
+
+  # Family join request represents a request to join a family
+  type FamilyJoinRequest {
+    id: ID!
+    user: User!                           # User who sent the request
+    family: Family!                       # Family they want to join
+    owner: User!                          # Family owner who will approve/reject
+    status: FamilyJoinRequestStatus!      # Current status
+    message: String                       # Optional message from requester
+    requestedAt: String!                  # When request was sent
+    respondedAt: String                   # When request was responded to
+    responseMessage: String               # Optional response from owner
+    isActive: Boolean!
+  }
+
   # ----- Purchase-related types and inputs -----
 
   type Purchase {
@@ -429,6 +480,19 @@ module.exports = `
   input UpdateMemberRoleInput {
     userId: ID!
     role: FamilyRole!
+  }
+
+  # Input for responding to family join request
+  input RespondToJoinRequestInput {
+    requestId: ID!
+    response: FamilyJoinRequestResponse!
+    message: String
+  }
+
+  # Enum for family join request responses
+  enum FamilyJoinRequestResponse {
+    APPROVE
+    REJECT
   }
 
 `;
