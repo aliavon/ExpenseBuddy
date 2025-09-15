@@ -5,7 +5,7 @@ const ACCESS_TOKEN_SECRET =
   process.env.JWT_ACCESS_SECRET || "dev-access-secret-change-in-production";
 const REFRESH_TOKEN_SECRET =
   process.env.JWT_REFRESH_SECRET || "dev-refresh-secret-change-in-production";
-const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRY || "15m";
+const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRY || "1h";
 const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRY || "7d";
 const INVITATION_TOKEN_EXPIRY = process.env.JWT_INVITATION_EXPIRY || "24h";
 const VERIFICATION_TOKEN_EXPIRY = process.env.JWT_VERIFICATION_EXPIRY || "24h";
