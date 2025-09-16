@@ -1,6 +1,4 @@
-version: "3"
 services:
-
   expense-buddy-client:
     container_name: expense-buddy-client
     build: ./packages/client
@@ -17,7 +15,7 @@ services:
     volumes:
       - ./packages/client/src:/home/app/src
     links:
-      - expense-buddy-server
+      - server
     networks:
       - app_network
 
@@ -30,6 +28,19 @@ services:
       - API_HOST=${API_HOST}
       - APP_SERVER_PORT=${APP_SERVER_PORT}
       - DATABASE_HOST=mongodb://expenseBuddyMongoDB:${DATABASE_PORT}/server
+      # Email Configuration
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - CLIENT_URL=${CLIENT_URL}
+      - APP_NAME=${APP_NAME}
+      # JWT Configuration
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_EMAIL_SECRET=${JWT_EMAIL_SECRET}
     ports:
       - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
     depends_on:
