@@ -73,10 +73,6 @@ async function removeFamilyMember(parent, args, context) {
       },
     });
 
-    console.log(
-      `Family member removed: ${userToRemove.firstName} ${userToRemove.lastName} (${userId})`
-    );
-
     return true;
   } catch (error) {
     console.error("Error in removeFamilyMember:", error);

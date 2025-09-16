@@ -72,10 +72,6 @@ async function respondToJoinRequest(parent, args, context) {
         familyId: joinRequest.familyId._id,
         roleInFamily: "MEMBER",
       });
-
-      console.log(
-        `User ${joinRequest.userId.email} approved to join family ${joinRequest.familyId.name}`
-      );
     }
 
     // Send notification email to the user about the response

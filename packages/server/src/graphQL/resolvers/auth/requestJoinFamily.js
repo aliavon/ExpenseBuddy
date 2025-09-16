@@ -83,7 +83,7 @@ async function requestJoinFamily(parent, args, context) {
     }
 
     // Create the join request record
-    const joinRequest = await FamilyJoinRequest.create({
+    await FamilyJoinRequest.create({
       userId: auth.user._id,
       familyId: familyId,
       ownerId: family.ownerId._id,
@@ -92,10 +92,6 @@ async function requestJoinFamily(parent, args, context) {
       requestedAt: new Date(),
       isActive: true,
     });
-
-    console.log(
-      `Family join request created: ${joinRequest._id} for user ${auth.user._id} to family ${familyId}`
-    );
 
     return true;
   } catch (error) {
