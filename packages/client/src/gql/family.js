@@ -120,3 +120,20 @@ export const REMOVE_FAMILY_MEMBER_MUTATION = gql`
     removeFamilyMember(userId: $userId)
   }
 `;
+
+export const UPDATE_FAMILY_MUTATION = gql`
+  mutation UpdateFamily($input: UpdateFamilyInput!) {
+    updateFamily(input: $input) {
+      id
+      name
+      description
+      owner {
+        id
+        firstName
+        lastName
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
