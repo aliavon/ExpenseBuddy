@@ -14,12 +14,18 @@ const navItems = [
   {
     title: 'Add Purchases',
     itemId: '/add',
-  }, {
+  },
+  {
     title: 'View Purchases',
     itemId: '/view',
-  }, {
+  },
+  {
     title: 'Family Income',
     itemId: '/income',
+  },
+  {
+    title: 'Family Dashboard',
+    itemId: '/family',
   },
 ];
 
@@ -88,7 +94,7 @@ const SideNav = () => {
               {user ? `${user.firstName} ${user.lastName}` : 'Loading...'}
             </LabelMedium>
             <ParagraphSmall color="contentSecondary">
-              {user?.family?.name || 'Loading...'}
+              {user?.familyId ? 'In Family' : 'No Family'}
             </ParagraphSmall>
             <ParagraphSmall color="contentSecondary">
               {user?.roleInFamily || ''}

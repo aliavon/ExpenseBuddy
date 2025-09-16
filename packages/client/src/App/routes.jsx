@@ -10,7 +10,9 @@ import RegisterPage from '../pages/auth/RegisterPage';
 import RequestPasswordResetPage from '../pages/auth/RequestPasswordResetPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import VerifyEmailPage from '../pages/auth/VerifyEmailPage';
+import ConfirmEmailChangePage from '../pages/auth/ConfirmEmailChangePage';
 import FamilySetupPage from '../pages/family/FamilySetupPage';
+import FamilyDashboard from '../pages/family/FamilyDashboard';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -67,6 +69,10 @@ const RootRoutes = () => {
           path="/auth/verify-email"
           element={<VerifyEmailPage />}
         />
+        <Route
+          path="/auth/confirm-email-change"
+          element={<ConfirmEmailChangePage />}
+        />
         {/* Family Setup - protected but for users without family */}
         <Route
           path="/family-setup"
@@ -99,6 +105,14 @@ const RootRoutes = () => {
           element={(
             <ProtectedRoute>
               <FamilyIncome />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/family"
+          element={(
+            <ProtectedRoute>
+              <FamilyDashboard />
             </ProtectedRoute>
           )}
         />

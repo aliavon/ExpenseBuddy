@@ -10,6 +10,7 @@ const ME_QUERY = gql`
       id
       firstName
       lastName
+      middleName
       email
       isEmailVerified
       familyId
@@ -29,6 +30,7 @@ const LOGIN_MUTATION = gql`
         id
         firstName
         lastName
+        middleName
         email
         familyId
         roleInFamily
@@ -81,7 +83,6 @@ const isTokenValid = token => {
 
 // Auth Provider component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -92,12 +93,11 @@ export const AuthProvider = ({ children }) => {
   });
 
   // Query to get current user (only if there's a valid token)
-  const { loading: userLoading, refetch: refetchUser } = useQuery(ME_QUERY, {
+  const { data: userData, loading: userLoading, refetch: refetchUser } = useQuery(ME_QUERY, {
     skip: !hasValidToken,
     errorPolicy: 'all',
     onCompleted: data => {
       if (data?.me) {
-        setUser(data.me);
         setError(null);
       }
     },
@@ -110,6 +110,9 @@ export const AuthProvider = ({ children }) => {
     },
   });
 
+  // Get user from query data directly (reactive!)
+  const user = userData?.me || null;
+
   // Login mutation
   const [loginMutation] = useMutation(LOGIN_MUTATION, {
     onCompleted: data => {
@@ -118,8 +121,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('accessToken', data.login.accessToken);
         localStorage.setItem('refreshToken', data.login.refreshToken);
 
-        // Set user
-        setUser(data.login.user);
+        // Update token state
         setHasValidToken(true);
         setError(null);
 
@@ -161,16 +163,18 @@ export const AuthProvider = ({ children }) => {
 
       if (preAuthData) {
         // Post-registration login with pre-authenticated data
-        const { accessToken, refreshToken, user } = preAuthData;
+        const { accessToken, refreshToken } = preAuthData;
 
         // Save tokens
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
 
-        // Update state
-        setUser(user);
+        // Update token state and refetch user data
         setHasValidToken(true);
         setIsLoading(false);
+
+        // Refetch ME_QUERY to get fresh user data
+        await refetchUser();
 
         return true;
       } else {
@@ -183,6 +187,9 @@ export const AuthProvider = ({ children }) => {
             },
           },
         });
+
+        // After successful login, refetch user data
+        await refetchUser();
         return true;
       }
     } catch (error) {
@@ -197,8 +204,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
 
-    // Clear state
-    setUser(null);
+    // Clear state (user will be null automatically when hasValidToken is false)
     setHasValidToken(false);
     setError(null);
   };
@@ -238,8 +244,8 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    family: user?.family || null,
-    isAuthenticated: !!user && hasValidToken,
+    family: null, // Family info will be loaded separately when needed
+    isAuthenticated: hasValidToken && (!!user || userLoading), // Authenticated if token valid and (user loaded OR loading)
     isLoading,
     login,
     logout,

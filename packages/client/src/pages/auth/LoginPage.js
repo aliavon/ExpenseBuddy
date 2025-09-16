@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -23,8 +23,20 @@ const validationSchema = Yup.object({
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate('/add', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
+
+  // Don't show login form if user is authenticated or being redirected
+  if (isAuthenticated || authLoading) {
+    return null;
+  }
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {

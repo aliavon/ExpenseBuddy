@@ -28,3 +28,40 @@ export const VERIFY_EMAIL_MUTATION = gql`
     verifyEmail(token: $token)
   }
 `;
+
+// Update user profile mutation
+export const UPDATE_PROFILE_MUTATION = gql`
+  mutation UpdateUser($user: UpdateUserInput!) {
+    updateUser(user: $user) {
+      id
+      firstName
+      middleName
+      lastName
+      email
+      isEmailVerified
+      familyId
+      roleInFamily
+    }
+  }
+`;
+
+// Change password mutation
+export const CHANGE_PASSWORD_MUTATION = gql`
+  mutation ChangePassword($input: ChangePasswordInput!) {
+    changePassword(input: $input)
+  }
+`;
+
+// Request email change mutation
+export const REQUEST_EMAIL_CHANGE_MUTATION = gql`
+  mutation RequestEmailChange($input: RequestEmailChangeInput!) {
+    requestEmailChange(input: $input)
+  }
+`;
+
+// Confirm email change mutation
+export const CONFIRM_EMAIL_CHANGE_MUTATION = gql`
+  mutation ConfirmEmailChange($token: String!) {
+    confirmEmailChange(token: $token)
+  }
+`;
