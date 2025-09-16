@@ -57,6 +57,7 @@ chmod +x start.sh
 ```
 
 **Development mode:**
+
 ```bash
 # Start MongoDB and Redis
 docker-compose up -d mongo redis
@@ -64,7 +65,7 @@ docker-compose up -d mongo redis
 # Start server (in one terminal)
 cd packages/server && yarn dev
 
-# Start client (in another terminal)  
+# Start client (in another terminal)
 cd packages/client && yarn start
 ```
 
@@ -75,6 +76,7 @@ All configuration is done through environment variables in the `.env` file. Copy
 ### Required Variables
 
 #### 🔑 JWT Authentication (CRITICAL)
+
 Generate secure random 32+ character strings:
 
 ```bash
@@ -85,9 +87,11 @@ node -e "console.log('JWT_EMAIL_SECRET=' + require('crypto').randomBytes(32).toS
 ```
 
 #### 📧 Email Configuration (REQUIRED)
+
 **Option 1: Gmail SMTP (Recommended for development)**
 
 1. **Get Gmail App Password:**
+
    - Go to [Google Account Settings](https://myaccount.google.com/)
    - Security → 2-Step Verification → App passwords
    - Generate password for "Mail" app
@@ -95,7 +99,7 @@ node -e "console.log('JWT_EMAIL_SECRET=' + require('crypto').randomBytes(32).toS
 2. **Configure in .env:**
    ```
    SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587  
+   SMTP_PORT=587
    SMTP_SECURE=false
    SMTP_USER=your-email@gmail.com
    SMTP_PASS=your-16-digit-app-password
@@ -105,6 +109,7 @@ node -e "console.log('JWT_EMAIL_SECRET=' + require('crypto').randomBytes(32).toS
 **Option 2: SendGrid (Recommended for production)**
 
 1. **Get SendGrid API Key:**
+
    - Sign up at [SendGrid](https://sendgrid.com/)
    - Go to Settings → API Keys → Create API Key
    - Copy the API key
@@ -116,9 +121,11 @@ node -e "console.log('JWT_EMAIL_SECRET=' + require('crypto').randomBytes(32).toS
    ```
 
 #### 🌐 API Layer Key (Optional)
+
 For currency/location features:
 
 1. **Get API Layer Key:**
+
    - Sign up at [API Layer](https://apilayer.com/)
    - Copy your API key
 
@@ -128,10 +135,11 @@ For currency/location features:
    ```
 
 ### Auto-configured Variables
+
 These are automatically set by Docker (no action required):
 
 - `APP_CLIENT_PORT=3000` - Client port
-- `APP_SERVER_PORT=8000` - Server port  
+- `APP_SERVER_PORT=8000` - Server port
 - `DATABASE_PORT=27017` - MongoDB port
 - `CLIENT_URL=http://localhost:3000` - Frontend URL
 - `APP_NAME=ExpenseBuddy` - Application name
@@ -198,16 +206,20 @@ Add `credentials.json` file to the `packages/backup` folder to work with Google 
 ### Common Issues
 
 **"secretOrPrivateKey must have a value"**
+
 - Make sure JWT secrets are properly set in `.env` and Docker Compose includes them
 
-**"Redis client not initialized"**  
+**"Redis client not initialized"**
+
 - This is handled gracefully - authentication works without Redis
 
 **Email not sending**
+
 - Check SMTP credentials and Gmail app password
 - Verify email service is configured correctly
 
 **Database connection failed**
+
 - Make sure MongoDB container is running: `docker-compose up -d mongo`
 
 ## Contributing
@@ -215,10 +227,9 @@ Add `credentials.json` file to the `packages/backup` folder to work with Google 
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature/your-feature`
 3. Commit changes: `git commit -m 'Add your feature'`
-4. Push to branch: `git push origin feature/your-feature`  
+4. Push to branch: `git push origin feature/your-feature`
 5. Submit a pull request
 
 ## Support
 
 For questions or issues, please create a GitHub issue or contact the development team.
-
