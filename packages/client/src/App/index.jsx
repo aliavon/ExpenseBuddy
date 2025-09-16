@@ -6,6 +6,11 @@ import { useAuth } from '../contexts/AuthContext';
 
 import Routes from './routes';
 
+// Import error link testing utilities in development
+if (process.env.NODE_ENV === 'development') {
+  import('../utils/testErrorLink');
+}
+
 const App = () => {
   const { isAuthenticated, user } = useAuth();
 

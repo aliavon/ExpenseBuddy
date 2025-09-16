@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { jwtDecode } from 'jwt-decode';
 import { toaster } from 'baseui/toast';
+import { setGlobalLogout } from '../apollo/authLink';
 
 // GraphQL queries and mutations
 const ME_QUERY = gql`
@@ -209,7 +210,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await logoutMutation();
     } catch (error) {
@@ -217,7 +218,7 @@ export const AuthProvider = ({ children }) => {
       // Clear local data anyway
       handleLogout();
     }
-  };
+  }, [logoutMutation]);
 
   // Effect for state initialization
   useEffect(() => {
@@ -241,6 +242,17 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
     }
   }, [hasValidToken, userLoading]);
+
+  // Register logout function with errorLink for automatic logout on auth errors
+  useEffect(() => {
+    setGlobalLogout(logout);
+    console.log('Registered logout function with Apollo errorLink');
+
+    // Cleanup on unmount
+    return () => {
+      setGlobalLogout(null);
+    };
+  }, [logout]);
 
   const value = {
     user,
