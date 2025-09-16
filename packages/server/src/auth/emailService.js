@@ -527,6 +527,152 @@ async function sendFamilyJoinResponseEmail(
   }
 }
 
+/**
+ * Send email change request notification to current email
+ */
+async function sendEmailChangeRequestEmail(to, firstName, newEmail) {
+  const mailOptions = {
+    from: `"${APP_NAME}" <${FROM_EMAIL}>`,
+    to,
+    subject: `${APP_NAME} - Email Change Request`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+          .header { background-color: #FF9800; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; line-height: 1.6; }
+          .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0; }
+          .footer { background-color: #f1f1f1; padding: 15px; text-align: center; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>${APP_NAME}</h1>
+          </div>
+          <div class="content">
+            <h2>Email Change Request</h2>
+            <p>Hi ${firstName},</p>
+            <p>You have requested to change your email address from <strong>${to}</strong> to <strong>${newEmail}</strong>.</p>
+            
+            <div class="warning">
+              <strong>⚠️ Security Notice:</strong><br>
+              If you did not request this email change, please contact support immediately and change your password.
+            </div>
+
+            <p>To complete the email change, you need to:</p>
+            <ol>
+              <li>Check your new email address (<strong>${newEmail}</strong>) for a verification link</li>
+              <li>Click the verification link to confirm the change</li>
+            </ol>
+
+            <p>This request will expire in 1 hour for security reasons.</p>
+            
+            <p>Best regards,<br>The ${APP_NAME} Team</p>
+          </div>
+          <div class="footer">
+            <p>If you need help, contact us at support@expensebuddy.com</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    const transporter = createTransporter();
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Email change request notification sent to ${to}`);
+    return result;
+  } catch (error) {
+    console.error("Error sending email change request notification:", error);
+    throw new Error(
+      `Failed to send email change request notification: ${error.message}`
+    );
+  }
+}
+
+/**
+ * Send email change confirmation to new email address
+ */
+async function sendEmailChangeConfirmationEmail(
+  to,
+  firstName,
+  emailChangeToken
+) {
+  const confirmationUrl = `${CLIENT_URL}/auth/confirm-email-change?token=${emailChangeToken}`;
+
+  const mailOptions = {
+    from: `"${APP_NAME}" <${FROM_EMAIL}>`,
+    to,
+    subject: `${APP_NAME} - Confirm Your New Email Address`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+          .header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; line-height: 1.6; }
+          .button { 
+            display: inline-block; 
+            padding: 12px 24px; 
+            background-color: #4CAF50; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            margin: 20px 0; 
+          }
+          .footer { background-color: #f1f1f1; padding: 15px; text-align: center; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>${APP_NAME}</h1>
+          </div>
+          <div class="content">
+            <h2>Confirm Your New Email Address</h2>
+            <p>Hi ${firstName},</p>
+            <p>Please confirm that you want to change your ${APP_NAME} account email to this address.</p>
+            
+            <div style="text-align: center;">
+              <a href="${confirmationUrl}" class="button">Confirm Email Change</a>
+            </div>
+            
+            <p>If the button doesn't work, copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #666;">${confirmationUrl}</p>
+            
+            <p><strong>This link will expire in 1 hour</strong> for security reasons.</p>
+            
+            <p>If you didn't request this change, you can safely ignore this email.</p>
+            
+            <p>Best regards,<br>The ${APP_NAME} Team</p>
+          </div>
+          <div class="footer">
+            <p>If you need help, contact us at support@expensebuddy.com</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    const transporter = createTransporter();
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Email change confirmation sent to ${to}`);
+    return result;
+  } catch (error) {
+    console.error("Error sending email change confirmation:", error);
+    throw new Error(
+      `Failed to send email change confirmation: ${error.message}`
+    );
+  }
+}
+
 module.exports = {
   verifyEmailConfig,
   sendVerificationEmail,
@@ -534,6 +680,8 @@ module.exports = {
   sendFamilyInvitationEmail,
   sendFamilyJoinRequestEmail,
   sendFamilyJoinResponseEmail,
+  sendEmailChangeRequestEmail,
+  sendEmailChangeConfirmationEmail,
   sendTestEmail,
 
   // Constants for testing

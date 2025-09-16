@@ -22,8 +22,8 @@ async function changePass(parent, args, context) {
       });
     }
 
-    // Find current user in database
-    const user = await User.findById(context.auth.user._id);
+    // Find current user in database with password field (it has select: false by default)
+    const user = await User.findById(context.auth.user._id).select("+password");
 
     if (!user) {
       throw new GraphQLError("User not found", {

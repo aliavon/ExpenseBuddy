@@ -105,6 +105,10 @@ module.exports = `
     resetPassword(input: ResetPasswordInput!): Boolean!
     changePassword(input: ChangePasswordInput!): Boolean!
     
+    # Email change with double verification
+    requestEmailChange(input: RequestEmailChangeInput!): Boolean!
+    confirmEmailChange(token: String!): Boolean!
+    
     # Family management
     createFamily(input: CreateFamilyInput!): Family!
     updateFamily(input: UpdateFamilyInput!): Family!
@@ -450,6 +454,12 @@ module.exports = `
   input ChangePasswordInput {
     currentPassword: String!
     newPassword: String!
+  }
+
+  # Input for requesting email change
+  input RequestEmailChangeInput {
+    newEmail: String!
+    currentPassword: String!
   }
 
   # Input for creating family

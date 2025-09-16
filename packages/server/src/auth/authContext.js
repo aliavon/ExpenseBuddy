@@ -44,10 +44,18 @@ async function enhanceContextWithAuth(params, baseContext) {
     // Extract and verify token
     const token = extractTokenFromHeader(authHeader);
 
-    // Check if token is blacklisted
-    const blacklisted = await isTokenBlacklisted(token);
-    if (blacklisted) {
-      throw new Error("Token has been revoked");
+    // Check if token is blacklisted (skip if Redis not available)
+    try {
+      const blacklisted = await isTokenBlacklisted(token);
+      if (blacklisted) {
+        throw new Error("Token has been revoked");
+      }
+    } catch (redisError) {
+      console.warn(
+        "Redis blacklist check failed, continuing without blacklist check:",
+        redisError.message
+      );
+      // Continue without blacklist check if Redis is not available
     }
 
     // Verify token

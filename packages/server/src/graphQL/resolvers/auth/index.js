@@ -7,6 +7,8 @@ const sendVerificationEmail = require("./sendVerificationEmail");
 const requestPasswordReset = require("./requestPasswordReset");
 const resetPassword = require("./resetPassword");
 const changePassword = require("./changePassword");
+const requestEmailChange = require("./requestEmailChange");
+const confirmEmailChange = require("./confirmEmailChange");
 const createFamily = require("./createFamily");
 const updateFamily = require("./updateFamily");
 const joinFamilyByCode = require("./joinFamilyByCode");
@@ -26,6 +28,8 @@ module.exports = {
   requestPasswordReset,
   resetPassword,
   changePassword,
+  requestEmailChange,
+  confirmEmailChange,
   createFamily,
   updateFamily,
   joinFamilyByCode,
