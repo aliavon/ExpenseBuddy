@@ -49,7 +49,7 @@ const FamilyInfoCard = ({ user, members, isOwner, onEditClick }) => {
           <Block marginRight="scale800" marginBottom="scale400">
             <LabelMedium color="#666">Members</LabelMedium>
             <ParagraphSmall>
-              {members.length}
+              {members?.length || 0}
               {' '}
               members
             </ParagraphSmall>

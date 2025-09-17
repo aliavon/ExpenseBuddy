@@ -40,7 +40,7 @@ const FamilyMembersList = ({
       <StyledBody>
         <HeadingMedium marginBottom="scale600">
           Family Members (
-          {members.length}
+          {members?.length || 0}
           )
         </HeadingMedium>
 
@@ -54,7 +54,7 @@ const FamilyMembersList = ({
           </Block>
         ) : (
           <Block>
-            {members.map(member => (
+            {(members || []).map(member => (
               <Block key={member.id} marginBottom="scale400">
                 <ListItem
                   overrides={{

@@ -30,7 +30,7 @@ const JoinRequestsSection = ({
       <StyledBody>
         <HeadingMedium marginBottom="scale600">
           Join Requests (
-          {requests.length}
+          {requests?.length || 0}
           )
         </HeadingMedium>
 
@@ -42,13 +42,13 @@ const JoinRequestsSection = ({
           >
             <Spinner size={SPINNER_SIZE.medium} />
           </Block>
-        ) : requests.length === 0 ? (
+        ) : (requests?.length || 0) === 0 ? (
           <ParagraphSmall color="#666">
             No pending join requests
           </ParagraphSmall>
         ) : (
           <Block>
-            {requests.map(request => (
+            {(requests || []).map(request => (
               <Block key={request.id} marginBottom="scale600">
                 <Block
                   backgroundColor="#F7F7F7"
