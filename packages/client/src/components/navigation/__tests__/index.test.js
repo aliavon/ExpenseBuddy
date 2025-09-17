@@ -39,6 +39,13 @@ jest.mock('baseui/block', () => ({
   ),
 }));
 
+// Mock UserProfile component to avoid Apollo Client issues
+jest.mock('../../profile/UserProfile', () => 
+  jest.fn(({isOpen, onClose}) => 
+    isOpen ? <div data-testid="user-profile" onClick={onClose}>User Profile</div> : null
+  )
+);
+
 describe('SideNav Component', () => {
   const mockNavigate = jest.fn();
   const mockUseLocation = useLocation;
@@ -148,6 +155,7 @@ describe('SideNav Component', () => {
       {title: 'Add Purchases', itemId: '/add'},
       {title: 'View Purchases', itemId: '/view'},
       {title: 'Family Income', itemId: '/income'},
+      {title: 'Family Dashboard', itemId: '/family'},
     ]);
     expect(props.activeItemId).toBe('/income');
     expect(typeof props.onChange).toBe('function');
