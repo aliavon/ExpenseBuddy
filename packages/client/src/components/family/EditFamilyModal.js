@@ -24,7 +24,7 @@ const EditFamilyModal = ({
       <Block marginBottom="scale600">
         <LabelMedium marginBottom="scale300">Family Name</LabelMedium>
         <Input
-          value={familyInfo.name}
+          value={familyInfo?.name || ''}
           onChange={e => onFamilyInfoChange('name', e.target.value)}
           placeholder="Enter family name..."
         />
@@ -32,7 +32,7 @@ const EditFamilyModal = ({
       <Block marginBottom="scale600">
         <LabelMedium marginBottom="scale300">Description</LabelMedium>
         <Textarea
-          value={familyInfo.description}
+          value={familyInfo?.description || ''}
           onChange={e => onFamilyInfoChange('description', e.target.value)}
           placeholder="Enter family description..."
           rows={3}
@@ -50,7 +50,7 @@ const EditFamilyModal = ({
       <ModalButton
         onClick={onSave}
         isLoading={loading}
-        disabled={!familyInfo.name.trim()}
+        disabled={!familyInfo?.name?.trim()}
       >
         Save Changes
       </ModalButton>

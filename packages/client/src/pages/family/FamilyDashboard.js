@@ -183,7 +183,14 @@ const FamilyDashboard = () => {
           user={user}
           members={members}
           isOwner={isOwner}
-          onEditClick={() => setFamilyEditMode(true)}
+          onEditClick={() => {
+            // Initialize edit form with current family data
+            setEditedFamilyInfo({
+              name: user?.family?.name || '',
+              description: user?.family?.description || '',
+            });
+            setFamilyEditMode(true);
+          }}
         />
 
         {/* Family Members List */}
