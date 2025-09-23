@@ -3,10 +3,8 @@ import useLazyFetch from '../use-lazy-fetch';
 import { 
   mockFetch, 
   mockFetchError, 
-  expectLoadingState, 
   expectFetchResponse, 
   expectErrorState,
-  waitForAsync,
   TEST_CONSTANTS,
   ERROR_MESSAGES 
 } from '../../test-utils/test-hooks-utils';

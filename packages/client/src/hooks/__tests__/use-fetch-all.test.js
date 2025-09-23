@@ -298,4 +298,51 @@ describe('useFetchAll', () => {
       expect(mockGetData).toHaveBeenNthCalledWith(index + 1, url, options);
     });
   });
+
+  it('should handle unexpected errors in hook execution - lines 55-57', async () => {
+    // Spy on console.error to verify error logging
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    // Mock Promise.allSettled to throw an error
+    const originalPromiseAllSettled = Promise.allSettled;
+    Promise.allSettled = jest.fn().mockImplementation(() => {
+      throw new Error('Promise.allSettled error');
+    });
+
+    mockGetData.mockResolvedValue({ data: 'test' });
+
+    const { result } = renderHook(() => useFetchAll(testUrls));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Should handle error and reset state (lines 55-57)
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error in useFetchAll:', expect.any(Error));
+    expect(result.current.data).toEqual([]);
+    expect(result.current.loading).toBe(false);
+
+    // Restore original Promise.allSettled
+    Promise.allSettled = originalPromiseAllSettled;
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should handle default parameter value when urls is undefined - line 5', () => {
+    // Test the default parameter urls = [] when no urls provided
+    const { result } = renderHook(() => useFetchAll(undefined));
+
+    expect(result.current.data).toEqual([]);
+    expect(result.current.loading).toBe(false);
+    expect(mockGetData).not.toHaveBeenCalled();
+  });
+
+
+  it('should handle no parameters (default parameter fallback) - line 5', () => {
+    // Test calling useFetchAll() with no parameters at all
+    const { result } = renderHook(() => useFetchAll());
+
+    expect(result.current.data).toEqual([]);
+    expect(result.current.loading).toBe(false);
+    expect(mockGetData).not.toHaveBeenCalled();
+  });
 }); 

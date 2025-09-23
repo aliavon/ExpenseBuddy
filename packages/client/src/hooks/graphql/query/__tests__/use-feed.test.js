@@ -191,4 +191,47 @@ describe('useFeed', () => {
     expect(result.current.feed).toEqual([]);
     expect(result.current.error).toBeUndefined();
   });
+
+  it('should handle fetchMore when fetchMoreResult is null - line 37', async () => {
+    // Mock the fetchMore call with null data - this should make fetchMoreResult falsy
+    const mockFetchMoreNull = {
+      request: {
+        query: QUERY_FEED,
+        variables: {
+          page: 1,
+          perPage: 10,
+        },
+      },
+      result: {
+        data: null, // This should make fetchMoreResult null in updateQuery
+      },
+    };
+
+    const { result } = renderHook(() => useFeed(), {
+      wrapper: (props) => wrapper({ 
+        ...props, 
+        mocks: [mockFeedQuery, mockFetchMoreNull] 
+      }),
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Initial data loaded
+    expect(result.current.feed).toEqual(mockFeedData.feed.feeds);
+    const originalLength = result.current.feed.length;
+
+    // Call loadMore which should receive null data and trigger !fetchMoreResult (line 37)
+    await act(async () => {
+      result.current.loadMore();
+    });
+
+    // Wait for the fetchMore operation
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Feed should remain unchanged when fetchMoreResult is null (line 37: return prev)
+    expect(result.current.feed.length).toBe(originalLength);
+    expect(result.current.feed).toEqual(mockFeedData.feed.feeds);
+  });
 }); 
