@@ -426,5 +426,65 @@ describe('Skeleton Component', () => {
       // When items are present, borderRadius should not be set in root
       expect(rootOverride.borderRadius).toBeUndefined();
     });
+
+    it('executes rowStyleOverride without itemHeight - line 31', () => {
+      const {Skeleton: MockSkeleton} = require('baseui/skeleton');
+      render(<Skeleton radius="scale200" />); // No itemHeight provided
+      
+      const calls = MockSkeleton.mock.calls;
+      const overrides = calls[calls.length - 1][0].overrides;
+      
+      // Execute the Row style override function without itemHeight
+      const rowOverride = overrides.Row.style({
+        $theme: {
+          sizing: {
+            scale200: '8px',
+          },
+        },
+      });
+      
+      // When itemHeight is not provided, height should not be set
+      expect(rowOverride.height).toBeUndefined();
+      expect(rowOverride.borderRadius).toBe('8px');
+      expect(rowOverride.marginBottom).toBe('0px');
+      expect(rowOverride.flexGrow).toBe(1);
+      expect(rowOverride.flexShrink).toBe(0);
+    });
+
+    it('executes rootStyleOverride with grid view and no itemWidth (fallback to 1fr) - line 57', () => {
+      const {Skeleton: MockSkeleton} = require('baseui/skeleton');
+      
+      // Mock useStyletron to return a sizing object that doesn't have the itemWidth scale
+      jest.mocked(require('baseui').useStyletron).mockReturnValue([
+        null,
+        {
+          sizing: {
+            scale200: '8px',
+            // No scale for itemWidth, so getScale will return the itemWidth value as-is or undefined
+          },
+        },
+      ]);
+      
+      render(<Skeleton view={VIEW.grid} gap="scale200" />); // No itemWidth provided, should use '1fr' fallback
+      
+      const calls = MockSkeleton.mock.calls;
+      const overrides = calls[calls.length - 1][0].overrides;
+      
+      // Execute the Root style override function with grid view and no itemWidth
+      const rootOverride = overrides.Root.style({
+        $theme: {
+          sizing: {
+            scale200: '8px',
+          },
+        },
+      });
+      
+      expect(rootOverride.display).toBe('grid');
+      expect(rootOverride.gridRowGap).toBe('8px');
+      expect(rootOverride.gridColumnGap).toBe('8px');
+      // This should test the fallback: getScale(sizing, itemWidth) || '1fr'
+      // When itemWidth is undefined, getScale returns undefined, so fallback to '1fr'
+      expect(rootOverride.gridTemplateColumns).toBe('repeat(auto-fill, minmax(1fr, 1fr))');
+    });
   });
 }); 
