@@ -115,16 +115,16 @@ export const AuthProvider = ({ children }) => {
   // Login mutation
   const [loginMutation] = useMutation(LOGIN_MUTATION, {
     onCompleted: data => {
-        // Save tokens
-        localStorage.setItem('accessToken', data.login.accessToken);
-        localStorage.setItem('refreshToken', data.login.refreshToken);
+      // Save tokens
+      localStorage.setItem('accessToken', data.login.accessToken);
+      localStorage.setItem('refreshToken', data.login.refreshToken);
 
-        // Update token state
-        setHasValidToken(true);
-        setError(null);
+      // Update token state
+      setHasValidToken(true);
+      setError(null);
 
-        // Show success toast after login mutation completes
-        toaster.positive('Successfully logged in!');
+      // Show success toast after login mutation completes
+      toaster.positive('Successfully logged in!');
     },
     onError: error => {
       console.error('Login error:', error);
