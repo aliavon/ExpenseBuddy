@@ -98,9 +98,7 @@ export const AuthProvider = ({ children }) => {
     skip: !hasValidToken,
     errorPolicy: 'all',
     onCompleted: data => {
-      if (data?.me) {
-        setError(null);
-      }
+      setError(null);
     },
     onError: error => {
       setError(error.message);
@@ -117,7 +115,6 @@ export const AuthProvider = ({ children }) => {
   // Login mutation
   const [loginMutation] = useMutation(LOGIN_MUTATION, {
     onCompleted: data => {
-      if (data?.login) {
         // Save tokens
         localStorage.setItem('accessToken', data.login.accessToken);
         localStorage.setItem('refreshToken', data.login.refreshToken);
@@ -128,7 +125,6 @@ export const AuthProvider = ({ children }) => {
 
         // Show success toast after login mutation completes
         toaster.positive('Successfully logged in!');
-      }
     },
     onError: error => {
       console.error('Login error:', error);
@@ -211,13 +207,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = useCallback(async () => {
-    try {
-      await logoutMutation();
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Clear local data anyway
-      handleLogout();
-    }
+    await logoutMutation();
   }, [logoutMutation]);
 
   // Effect for state initialization

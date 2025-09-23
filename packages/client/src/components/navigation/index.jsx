@@ -9,25 +9,8 @@ import { toaster } from 'baseui/toast';
 
 import { useAuth } from '../../contexts/AuthContext';
 import UserProfile from '../profile/UserProfile';
+import { navItems } from './constants';
 
-const navItems = [
-  {
-    title: 'Add Purchases',
-    itemId: '/add',
-  },
-  {
-    title: 'View Purchases',
-    itemId: '/view',
-  },
-  {
-    title: 'Family Income',
-    itemId: '/income',
-  },
-  {
-    title: 'Family Dashboard',
-    itemId: '/family',
-  },
-];
 
 const SideNav = () => {
   const location = useLocation();
@@ -120,6 +103,7 @@ const SideNav = () => {
       <UserProfile
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+        onLogout={handleLogout}
       />
     </Block>
   );
