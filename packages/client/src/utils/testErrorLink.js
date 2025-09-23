@@ -35,7 +35,7 @@ const LOGIN_MUTATION = gql`
 `;
 
 // Create test Apollo Client with configurable auth
-const createTestClient = (authToken = null, customUri = null) => {
+export const createTestClient = (authToken = null, customUri = null) => {
   const httpLink = createHttpLink({
     uri: customUri || `http://localhost:${process.env.REACT_APP_SERVER_PORT || 8000}/graphql`,
   });
@@ -200,80 +200,11 @@ export const testErrorScenarios = {
 };
 
 /**
- * Test errorLink by simulating localStorage token corruption
- */
-export const testInvalidToken = async () => {
-  console.log('🧪 Testing invalid token scenario');
-
-  const originalToken = localStorage.getItem('accessToken');
-  console.log('Original token:', originalToken ? 'exists' : 'none');
-
-  // Set invalid token
-  localStorage.setItem('accessToken', 'invalid.jwt.token.here');
-  console.log('✅ Set invalid token in localStorage');
-
-  // Try to make a request with the main app's Apollo Client
-  console.log('Next authenticated GraphQL request should trigger UNAUTHENTICATED error');
-  console.log('Try refreshing the page or navigating to trigger ME_QUERY');
-
-  // Optional: restore token after 10 seconds for convenience
-  setTimeout(() => {
-    if (originalToken) {
-      localStorage.setItem('accessToken', originalToken);
-      console.log('🔄 Original token restored automatically after 10 seconds');
-    } else {
-      localStorage.removeItem('accessToken');
-      console.log('🔄 Token removed (no original token to restore)');
-    }
-  }, 10000);
-};
-
-/**
- * Test errorLink by clearing tokens manually
- */
-export const testClearTokens = () => {
-  console.log('🧪 Clearing all tokens to simulate logout');
-
-  const hadTokens = {
-    accessToken: !!localStorage.getItem('accessToken'),
-    refreshToken: !!localStorage.getItem('refreshToken'),
-  };
-
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-
-  console.log('✅ Tokens cleared:', hadTokens);
-  console.log('Expected: User should be redirected to login immediately');
-
-  // Trigger a page refresh to ensure auth state updates
-  setTimeout(() => {
-    console.log('🔄 Refreshing page to update auth state...');
-    window.location.reload();
-  }, 1000);
-};
-
-/**
  * Helper to check current auth state
  */
 export const checkAuthState = () => {
   const accessToken = localStorage.getItem('accessToken');
   const refreshToken = localStorage.getItem('refreshToken');
-
-  let tokenInfo = null;
-  if (accessToken) {
-    try {
-      // Try to decode JWT without verification (just for info)
-      const payload = JSON.parse(atob(accessToken.split('.')[1]));
-      tokenInfo = {
-        userId: payload.userId || payload.sub,
-        email: payload.email,
-        exp: new Date(payload.exp * 1000).toISOString(),
-        isExpired: Date.now() > payload.exp * 1000,
-      };
-    } catch (e) {
-      tokenInfo = { error: 'Invalid JWT format' };
-    }
-  }
 
   const authState = {
     hasAccessToken: !!accessToken,
@@ -281,16 +212,10 @@ export const checkAuthState = () => {
     accessTokenLength: accessToken?.length || 0,
     refreshTokenLength: refreshToken?.length || 0,
     currentPath: window.location.pathname,
-    tokenInfo,
     timestamp: new Date().toISOString(),
   };
 
   console.log('🔍 Current auth state:', authState);
-
-  if (tokenInfo?.isExpired) {
-    console.warn('⚠️ Access token is EXPIRED');
-  }
-
   return authState;
 };
 
@@ -330,10 +255,6 @@ if (typeof window !== 'undefined') {
     // Error scenario tests
     scenarios: testErrorScenarios,
     testAllScenarios,
-
-    // Token manipulation
-    testInvalidToken,
-    testClearTokens,
     checkAuthState,
 
     // Quick access to individual scenarios
@@ -343,22 +264,4 @@ if (typeof window !== 'undefined') {
     testNetwork: testErrorScenarios.networkError,
     testServer: testErrorScenarios.serverError,
   };
-
-  console.log('\n🧪 ErrorLink test utilities loaded!');
-  console.log('Available at: window.testErrorLink\n');
-
-  console.log('🎯 Quick Commands:');
-  console.log('  window.testErrorLink.checkAuthState()           - Check current auth status');
-  console.log('  window.testErrorLink.testInvalidToken()         - Test invalid token handling');
-  console.log('  window.testErrorLink.testClearTokens()          - Clear all tokens');
-  console.log('  window.testErrorLink.testAllScenarios()         - Run all error tests\n');
-
-  console.log('🔧 Individual Error Tests:');
-  console.log('  window.testErrorLink.testUnauthenticated()      - Test 401 auth errors');
-  console.log('  window.testErrorLink.testForbidden()            - Test 403 permission errors');
-  console.log('  window.testErrorLink.testValidation()           - Test validation errors');
-  console.log('  window.testErrorLink.testNetwork()              - Test network connectivity');
-  console.log('  window.testErrorLink.testServer()               - Test server errors\n');
-
-  console.log('💡 Pro tip: Run testAllScenarios() for comprehensive errorLink testing!');
 }

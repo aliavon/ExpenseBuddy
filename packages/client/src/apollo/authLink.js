@@ -4,9 +4,9 @@ import { from } from '@apollo/client';
 import { toaster } from 'baseui/toast';
 
 /**
- * Auth Link for automatic JWT token addition
+ * Auth context function for JWT token addition
  */
-const authLink = setContext((_, { headers }) => {
+export const authContextFn = (_, { headers }) => {
   // Get token from localStorage
   const token = localStorage.getItem('accessToken');
 
@@ -17,7 +17,12 @@ const authLink = setContext((_, { headers }) => {
       ...(token && { authorization: `Bearer ${token}` }),
     },
   };
-});
+};
+
+/**
+ * Auth Link for automatic JWT token addition
+ */
+const authLink = setContext(authContextFn);
 
 /**
  * Global logout function that can be called from errorLink
@@ -30,10 +35,53 @@ export const setGlobalLogout = logoutFn => {
   globalLogoutFn = logoutFn;
 };
 
+// Export function to get current logout callback (for testing)
+export const getGlobalLogout = () => globalLogoutFn;
+
 /**
- * Error Link for comprehensive GraphQL error handling
+ * Handle authentication errors by clearing tokens and redirecting
  */
-const errorLink = onError(({ graphQLErrors, networkError, operation, _forward }) => {
+export const handleAuthError = () => {
+  console.log('Handling authentication error...');
+
+  // Clear tokens from localStorage
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+
+  // Call global logout function if available (cleaner than direct localStorage)
+  if (globalLogoutFn) {
+    try {
+      globalLogoutFn();
+      console.log('Called global logout function');
+    } catch (error) {
+      console.error('Error calling global logout:', error);
+    }
+  }
+
+  // Redirect to login if not already there
+  const currentPath = window.location.pathname;
+  const authPaths = [
+    '/login',
+    '/register',
+    '/auth/reset-password',
+    '/auth/verify-email',
+    '/auth/confirm-email-change',
+  ];
+
+  if (!authPaths.some(path => currentPath.startsWith(path))) {
+    console.log('Redirecting to login...');
+
+    // Add delay to allow toast to show
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 1000);
+  }
+};
+
+/**
+ * Error handler function for GraphQL and network errors
+ */
+export const errorHandlerFn = ({ graphQLErrors, networkError, operation, _forward }) => {
   // Handle GraphQL errors
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path, extensions }) => {
@@ -173,47 +221,12 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, _forward })
       );
     }
   }
-});
+};
 
 /**
- * Handle authentication errors by clearing tokens and redirecting
+ * Error Link for comprehensive GraphQL error handling
  */
-const handleAuthError = () => {
-  console.log('Handling authentication error...');
-
-  // Clear tokens from localStorage
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-
-  // Call global logout function if available (cleaner than direct localStorage)
-  if (globalLogoutFn) {
-    try {
-      globalLogoutFn();
-      console.log('Called global logout function');
-    } catch (error) {
-      console.error('Error calling global logout:', error);
-    }
-  }
-
-  // Redirect to login if not already there
-  const currentPath = window.location.pathname;
-  const authPaths = [
-    '/login',
-    '/register',
-    '/auth/reset-password',
-    '/auth/verify-email',
-    '/auth/confirm-email-change',
-  ];
-
-  if (!authPaths.some(path => currentPath.startsWith(path))) {
-    console.log('Redirecting to login...');
-
-    // Add delay to allow toast to show
-    setTimeout(() => {
-      window.location.href = '/login';
-    }, 1000);
-  }
-};
+const errorLink = onError(errorHandlerFn);
 
 // Combine links
 const combinedAuthLink = from([errorLink, authLink]);
