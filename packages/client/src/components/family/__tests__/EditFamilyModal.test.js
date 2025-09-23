@@ -1,10 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import EditFamilyModal from '../EditFamilyModal';
-import { mockBaseUIComponents } from '../../../test-utils/mocks';
-
-// Setup mocks
-mockBaseUIComponents();
 
 describe('EditFamilyModal', () => {
   const defaultProps = {

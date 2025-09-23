@@ -1,10 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import FamilyInfoCard from '../FamilyInfoCard';
-import { mockBaseUIComponents } from '../../../test-utils/mocks';
-
-// Setup mocks
-mockBaseUIComponents();
 
 describe('FamilyInfoCard', () => {
   const mockUser = {

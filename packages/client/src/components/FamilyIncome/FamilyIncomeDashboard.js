@@ -59,14 +59,21 @@ const FamilyIncomeDashboard = () => {
   // Simulate data fetching with mock data
   useEffect(() => {
     setLoading(true);
+    setError(null); // Clear previous errors
     try {
       // Simulate network delay
       setTimeout(() => {
-        const mockData = filterAndSortMockData(filters, pagination, sort);
-        setData(mockData);
-        setLoading(false);
+        try {
+          const mockData = filterAndSortMockData(filters, pagination, sort);
+          setData(mockData);
+          setLoading(false);
+        } catch (err) {
+          setError(err);
+          setLoading(false);
+        }
       }, 300);
     } catch (err) {
+      // This catch is for setTimeout setup errors (unlikely but possible)
       setError(err);
       setLoading(false);
     }

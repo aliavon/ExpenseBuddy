@@ -193,4 +193,50 @@ describe('FamilyIncomeDashboard', () => {
       expect(screen.getByText('Total Pages: 5')).toBeInTheDocument();
     });
   });
+
+  it('handles error when filterAndSortMockData throws inside setTimeout callback', async () => {
+    // Mock filterAndSortMockData to throw an error
+    const mockData = require('../mockData');
+    const originalMockFn = mockData.filterAndSortMockData;
+    
+    mockData.filterAndSortMockData.mockImplementationOnce(() => {
+      throw new Error('Data processing failed');
+    });
+
+    render(<FamilyIncomeDashboard />);
+    
+    // Initially loading
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    
+    // Fast-forward time to trigger error inside setTimeout
+    jest.advanceTimersByTime(300);
+    
+    await waitFor(() => {
+      // Text is split across elements, so use more flexible matcher
+      expect(screen.getByText(/Error:/)).toBeInTheDocument();
+      expect(screen.getByText(/Data processing failed/)).toBeInTheDocument();
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+    });
+    
+    // Restore original function
+    mockData.filterAndSortMockData = originalMockFn;
+  });
+
+  it('handles setTimeout setup errors (outer try-catch)', () => {
+    // Mock setTimeout to throw error during setup - this covers lines 77-78
+    const originalSetTimeout = global.setTimeout;
+    global.setTimeout = jest.fn(() => {
+      throw new Error('setTimeout setup failed');
+    });
+
+    // This should immediately trigger the outer try-catch without waiting
+    render(<FamilyIncomeDashboard />);
+    
+    // No async wait needed - error happens immediately during render
+    expect(screen.getByText(/Error:/)).toBeInTheDocument();
+    expect(screen.getByText(/setTimeout setup failed/)).toBeInTheDocument();
+    
+    // Restore original setTimeout
+    global.setTimeout = originalSetTimeout;
+  });
 }); 

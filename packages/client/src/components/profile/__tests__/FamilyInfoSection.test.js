@@ -1,10 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import FamilyInfoSection from '../FamilyInfoSection';
-import { mockBaseUIComponents } from '../../../test-utils/mocks';
-
-// Setup mocks
-mockBaseUIComponents();
 
 describe('FamilyInfoSection', () => {
   const mockUserWithFamily = {

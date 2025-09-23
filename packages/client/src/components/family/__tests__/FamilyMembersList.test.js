@@ -1,10 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import FamilyMembersList from '../FamilyMembersList';
-import { mockBaseUIComponents } from '../../../test-utils/mocks';
-
-// Setup mocks
-mockBaseUIComponents();
 
 describe('FamilyMembersList', () => {
   const mockMembers = [

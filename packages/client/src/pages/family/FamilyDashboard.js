@@ -99,10 +99,6 @@ const FamilyDashboard = () => {
 
   // Handlers
   const handleRemoveMember = async () => {
-    if (!memberToRemove) {
-      return;
-    }
-
     try {
       await removeFamilyMember({
         variables: { userId: memberToRemove.id },

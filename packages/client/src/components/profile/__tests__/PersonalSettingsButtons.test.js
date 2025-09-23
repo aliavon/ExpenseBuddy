@@ -1,10 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import PersonalSettingsButtons from '../PersonalSettingsButtons';
-import { mockBaseUIComponents } from '../../../test-utils/mocks';
-
-// Setup mocks
-mockBaseUIComponents();
 
 describe('PersonalSettingsButtons', () => {
   const defaultProps = {

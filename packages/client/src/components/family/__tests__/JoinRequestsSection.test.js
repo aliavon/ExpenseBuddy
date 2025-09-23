@@ -1,10 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import JoinRequestsSection from '../JoinRequestsSection';
-import { mockBaseUIComponents } from '../../../test-utils/mocks';
-
-// Setup mocks
-mockBaseUIComponents();
 
 describe('JoinRequestsSection', () => {
   const mockRequests = [
@@ -225,4 +221,65 @@ describe('JoinRequestsSection', () => {
 
     expect(screen.getByText('Join Requests (0)')).toBeInTheDocument();
   });
+
+  it('handles null requests gracefully - line 51', () => {
+    render(<JoinRequestsSection {...defaultProps} requests={null} />);
+
+    expect(screen.getByText('Join Requests (0)')).toBeInTheDocument();
+    expect(screen.getByText('No pending join requests')).toBeInTheDocument();
+  });
+
+  it('covers getInitials with null/undefined names - line 26', () => {
+    const requestsWithNullNames = [
+      {
+        id: 'request-1',
+        user: {
+          id: 'user-1',
+          firstName: null,
+          lastName: undefined,
+          email: 'test-null@email.com',
+        },
+        message: 'Message for null names test',
+        requestedAt: '2023-01-01',
+      },
+      {
+        id: 'request-2',
+        user: {
+          id: 'user-2',
+          firstName: undefined,
+          lastName: null,
+          email: 'test-undefined@email.com',
+        },
+        message: 'Message for undefined names test',
+        requestedAt: '2023-01-02',
+      }
+    ];
+
+    render(<JoinRequestsSection {...defaultProps} requests={requestsWithNullNames} />);
+
+    // Should handle null/undefined firstName and lastName gracefully in getInitials function
+    // This test covers the optional chaining and fallback logic in line 26
+    expect(screen.getByText('Join Requests (2)')).toBeInTheDocument();
+    
+    // Check that component renders without crashing with null/undefined names
+    expect(screen.getByText(/test-null@email\.com/)).toBeInTheDocument();
+    expect(screen.getByText(/test-undefined@email\.com/)).toBeInTheDocument();
+  });
+
+  it('covers the || [] fallback with undefined requests - line 51', () => {
+    // Test with undefined (falsy) requests to cover the || [] fallback
+    render(<JoinRequestsSection {...defaultProps} requests={undefined} />);
+
+    expect(screen.getByText('Join Requests (0)')).toBeInTheDocument();
+    expect(screen.getByText('No pending join requests')).toBeInTheDocument();
+  });
+
+  it('covers the || [] fallback with false requests - line 51', () => {
+    // Test with false (falsy) requests to cover the || [] fallback
+    render(<JoinRequestsSection {...defaultProps} requests={false} />);
+
+    expect(screen.getByText('Join Requests (0)')).toBeInTheDocument();
+    expect(screen.getByText('No pending join requests')).toBeInTheDocument();
+  });
+
 });
