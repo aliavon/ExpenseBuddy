@@ -7,7 +7,9 @@ jest.mock("bcryptjs");
 
 jest.mock("../../../../database/schemas", () => ({
   User: {
-    findById: jest.fn(),
+    findById: jest.fn().mockReturnValue({
+      select: jest.fn().mockResolvedValue(null),
+    }),
     findByIdAndUpdate: jest.fn(),
   },
 }));
@@ -40,7 +42,7 @@ describe("changePassword resolver", () => {
         password: hashedNewPassword,
       };
 
-      User.findById.mockResolvedValue(mockUser);
+      User.findById().select.mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(true);
       bcrypt.hash = jest.fn().mockResolvedValue(hashedNewPassword);
       User.findByIdAndUpdate.mockResolvedValue(updatedUser);
@@ -85,7 +87,7 @@ describe("changePassword resolver", () => {
       const originalBcryptRounds = process.env.BCRYPT_ROUNDS;
       process.env.BCRYPT_ROUNDS = "10";
 
-      User.findById.mockResolvedValue(mockUser);
+      User.findById().select.mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(true);
       bcrypt.hash = jest.fn().mockResolvedValue("hashed-password");
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
@@ -172,7 +174,7 @@ describe("changePassword resolver", () => {
         },
       };
 
-      User.findById.mockResolvedValue(null); // User not found
+      User.findById().select.mockResolvedValue(null); // User not found
 
       await expect(
         changePasswordResolver(
@@ -205,7 +207,7 @@ describe("changePassword resolver", () => {
         isActive: false,
       };
 
-      User.findById.mockResolvedValue(deactivatedUser);
+      User.findById().select.mockResolvedValue(deactivatedUser);
 
       await expect(
         changePasswordResolver(
@@ -236,7 +238,7 @@ describe("changePassword resolver", () => {
         },
       };
 
-      User.findById.mockResolvedValue(mockUser);
+      User.findById().select.mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(false);
 
       await expect(
@@ -271,7 +273,7 @@ describe("changePassword resolver", () => {
         },
       };
 
-      User.findById.mockResolvedValue(mockUser);
+      User.findById().select.mockResolvedValue(mockUser);
       bcrypt.compare = jest
         .fn()
         .mockRejectedValue(new Error("bcrypt compare error"));
@@ -305,7 +307,7 @@ describe("changePassword resolver", () => {
         },
       };
 
-      User.findById.mockResolvedValue(mockUser);
+      User.findById().select.mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(true);
       bcrypt.hash = jest.fn().mockRejectedValue(new Error("bcrypt hash error"));
 
@@ -336,7 +338,9 @@ describe("changePassword resolver", () => {
         },
       };
 
-      User.findById.mockRejectedValue(new Error("Database connection error"));
+      User.findById().select.mockRejectedValue(
+        new Error("Database connection error")
+      );
 
       await expect(
         changePasswordResolver(
@@ -365,7 +369,7 @@ describe("changePassword resolver", () => {
         },
       };
 
-      User.findById.mockResolvedValue(mockUser);
+      User.findById().select.mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(true);
       bcrypt.hash = jest.fn().mockResolvedValue("hashed-new-password");
       User.findByIdAndUpdate.mockRejectedValue(
@@ -399,7 +403,7 @@ describe("changePassword resolver", () => {
         },
       };
 
-      User.findById.mockResolvedValue(mockUser);
+      User.findById().select.mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(true);
 
       await expect(
@@ -430,7 +434,7 @@ describe("changePassword resolver", () => {
         },
       };
 
-      User.findById.mockResolvedValue(mockUser);
+      User.findById().select.mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(true);
       bcrypt.hash = jest.fn().mockResolvedValue("hashed-new-password");
       User.findByIdAndUpdate.mockResolvedValue(mockUser);
