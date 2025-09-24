@@ -115,6 +115,48 @@ describe("Auth Context", () => {
       expect(result.auth.error).toBe("Token has been revoked");
     });
 
+    it("should handle blacklist error thrown as exception", async () => {
+      const token = "error-token";
+      mockContext.request.headers.authorization = `Bearer ${token}`;
+
+      extractTokenFromHeader.mockReturnValue(token);
+      isTokenBlacklisted.mockRejectedValue(new Error("Token has been revoked"));
+
+      const result = await enhanceContextWithAuth(mockContext);
+
+      expect(result.auth.isAuthenticated).toBe(false);
+      expect(result.auth.error).toBe("Token has been revoked");
+    });
+
+    it("should continue without blacklist check on Redis connection error", async () => {
+      const token = "valid-token";
+      const consoleSpy = jest.spyOn(console, "warn").mockImplementation();
+
+      mockContext.request.headers.authorization = `Bearer ${token}`;
+
+      extractTokenFromHeader.mockReturnValue(token);
+      isTokenBlacklisted.mockRejectedValue(
+        new Error("Redis connection failed")
+      );
+      verifyAccessToken.mockReturnValue({ userId: "user-id" });
+      User.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockUser),
+      });
+      Family.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockFamily),
+      });
+
+      const result = await enhanceContextWithAuth(mockContext);
+
+      expect(result.auth.isAuthenticated).toBe(true);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Redis blacklist check failed, continuing without blacklist check:",
+        "Redis connection failed"
+      );
+
+      consoleSpy.mockRestore();
+    });
+
     it("should reject invalid token", async () => {
       const token = "invalid-token";
       mockContext.request.headers.authorization = `Bearer ${token}`;
@@ -240,6 +282,38 @@ describe("Auth Context", () => {
       const result = await enhanceContextWithAuth(mockContext);
 
       expect(result.auth.isAuthenticated).toBe(true);
+    });
+
+    it("should handle Headers object with lowercase authorization header", async () => {
+      const token = "valid-token";
+      // Mock Headers object with .get() method
+      const mockHeaders = {
+        get: jest.fn((headerName) => {
+          if (headerName === "authorization") return `Bearer ${token}`;
+          if (headerName === "Authorization") return null;
+          return null;
+        }),
+      };
+
+      mockContext.request.headers = mockHeaders;
+
+      extractTokenFromHeader.mockReturnValue(token);
+      isTokenBlacklisted.mockResolvedValue(false);
+      verifyAccessToken.mockReturnValue({ userId: mockUserId });
+
+      User.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockUser),
+      });
+
+      Family.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockFamily),
+      });
+
+      const result = await enhanceContextWithAuth(mockContext);
+
+      expect(result.auth.isAuthenticated).toBe(true);
+      expect(mockHeaders.get).toHaveBeenCalledWith("authorization");
+      expect(result.auth.user).toEqual(mockUser);
     });
   });
 

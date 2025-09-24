@@ -3,6 +3,10 @@ const {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendFamilyInvitationEmail,
+  sendFamilyJoinRequestEmail,
+  sendFamilyJoinResponseEmail,
+  sendEmailChangeRequestEmail,
+  sendEmailChangeConfirmationEmail,
   sendTestEmail,
   CLIENT_URL,
   FROM_EMAIL,
@@ -155,7 +159,7 @@ describe("Email Service", () => {
       );
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];
-      const expectedUrl = `${CLIENT_URL}/auth/reset-password?token=${mockUser.resetToken}`;
+      const expectedUrl = `${CLIENT_URL}/auth/reset/${mockUser.resetToken}`;
 
       expect(callArgs.html).toContain(expectedUrl);
       expect(callArgs.text).toContain(expectedUrl);
@@ -425,6 +429,249 @@ describe("Email Service", () => {
       await expect(
         sendVerificationEmail("test@example.com", "token", "John")
       ).rejects.toThrow("Failed to send verification email");
+    });
+  });
+
+  describe("Family Join Request Email", () => {
+    it("should send join request notification successfully", async () => {
+      const ownerEmail = "owner@example.com";
+      const familyName = "Smith Family";
+      const requestingUser = {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+      };
+      const ownerFirstName = "Alice";
+
+      mockTransporter.sendMail.mockResolvedValue({
+        messageId: "test-message-id",
+      });
+
+      const result = await sendFamilyJoinRequestEmail(
+        ownerEmail,
+        familyName,
+        requestingUser,
+        ownerFirstName
+      );
+
+      expect(result.messageId).toBe("test-message-id");
+      expect(mockTransporter.sendMail).toHaveBeenCalledTimes(1);
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      expect(callArgs.to).toBe(ownerEmail);
+      expect(callArgs.subject).toContain("Request to Join Your Family");
+    });
+
+    it("should include requesting user details", async () => {
+      const requestingUser = {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+      };
+
+      mockTransporter.sendMail.mockResolvedValue({ messageId: "test-id" });
+
+      await sendFamilyJoinRequestEmail(
+        "owner@example.com",
+        "Smith Family",
+        requestingUser,
+        "Alice"
+      );
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain(requestingUser.firstName);
+      expect(callArgs.html).toContain(requestingUser.lastName);
+      expect(callArgs.html).toContain(requestingUser.email);
+    });
+
+    it("should handle join request email errors", async () => {
+      mockTransporter.sendMail.mockRejectedValue(new Error("Network error"));
+
+      await expect(
+        sendFamilyJoinRequestEmail(
+          "owner@example.com",
+          "Smith Family",
+          { firstName: "John", lastName: "Doe", email: "john@example.com" },
+          "Alice"
+        )
+      ).rejects.toThrow("Failed to send join request email: Network error");
+    });
+  });
+
+  describe("Family Join Response Email", () => {
+    it("should send approval response successfully", async () => {
+      const userEmail = "user@example.com";
+      const familyName = "Smith Family";
+      const ownerName = "Alice Smith";
+
+      mockTransporter.sendMail.mockResolvedValue({
+        messageId: "test-message-id",
+      });
+
+      const result = await sendFamilyJoinResponseEmail(
+        userEmail,
+        familyName,
+        true,
+        "Welcome to our family!",
+        ownerName
+      );
+
+      expect(result.messageId).toBe("test-message-id");
+      expect(mockTransporter.sendMail).toHaveBeenCalledTimes(1);
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      expect(callArgs.to).toBe(userEmail);
+      expect(callArgs.subject).toContain("Welcome to Smith Family");
+    });
+
+    it("should send rejection response successfully", async () => {
+      mockTransporter.sendMail.mockResolvedValue({
+        messageId: "test-message-id",
+      });
+
+      await sendFamilyJoinResponseEmail(
+        "user@example.com",
+        "Smith Family",
+        false,
+        "Sorry, request declined",
+        "Alice Smith"
+      );
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain("rejected");
+      expect(callArgs.html).toContain("Sorry, request declined");
+    });
+
+    it("should include approval content for approved requests", async () => {
+      mockTransporter.sendMail.mockResolvedValue({ messageId: "test-id" });
+
+      await sendFamilyJoinResponseEmail(
+        "user@example.com",
+        "Smith Family",
+        true,
+        "Welcome message",
+        "Alice Smith"
+      );
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain("approved");
+      expect(callArgs.html).toContain("Welcome message");
+    });
+
+    it("should handle response email errors", async () => {
+      mockTransporter.sendMail.mockRejectedValue(new Error("Send failed"));
+
+      await expect(
+        sendFamilyJoinResponseEmail(
+          "user@example.com",
+          "Smith Family",
+          true,
+          "Welcome",
+          "Alice"
+        )
+      ).rejects.toThrow("Failed to send join response email: Send failed");
+    });
+  });
+
+  describe("Email Change Request Email", () => {
+    it("should send email change request successfully", async () => {
+      const userEmail = "user@example.com";
+      const firstName = "John";
+      const newEmail = "newemail@example.com";
+
+      mockTransporter.sendMail.mockResolvedValue({
+        messageId: "test-message-id",
+      });
+
+      const result = await sendEmailChangeRequestEmail(
+        userEmail,
+        firstName,
+        newEmail
+      );
+
+      expect(result.messageId).toBe("test-message-id");
+      expect(mockTransporter.sendMail).toHaveBeenCalledTimes(1);
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      expect(callArgs.to).toBe(userEmail);
+      expect(callArgs.subject).toContain("Email Change Request");
+    });
+
+    it("should include new email details", async () => {
+      const newEmail = "newemail@example.com";
+
+      mockTransporter.sendMail.mockResolvedValue({ messageId: "test-id" });
+
+      await sendEmailChangeRequestEmail("user@example.com", "John", newEmail);
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain(newEmail);
+      expect(callArgs.html).toContain("John");
+    });
+
+    it("should handle email change request errors", async () => {
+      mockTransporter.sendMail.mockRejectedValue(new Error("SMTP error"));
+
+      await expect(
+        sendEmailChangeRequestEmail(
+          "user@example.com",
+          "John",
+          "new@example.com"
+        )
+      ).rejects.toThrow(
+        "Failed to send email change request notification: SMTP error"
+      );
+    });
+  });
+
+  describe("Email Change Confirmation Email", () => {
+    it("should send confirmation email successfully", async () => {
+      const userEmail = "user@example.com";
+      const firstName = "John";
+      const emailChangeToken = "confirm-token-123";
+
+      mockTransporter.sendMail.mockResolvedValue({
+        messageId: "test-message-id",
+      });
+
+      const result = await sendEmailChangeConfirmationEmail(
+        userEmail,
+        firstName,
+        emailChangeToken
+      );
+
+      expect(result.messageId).toBe("test-message-id");
+      expect(mockTransporter.sendMail).toHaveBeenCalledTimes(1);
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      expect(callArgs.to).toBe(userEmail);
+      expect(callArgs.subject).toContain("Confirm Your New Email Address");
+    });
+
+    it("should include confirmation link", async () => {
+      const emailChangeToken = "confirm-token-123";
+
+      mockTransporter.sendMail.mockResolvedValue({ messageId: "test-id" });
+
+      await sendEmailChangeConfirmationEmail(
+        "user@example.com",
+        "John",
+        emailChangeToken
+      );
+
+      const callArgs = mockTransporter.sendMail.mock.calls[0][0];
+      const expectedUrl = `${CLIENT_URL}/auth/confirm-email-change?token=${emailChangeToken}`;
+      expect(callArgs.html).toContain(expectedUrl);
+    });
+
+    it("should handle confirmation email errors", async () => {
+      mockTransporter.sendMail.mockRejectedValue(new Error("Service down"));
+
+      await expect(
+        sendEmailChangeConfirmationEmail("user@example.com", "John", "token123")
+      ).rejects.toThrow(
+        "Failed to send email change confirmation: Service down"
+      );
     });
   });
 });

@@ -311,4 +311,103 @@ describe("JWT Utils", () => {
       expect(() => isTokenExpired("invalid")).not.toThrow();
     });
   });
+
+  describe("Error Handling", () => {
+    it("should throw error for invalid refresh token", () => {
+      expect(() => {
+        verifyRefreshToken("completely.invalid.token");
+      }).toThrow("Invalid refresh token");
+    });
+
+    it("should throw error for invalid invitation token", () => {
+      expect(() => {
+        verifyInvitationToken("completely.invalid.token");
+      }).toThrow("Invalid invitation token");
+    });
+
+    it("should throw error for invalid verification token", () => {
+      expect(() => {
+        verifyVerificationToken("completely.invalid.token");
+      }).toThrow("Invalid verification token");
+    });
+
+    it("should throw error for invalid password reset token", () => {
+      expect(() => {
+        verifyPasswordResetToken("completely.invalid.token");
+      }).toThrow("Invalid password reset token");
+    });
+
+    it("should handle invalid token in decodeToken", () => {
+      const result = decodeToken("not-a-valid-jwt-at-all");
+      expect(result).toBeNull();
+    });
+
+    it("should throw error when decodeToken receives invalid input", () => {
+      // Mock jwt.decode to throw an error for this specific test
+      const jwt = require("jsonwebtoken");
+      const originalDecode = jwt.decode;
+
+      jwt.decode = jest.fn().mockImplementation(() => {
+        throw new Error("Decode failed");
+      });
+
+      expect(() => {
+        decodeToken("some-token");
+      }).toThrow("Cannot decode token: Decode failed");
+
+      // Restore original function
+      jwt.decode = originalDecode;
+    });
+
+    it("should handle invalid token in isTokenExpired", () => {
+      const result = isTokenExpired("malformed-token");
+      expect(result).toBe(true);
+    });
+
+    it("should handle invalid token in getTokenExpiry", () => {
+      const result = getTokenExpiry("malformed-token");
+      expect(result).toBeNull();
+    });
+
+    it("should handle invalid token in getTokenTTL", () => {
+      const result = getTokenTTL("malformed-token");
+      expect(result).toBe(0);
+    });
+
+    it("should handle decodeToken error in isTokenExpired", () => {
+      const jwtUtils = require("../jwtUtils");
+      const spy = jest.spyOn(jwtUtils, "decodeToken").mockImplementation(() => {
+        throw new Error("Decode failed");
+      });
+
+      const result = jwtUtils.isTokenExpired("some-token");
+      expect(result).toBe(true);
+
+      spy.mockRestore();
+    });
+
+    it("should handle decodeToken error in getTokenExpiry", () => {
+      const jwtUtils = require("../jwtUtils");
+      const spy = jest.spyOn(jwtUtils, "decodeToken").mockImplementation(() => {
+        throw new Error("Decode failed");
+      });
+
+      const result = jwtUtils.getTokenExpiry("some-token");
+      expect(result).toBeNull();
+
+      spy.mockRestore();
+    });
+
+    it("should handle decodeToken error in getTokenTTL", () => {
+      const jwtUtils = require("../jwtUtils");
+      const spy = jest.spyOn(jwtUtils, "decodeToken").mockImplementation(() => {
+        throw new Error("Decode failed");
+      });
+
+      const result = jwtUtils.getTokenTTL("some-token");
+      expect(result).toBe(0);
+
+      spy.mockRestore();
+    });
+  });
 });
