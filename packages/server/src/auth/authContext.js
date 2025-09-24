@@ -48,9 +48,15 @@ async function enhanceContextWithAuth(params, baseContext) {
     try {
       const blacklisted = await isTokenBlacklisted(token);
       if (blacklisted) {
-        throw new Error("Token has been revoked");
+        authContext.error = "Token has been revoked";
+        return { ...baseContext, auth: authContext };
       }
     } catch (redisError) {
+      // Check if this is a blacklist error vs Redis connection error
+      if (redisError.message === "Token has been revoked") {
+        authContext.error = "Token has been revoked";
+        return { ...baseContext, auth: authContext };
+      }
       console.warn(
         "Redis blacklist check failed, continuing without blacklist check:",
         redisError.message
