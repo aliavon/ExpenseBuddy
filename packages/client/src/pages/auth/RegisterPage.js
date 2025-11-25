@@ -38,7 +38,7 @@ const RegisterPage = () => {
 
   const [registerUser] = useMutation(REGISTER_MUTATION, {
     onCompleted: data => {
-      toaster.positive(data.register.message || 'Registration successful! Please check your email to activate your account.');
+      toaster.positive(data.register.message || 'Registration successful! Please check your email (including spam folder) to activate your account.');
       navigate('/auth/login');
     },
     onError: error => {

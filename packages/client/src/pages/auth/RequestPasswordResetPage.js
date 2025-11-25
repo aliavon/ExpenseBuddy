@@ -25,7 +25,7 @@ const RequestPasswordResetPage = () => {
 
   const [requestPasswordReset] = useMutation(REQUEST_PASSWORD_RESET, {
     onCompleted: () => {
-      toaster.positive('Password reset instructions sent! Check your email.');
+      toaster.positive('Password reset instructions sent! Check your email (including spam folder).');
       // Redirect back to login after success
       setTimeout(() => navigate('/auth/login'), 2000);
     },

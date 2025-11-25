@@ -131,9 +131,13 @@ export const AuthProvider = ({ children }) => {
       setError(error.message);
 
       // Show error toast immediately when mutation fails
-      if (error.message.includes('Invalid credentials') || error.message.includes('User not found')) {
+      // Check error code first, then fallback to message
+      const errorCode = error.graphQLErrors?.[0]?.extensions?.code;
+      const errorMessage = error.message || error.graphQLErrors?.[0]?.message;
+
+      if (errorCode === 'INVALID_CREDENTIALS' || errorMessage?.includes('Invalid email or password')) {
         toaster.negative('Invalid email or password');
-      } else if (error.message.includes('not verified')) {
+      } else if (errorMessage?.includes('not verified')) {
         toaster.info('Email verification required');
       } else {
         toaster.negative('Login error. Try again later.');
@@ -158,6 +162,14 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
 
+      // Clear any existing tokens before attempting login
+      // This prevents ME_QUERY from running with stale tokens
+      if (!preAuthData) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setHasValidToken(false);
+      }
+
       if (preAuthData) {
         // Post-registration login with pre-authenticated data
         const { accessToken, refreshToken } = preAuthData;
@@ -166,12 +178,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
 
-        // Update token state and refetch user data
+        // Update token state - ME_QUERY will automatically run when hasValidToken becomes true
         setHasValidToken(true);
         setIsLoading(false);
-
-        // Refetch ME_QUERY to get fresh user data
-        await refetchUser();
 
         return true;
       } else {
@@ -185,8 +194,7 @@ export const AuthProvider = ({ children }) => {
           },
         });
 
-        // After successful login, refetch user data
-        await refetchUser();
+        // ME_QUERY will automatically run when onCompleted sets hasValidToken to true
         return true;
       }
     } catch (error) {
@@ -235,14 +243,15 @@ export const AuthProvider = ({ children }) => {
 
   // Register logout function with errorLink for automatic logout on auth errors
   useEffect(() => {
-    setGlobalLogout(logout);
+    // Pass handleLogout instead of logout to avoid mutation calls during error handling
+    setGlobalLogout(handleLogout);
     console.log('Registered logout function with Apollo errorLink');
 
     // Cleanup on unmount
     return () => {
       setGlobalLogout(null);
     };
-  }, [logout]);
+  }, []);
 
   const value = {
     user,

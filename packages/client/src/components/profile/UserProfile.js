@@ -61,7 +61,7 @@ const UserProfile = ({ isOpen, onClose }) => {
 
   const [requestEmailChange, { loading: emailChangeLoading }] = useMutation(REQUEST_EMAIL_CHANGE_MUTATION, {
     onCompleted: () => {
-      toaster.positive('Email change request sent! Check both your current and new email addresses.');
+      toaster.positive('Email change request sent! Check both your current and new email addresses (including spam folder).');
       setShowChangeEmail(false);
       // Reset form
       setEmailForm({

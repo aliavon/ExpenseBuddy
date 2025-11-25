@@ -82,6 +82,18 @@ export const handleAuthError = () => {
  * Error handler function for GraphQL and network errors
  */
 export const errorHandlerFn = ({ graphQLErrors, networkError, operation, _forward }) => {
+  // Skip error handling for auth operations and Me query - they handle their own errors
+  const skipOperations = [
+    'Login',
+    'Register',
+    'Logout',
+    'Me',
+  ];
+  if (skipOperations.includes(operation.operationName)) {
+    console.log(`Skipping global error handler for ${operation.operationName} operation`);
+    return;
+  }
+
   // Handle GraphQL errors
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path, extensions }) => {
