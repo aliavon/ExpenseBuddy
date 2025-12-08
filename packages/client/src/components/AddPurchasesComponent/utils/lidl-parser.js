@@ -31,15 +31,28 @@ const lidlParse = async file => {
     if (row.length === 2) {
       let name, quantity, price, unit = 'pcs', discount = 0;
       [name] = row;
-      if (['Lidl Plus rabat'].includes(name) || (parseFloat(row[1]) < 0)) {
+      if ([
+        'Lidl Plus rabat',
+        'Lidl Plus voucher',
+        'Lidl Plus kupon',
+        'Rabat grupowy',
+      ].includes(name) || (parseFloat(row[1].replace(',', '.')) < 0)) {
         // handle discount calc
+        if (parsedData.length === 0) {
+          continue;
+        }
         let prevPrice = parsedData.at(-1).price;
-        let discountPrice = parseFloat(row[1].replace(',', '.').slice(1));
+        let discountPrice = Math.abs(parseFloat(row[1].replace(',', '.')));
         let discount = parseFloat((discountPrice * 100 / prevPrice).toFixed(0));
         parsedData.at(-1).price = parseFloat((prevPrice - discountPrice).toFixed(2));
         parsedData.at(-1).discount = parseFloat((parsedData.at(-1).discount + discount).toFixed(0));
       } else {
-        [, quantity, , price] = row[1].match(/([0-9]{1,2}|[0-9]{1,2},[0-9]{3}) .* ([0-9]{1,3},[0-9]{1,2}) ([0-9]{1,3},[0-9]{1,2})/);
+        // New format: "1 * 7.99 7.99 C" or "1,474kg x 3.99 5.88 C"
+        const itemMatch = row[1].match(/([0-9]{1,2}(?:[,.][0-9]{1,3})?k?g?)\s*[x*]\s*([0-9]{1,3}[,.][0-9]{1,2})\s+([0-9]{1,3}[,.][0-9]{1,2})/);
+        if (!itemMatch) {
+          continue;
+        }
+        [, quantity, , price] = itemMatch;
 
         if (name.includes('Luz') || name.includes('luz')){
           unit = 'g';
