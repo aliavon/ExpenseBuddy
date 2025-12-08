@@ -79,6 +79,18 @@ module.exports = `
       pagination: PaginationInput!,
       sort: SortInput
     ): FamilyIncomeRecordsResponse!
+
+    # Analytics: Get income statistics for a date range
+    getIncomeStatistics(dateFrom: String!, dateTo: String!): IncomeStatistics!
+    
+    # Analytics: Get income grouped by type
+    getIncomeByType(dateFrom: String!, dateTo: String!): [IncomeByType!]!
+    
+    # Analytics: Get income grouped by contributor
+    getIncomeByContributor(dateFrom: String!, dateTo: String!): [IncomeByContributor!]!
+    
+    # Analytics: Get income trends by month
+    getIncomeTrends(dateFrom: String!, dateTo: String!): [IncomeTrend!]!
   }
 
   type Mutation {
@@ -219,6 +231,38 @@ module.exports = `
     contributor: User       # The user who contributed this income.
     currency: Currency      # The currency in which the income is recorded.
     familyId: ID            # Reference to family (temporarily nullable)
+  }
+
+  # Income statistics for a given date range
+  type IncomeStatistics {
+    totalIncome: Float!
+    averageIncome: Float!
+    incomeCount: Int!
+    topContributor: User
+    topIncomeType: IncomeType
+  }
+
+  # Income grouped by type
+  type IncomeByType {
+    type: IncomeType!
+    amount: Float!
+    count: Int!
+    percentage: Float!
+  }
+
+  # Income grouped by contributor
+  type IncomeByContributor {
+    contributor: User!
+    amount: Float!
+    count: Int!
+    percentage: Float!
+  }
+
+  # Income trends by month
+  type IncomeTrend {
+    period: String!     # Format: "YYYY-MM"
+    amount: Float!
+    count: Int!
   }
 
   # Enum for periodicity values, generated from constants.

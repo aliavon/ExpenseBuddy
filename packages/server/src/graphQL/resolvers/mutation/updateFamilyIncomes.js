@@ -11,15 +11,36 @@ module.exports = async (_, { updates }, context) => {
   const auth = requireFamily(context);
 
   // Build bulk operations with family security
-  const bulkOperations = updates.map(({ id, ...fields }) => ({
-    updateOne: {
-      filter: {
-        _id: new mongoose.Types.ObjectId(id),
-        familyId: new mongoose.Types.ObjectId(auth.user.familyId), // Only update income from user's family
+  const bulkOperations = updates.map(({ id, ...fields }) => {
+    // Convert string IDs to ObjectId
+    const updateFields = { ...fields };
+    if (updateFields.contributorId) {
+      updateFields.contributorId = new mongoose.Types.ObjectId(
+        updateFields.contributorId
+      );
+    }
+    if (updateFields.typeId) {
+      updateFields.typeId = new mongoose.Types.ObjectId(updateFields.typeId);
+    }
+    if (updateFields.currencyId) {
+      updateFields.currencyId = new mongoose.Types.ObjectId(
+        updateFields.currencyId
+      );
+    }
+    if (updateFields.date) {
+      updateFields.date = new Date(updateFields.date);
+    }
+
+    return {
+      updateOne: {
+        filter: {
+          _id: new mongoose.Types.ObjectId(id),
+          familyId: new mongoose.Types.ObjectId(auth.user.familyId), // Only update income from user's family
+        },
+        update: { $set: updateFields },
       },
-      update: { $set: fields },
-    },
-  }));
+    };
+  });
 
   const bulkResult = await FamilyIncome.bulkWrite(bulkOperations);
 

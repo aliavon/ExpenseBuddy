@@ -22,6 +22,10 @@ const getPurchasesCategorySuggestion = require("./getPurchasesCategorySuggestion
 const getItems = require("./getItems");
 const getFamilyIncomePeriodicityOptions = require("./getFamilyIncomePeriodicityOptions");
 const getFamilyIncomeRecords = require("./getFamilyIncomeRecords");
+const getIncomeStatistics = require("./getIncomeStatistics");
+const getIncomeByType = require("./getIncomeByType");
+const getIncomeByContributor = require("./getIncomeByContributor");
+const getIncomeTrends = require("./getIncomeTrends");
 const getCurrencies = require("./getCurrencies");
 const getIncomeTypes = require("./getIncomeTypes");
 const getUsers = require("./getUsers");
@@ -70,6 +74,10 @@ const familyIncomeResolvers = {
     getFamilyIncomeRecordsSchema,
     getFamilyIncomeRecords
   ),
+  getIncomeStatistics: getIncomeStatistics, // Already wrapped in resolver file
+  getIncomeByType: getIncomeByType, // Already wrapped in resolver file
+  getIncomeByContributor: getIncomeByContributor, // Already wrapped in resolver file
+  getIncomeTrends: getIncomeTrends, // Already wrapped in resolver file
 };
 
 // Currency-related queries

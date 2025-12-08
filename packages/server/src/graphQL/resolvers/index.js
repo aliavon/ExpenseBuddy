@@ -5,6 +5,7 @@ const FamilyIncomeResolver = require("./FamilyIncome");
 const FamilyResolver = require("./Family");
 const FamilyJoinRequestResolver = require("./FamilyJoinRequest");
 const UserResolver = require("./User");
+const IncomeTypeResolver = require("./IncomeType");
 const authResolvers = require("./auth");
 const protectedResolvers = require("./protected");
 
@@ -22,4 +23,5 @@ module.exports = {
   Family: FamilyResolver,
   FamilyJoinRequest: FamilyJoinRequestResolver,
   User: UserResolver,
+  IncomeType: IncomeTypeResolver,
 };

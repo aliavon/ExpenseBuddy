@@ -9,6 +9,16 @@ const UserResolver = {
   },
 
   /**
+   * Compute fullName from firstName, middleName, lastName
+   */
+  fullName: (user) => {
+    const parts = [user.firstName, user.middleName, user.lastName].filter(
+      Boolean
+    );
+    return parts.join(" ");
+  },
+
+  /**
    * Transform populated familyId to ID string for GraphQL
    * GraphQL schema expects: familyId: ID
    * But Mongoose populate returns full Family object

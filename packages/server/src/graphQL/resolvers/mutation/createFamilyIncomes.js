@@ -1,4 +1,5 @@
 const { requireFamily } = require("../../../auth");
+const mongoose = require("mongoose");
 
 module.exports = async (_, { familyIncomes }, context) => {
   const {
@@ -9,10 +10,14 @@ module.exports = async (_, { familyIncomes }, context) => {
   // Require authentication and family membership
   const auth = requireFamily(context);
 
-  // Enrich family incomes with family context
+  // Enrich family incomes with family context and convert IDs to ObjectId
   const enrichedFamilyIncomes = familyIncomes.map((income) => ({
     ...income,
-    familyId: auth.user.familyId,
+    familyId: new mongoose.Types.ObjectId(auth.user.familyId),
+    contributorId: new mongoose.Types.ObjectId(income.contributorId),
+    typeId: new mongoose.Types.ObjectId(income.typeId),
+    currencyId: new mongoose.Types.ObjectId(income.currencyId),
+    date: new Date(income.date),
   }));
 
   const newFamilyIncomes = await FamilyIncome.insertMany(enrichedFamilyIncomes);

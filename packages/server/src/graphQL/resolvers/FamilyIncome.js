@@ -2,14 +2,35 @@ const { GraphQLError } = require("graphql");
 const ERROR_CODES = require("../../constants/errorCodes");
 
 module.exports = {
+  id: (parent) => parent.id || parent._id,
+
+  date: (parent) => {
+    // Always convert to ISO string
+    if (parent.date instanceof Date) {
+      return parent.date.toISOString();
+    }
+    // If it's a timestamp (number or string), convert to Date first
+    if (
+      typeof parent.date === "number" ||
+      (typeof parent.date === "string" && !isNaN(parent.date))
+    ) {
+      return new Date(Number(parent.date)).toISOString();
+    }
+    // If it's already an ISO string, return as is
+    return parent.date;
+  },
+
   type: async (parent, _, { logger, loaders: { incomeTypeLoader } }) => {
+    // Return null if typeId is not set
+    if (!parent.typeId) {
+      return null;
+    }
+
     try {
       const incomeType = await incomeTypeLoader.load(parent.typeId.toString());
       if (!incomeType) {
         logger.error({ parentId: parent.typeId }, "IncomeType not found");
-        throw new GraphQLError(`IncomeType not found for id ${parent.typeId}`, {
-          extensions: { code: ERROR_CODES.INCOME_TYPE_NOT_FOUND },
-        });
+        return null; // Return null instead of throwing error
       }
       return incomeType;
     } catch (error) {
@@ -17,27 +38,21 @@ module.exports = {
         { err: error, parentId: parent.typeId },
         "Error retrieving IncomeType"
       );
-      throw new GraphQLError(
-        "Failed to retrieve IncomeType. Please try again later.",
-        {
-          extensions: {
-            code: error.extensions?.code || ERROR_CODES.GET_INCOME_TYPE_ERROR,
-            detailedMessage: error.message,
-          },
-        }
-      );
+      return null; // Return null on error
     }
   },
 
   contributor: async (parent, _, { logger, loaders: { userLoader } }) => {
+    // Return null if contributorId is not set
+    if (!parent.contributorId) {
+      return null;
+    }
+
     try {
       const user = await userLoader.load(parent.contributorId.toString());
       if (!user) {
         logger.error({ parentId: parent.contributorId }, "User not found");
-        throw new GraphQLError(
-          `User not found for id ${parent.contributorId}`,
-          { extensions: { code: ERROR_CODES.USER_NOT_FOUND } }
-        );
+        return null; // Return null instead of throwing error
       }
       return user;
     } catch (error) {
@@ -45,28 +60,20 @@ module.exports = {
         { err: error, parentId: parent.contributorId },
         "Error retrieving User"
       );
-      throw new GraphQLError(
-        "Failed to retrieve user. Please try again later.",
-        {
-          extensions: {
-            code: error.extensions?.code || ERROR_CODES.GET_USER_ERROR,
-            detailedMessage: error.message,
-          },
-        }
-      );
+      return null; // Return null on error
     }
   },
   currency: async (parent, _, { logger, loaders: { currencyLoader } }) => {
+    // Return null if currencyId is not set
+    if (!parent.currencyId) {
+      return null;
+    }
+
     try {
       const currency = await currencyLoader.load(parent.currencyId.toString());
       if (!currency) {
         logger.error({ parentId: parent.currencyId }, "Currency not found");
-        throw new GraphQLError(
-          `Currency not found for id ${parent.currencyId}`,
-          {
-            extensions: { code: ERROR_CODES.CURRENCY_NOT_FOUND },
-          }
-        );
+        return null; // Return null instead of throwing error
       }
       return currency;
     } catch (error) {
@@ -74,15 +81,7 @@ module.exports = {
         { err: error, parentId: parent.currencyId },
         "Error retrieving Currency"
       );
-      throw new GraphQLError(
-        "Failed to retrieve Currency. Please try again later.",
-        {
-          extensions: {
-            code: error.extensions?.code || ERROR_CODES.GET_CURRENCY_ERROR,
-            detailedMessage: error.message,
-          },
-        }
-      );
+      return null; // Return null on error
     }
   },
 };
