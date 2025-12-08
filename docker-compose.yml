@@ -54,7 +54,7 @@ services:
 
   mongo:
     container_name: expenseBuddyMongoDB
-    image: mongo:4.0.10-xenial
+    image: mongo:4.2
     ports:
       - ${DATABASE_PORT}:${DATABASE_PORT}
     volumes:
