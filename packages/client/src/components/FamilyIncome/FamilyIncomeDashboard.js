@@ -1,163 +1,186 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Paper } from '@mui/material';
-// import {useQuery, gql} from '@apollo/client';
+import React, { useState } from 'react';
+import { Block } from 'baseui/block';
+import { Spinner } from 'baseui/spinner';
+import { Notification } from 'baseui/notification';
+import { Button, SIZE, SHAPE } from 'baseui/button';
+import { useQuery } from '@apollo/client';
+import Plus from 'baseui/icon/plus';
+import { Tabs, Tab } from 'baseui/tabs-motion';
 import FamilyIncomeFilters from './FamilyIncomeFilters';
 import FamilyIncomeTable from './FamilyIncomeTable';
-import { filterAndSortMockData } from './mockData';
+import AddIncomeModal from './AddIncomeModal';
+import EditIncomeModal from './EditIncomeModal';
+import DeleteIncomeDialog from './DeleteIncomeDialog';
+import IncomeStatisticsCards from './charts/IncomeStatisticsCards';
+import IncomeByTypeChart from './charts/IncomeByTypeChart';
+import IncomeByContributorChart from './charts/IncomeByContributorChart';
+import { GET_FAMILY_INCOME_RECORDS_QUERY } from '../../gql/income';
 
-// const GET_FAMILY_INCOME_RECORDS = gql`
-//   query GetFamilyIncomeRecords($filters: FamilyIncomeFiltersInput, $pagination: PaginationInput!, $sort: SortInput) {
-//     getFamilyIncomeRecords(filters: $filters, pagination: $pagination, sort: $sort) {
-//       items {
-//         id
-//         date
-//         amount
-//         note
-//         periodicity
-//         type {
-//           id
-//           name
-//           description
-//         }
-//         contributor {
-//           id
-//           fullName
-//         }
-//         currency {
-//           id
-//           code
-//           name
-//         }
-//       }
-//       pagination {
-//         currentPage
-//         nextPage
-//         totalPages
-//         totalCount
-//       }
-//     }
-//   }
-// `;
+// Helper to get default date range (start of year to today)
+const getDefaultDateRange = () => {
+  const startDate = new Date();
+  startDate.setDate(1);
+  startDate.setMonth(0);
+  startDate.setHours(0, 0, 0, 0);
+  return [startDate, new Date()];
+};
 
 const FamilyIncomeDashboard = () => {
-  // State for filters, pagination, and sorting
-  const [filters, setFilters] = useState({});
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
+  // State for tabs
+  const [activeTab, setActiveTab] = useState('0');
+
+  // State for filters - initialize with default dates
+  const [filters, setFilters] = useState(() => {
+    const [dateFrom, dateTo] = getDefaultDateRange();
+    return {
+      dateFrom: dateFrom.toISOString(),
+      dateTo: dateTo.toISOString(),
+    };
   });
-  const [sort, setSort] = useState({
-    sortBy: 'date',
-    sortOrder: 'desc',
+
+  // State for modals
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingIncome, setEditingIncome] = useState(null);
+  const [deletingIncome, setDeletingIncome] = useState(null);
+
+  // GraphQL query - get all records, DataTable will handle pagination
+  const { data, loading, error, refetch } = useQuery(GET_FAMILY_INCOME_RECORDS_QUERY, {
+    variables: {
+      filters,
+      pagination: { page: 1, limit: 1000 }, // Get all records
+      sort: { sortBy: 'date', sortOrder: 'desc' },
+    },
+    fetchPolicy: 'cache-and-network',
   });
-
-  // State for mock data
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Simulate data fetching with mock data
-  useEffect(() => {
-    setLoading(true);
-    setError(null); // Clear previous errors
-    try {
-      // Simulate network delay
-      setTimeout(() => {
-        try {
-          const mockData = filterAndSortMockData(filters, pagination, sort);
-          setData(mockData);
-          setLoading(false);
-        } catch (err) {
-          setError(err);
-          setLoading(false);
-        }
-      }, 300);
-    } catch (err) {
-      // This catch is for setTimeout setup errors (unlikely but possible)
-      setError(err);
-      setLoading(false);
-    }
-  }, [filters, pagination, sort]);
-
-  // GraphQL query (commented out)
-  // const {data, loading, error, refetch} = useQuery(GET_FAMILY_INCOME_RECORDS, {
-  //   variables: {
-  //     filters,
-  //     pagination,
-  //     sort,
-  //   },
-  // });
 
   const handleFilterChange = newFilters => {
-    setFilters(newFilters);
-    // Reset to first page on filter change
-    setPagination(prev => ({
-      ...prev,
-      page: 1,
-    }));
+    setFilters({
+      dateFrom: newFilters.dateFrom,
+      dateTo: newFilters.dateTo,
+    });
   };
-
-  const handleSortChange = newSort => {
-    setSort(prev => ({
-      ...prev,
-      ...newSort,
-    }));
-  };
-
-  const handlePageChange = newPage => {
-    setPagination(prev => ({
-      ...prev,
-      page: newPage,
-    }));
-  };
-
-  // Removed refetch useEffect since we're using mock data
-  // useEffect(() => {
-  //   refetch({
-  //     filters,
-  //     pagination,
-  //     sort,
-  //   });
-  // }, [
-  //   filters,
-  //   pagination,
-  //   sort,
-  //   refetch,
-  // ]);
 
   if (loading) {
-    return <div>Loading...</div>;
-  }
-  if (error) {
     return (
-      <div>
-        Error:
-        {error.message}
-      </div>
+      <Block
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
+        <Spinner />
+      </Block>
     );
   }
 
-  const records = data.getFamilyIncomeRecords.items;
-  const paginationMeta = data.getFamilyIncomeRecords.pagination;
+  if (error) {
+    return (
+      <Block margin="scale800">
+        <Notification kind="negative" overrides={{ Body: { style: { width: '100%' } } }}>
+          Failed to load income records:
+          {' '}
+          {error.message}
+        </Notification>
+      </Block>
+    );
+  }
+
+  const records = data.getFamilyIncomeRecords.items || [];
 
   return (
-    <Box p={2}>
-      <Paper
-        sx={{
-          p: 2,
-          mb: 2,
+    <Block
+      width="100%" margin="scale800"
+      display="grid" gridTemplateRows="auto 1fr">
+      <FamilyIncomeFilters
+        initialFilters={filters}
+        onFilterChange={handleFilterChange}
+      />
+
+      <Tabs
+        activeKey={activeTab}
+        onChange={({ activeKey }) => setActiveTab(activeKey)}
+      >
+        <Tab title="Records" overrides={{ TabPanel: { style: { height: 'calc(100% - 96px)' } } }}>
+          <FamilyIncomeTable
+            data={records}
+            onEdit={setEditingIncome}
+            onDelete={setDeletingIncome}
+          />
+        </Tab>
+
+        <Tab title="Analytics">
+          {filters.dateFrom && filters.dateTo ? (
+            <>
+              <IncomeStatisticsCards
+                dateFrom={filters.dateFrom}
+                dateTo={filters.dateTo}
+              />
+              <Block
+                display="grid"
+                gridTemplateColumns={['1fr', '1fr', '1fr 1fr']}
+                gridGap="scale800"
+                marginTop="scale800"
+              >
+                <IncomeByTypeChart
+                  dateFrom={filters.dateFrom}
+                  dateTo={filters.dateTo}
+                />
+                <IncomeByContributorChart
+                  dateFrom={filters.dateFrom}
+                  dateTo={filters.dateTo}
+                />
+              </Block>
+            </>
+          ) : (
+            <Notification kind="info">
+              Please select a date range to view analytics.
+            </Notification>
+          )}
+        </Tab>
+      </Tabs>
+
+      {/* FAB button for adding income */}
+      <Button
+        onClick={() => setIsAddModalOpen(true)}
+        shape={SHAPE.circle}
+        size={SIZE.compact}
+        overrides={{
+          BaseButton: {
+            style: {
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              zIndex: 1000,
+              padding: '0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            },
+          },
         }}
       >
-        <FamilyIncomeFilters onFilterChange={handleFilterChange} />
-      </Paper>
-      <FamilyIncomeTable
-        data={records}
-        totalPages={paginationMeta.totalPages}
-        currentPage={paginationMeta.currentPage}
-        onSortChange={handleSortChange}
-        onPageChange={handlePageChange}
+        <Plus />
+      </Button>
+
+      {/* Modals */}
+      <AddIncomeModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        refetch={refetch}
       />
-    </Box>
+      <EditIncomeModal
+        income={editingIncome}
+        isOpen={!!editingIncome}
+        onClose={() => setEditingIncome(null)}
+        refetch={refetch}
+      />
+      <DeleteIncomeDialog
+        income={deletingIncome}
+        isOpen={!!deletingIncome}
+        onClose={() => setDeletingIncome(null)}
+        refetch={refetch}
+      />
+    </Block>
   );
 };
 

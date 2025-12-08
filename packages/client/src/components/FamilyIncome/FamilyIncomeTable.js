@@ -1,82 +1,91 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Block } from 'baseui/block';
+import { Button, SIZE } from 'baseui/button';
 import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TableSortLabel,
-  Pagination,
-} from '@mui/material';
+  StatefulDataTable,
+  StringColumn,
+  NumericalColumn,
+  DatetimeColumn,
+  CategoricalColumn,
+} from 'baseui/data-table';
+import { Pencil, Trash } from '../../icons';
 
-const FamilyIncomeTable = ({ data, totalPages, currentPage, onSortChange, onPageChange }) => {
-  const handleSort = field => {
-    // For simplicity, assume toggling sort order is handled in the parent.
-    onSortChange({ sortBy: field });
-  };
+const FamilyIncomeTable = ({ data, onEdit, onDelete }) => {
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    if (data) {
+      setRows(
+        data.map(record => ({
+          id: String(record.id),
+          data: record,
+        }))
+      );
+    }
+  }, [data]);
+
+  const columns = [
+    DatetimeColumn({
+      title: 'Date',
+      mapDataToValue: data => {
+        // Handle both ISO string and timestamp
+        const dateValue = data.date;
+        // If it's an ISO string, convert to timestamp
+        if (typeof dateValue === 'string' && dateValue.includes('-')) {
+          return new Date(dateValue).getTime();
+        }
+        // If it's a timestamp string, convert to number
+        return +dateValue;
+      },
+      formatString: 'yyyy-MM-dd',
+    }),
+    NumericalColumn({
+      title: 'Amount',
+      mapDataToValue: data => data.amount,
+      precision: 2,
+    }),
+    StringColumn({
+      title: 'Currency',
+      mapDataToValue: data => data.currency?.code || '-',
+    }),
+    CategoricalColumn({
+      title: 'Type',
+      mapDataToValue: data => data.type?.name || '-',
+    }),
+    StringColumn({
+      title: 'Contributor',
+      mapDataToValue: data => data.contributor?.fullName || '-',
+    }),
+    CategoricalColumn({
+      title: 'Periodicity',
+      mapDataToValue: data => data.periodicity,
+    }),
+    StringColumn({
+      title: 'Note',
+      mapDataToValue: data => data.note || '-',
+    }),
+  ];
+
+  const rowActions = [
+    {
+      label: 'Edit',
+      onClick: ({ row }) => onEdit(row.data),
+      renderIcon: function RenderEditIcon({ size }) {
+        return <Pencil size={size} />;
+      },
+    }, {
+      label: 'Delete',
+      onClick: ({ row }) => onDelete(row.data),
+      renderIcon: function RenderDeleteIcon({ size }) {
+        return <Trash size={size} />;
+      },
+    },
+  ];
 
   return (
-    <Box>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TableSortLabel
-                  active={true}
-                  direction="asc"
-                  onClick={() => handleSort('date')}
-                >
-                  Date
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={true}
-                  direction="asc"
-                  onClick={() => handleSort('amount')}
-                >
-                  Amount
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Note</TableCell>
-              <TableCell>Periodicity</TableCell>
-              <TableCell>Income Type</TableCell>
-              <TableCell>Contributor</TableCell>
-              <TableCell>Currency</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map(record => (
-              <TableRow key={record.id}>
-                <TableCell>{record.date}</TableCell>
-                <TableCell>{record.amount}</TableCell>
-                <TableCell>{record.note}</TableCell>
-                <TableCell>{record.periodicity}</TableCell>
-                <TableCell>{record.type ? record.type.name : '-'}</TableCell>
-                <TableCell>{record.contributor ? record.contributor.fullName : '-'}</TableCell>
-                <TableCell>{record.currency ? record.currency.code : '-'}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Box
-        mt={2}
-        display="flex"
-        justifyContent="center"
-      >
-        <Pagination
-          count={totalPages}
-          page={currentPage}
-          onChange={(event, page) => onPageChange(page)}
-          color="primary"
-        />
-      </Box>
-    </Box>
+    <StatefulDataTable
+      columns={columns} rows={rows}
+      rowActions={rowActions} />
   );
 };
 
