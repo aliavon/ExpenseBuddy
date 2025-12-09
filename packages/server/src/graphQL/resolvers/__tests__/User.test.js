@@ -15,9 +15,9 @@ describe("User Resolver", () => {
     });
 
     it("should return user.id when both id and _id are available", () => {
-      const user = { 
-        id: "507f1f77bcf86cd799439011", 
-        _id: "different_id" 
+      const user = {
+        id: "507f1f77bcf86cd799439011",
+        _id: "different_id",
       };
       const result = UserResolver.id(user);
       expect(result).toBe("507f1f77bcf86cd799439011");
@@ -44,7 +44,11 @@ describe("User Resolver", () => {
 
   describe("familyId resolver", () => {
     it("should return _id from populated familyId object", () => {
-      const mockFamily = { _id: "family123", name: "Smith Family", ownerId: "owner123" };
+      const mockFamily = {
+        _id: "family123",
+        name: "Smith Family",
+        ownerId: "owner123",
+      };
       const user = { familyId: mockFamily };
       const result = UserResolver.familyId(user);
       expect(result).toBe("family123");
@@ -76,12 +80,12 @@ describe("User Resolver", () => {
     });
 
     it("should return populated object _id even when it has other properties", () => {
-      const mockFamily = { 
-        _id: "family123", 
-        name: "Smith Family", 
+      const mockFamily = {
+        _id: "family123",
+        name: "Smith Family",
         ownerId: "owner123",
         members: ["user1", "user2"],
-        createdAt: new Date()
+        createdAt: new Date(),
       };
       const user = { familyId: mockFamily };
       const result = UserResolver.familyId(user);
@@ -108,12 +112,134 @@ describe("User Resolver", () => {
     });
   });
 
+  describe("fullName resolver", () => {
+    it("should combine firstName, middleName, and lastName", () => {
+      const user = {
+        firstName: "John",
+        middleName: "Michael",
+        lastName: "Doe",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("John Michael Doe");
+    });
+
+    it("should combine firstName and lastName without middleName", () => {
+      const user = {
+        firstName: "John",
+        lastName: "Doe",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("John Doe");
+    });
+
+    it("should handle only firstName", () => {
+      const user = {
+        firstName: "John",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("John");
+    });
+
+    it("should handle only lastName", () => {
+      const user = {
+        lastName: "Doe",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("Doe");
+    });
+
+    it("should handle firstName and middleName without lastName", () => {
+      const user = {
+        firstName: "John",
+        middleName: "Michael",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("John Michael");
+    });
+
+    it("should handle middleName and lastName without firstName", () => {
+      const user = {
+        middleName: "Michael",
+        lastName: "Doe",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("Michael Doe");
+    });
+
+    it("should filter out null values", () => {
+      const user = {
+        firstName: "John",
+        middleName: null,
+        lastName: "Doe",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("John Doe");
+    });
+
+    it("should filter out undefined values", () => {
+      const user = {
+        firstName: "John",
+        middleName: undefined,
+        lastName: "Doe",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("John Doe");
+    });
+
+    it("should filter out empty strings", () => {
+      const user = {
+        firstName: "John",
+        middleName: "",
+        lastName: "Doe",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("John Doe");
+    });
+
+    it("should return empty string when all names are missing", () => {
+      const user = {};
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("");
+    });
+
+    it("should return empty string when all names are falsy", () => {
+      const user = {
+        firstName: null,
+        middleName: "",
+        lastName: undefined,
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("");
+    });
+
+    it("should handle names with spaces", () => {
+      const user = {
+        firstName: "John Paul",
+        middleName: "Michael",
+        lastName: "Doe Smith",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("John Paul Michael Doe Smith");
+    });
+
+    it("should handle names with special characters", () => {
+      const user = {
+        firstName: "José",
+        middleName: "María",
+        lastName: "García-López",
+      };
+      const result = UserResolver.fullName(user);
+      expect(result).toBe("José María García-López");
+    });
+  });
+
   describe("edge cases", () => {
     it("should handle empty user object", () => {
       const user = {};
-      
+
       expect(UserResolver.id(user)).toBeUndefined();
       expect(UserResolver.familyId(user)).toBeUndefined();
+      expect(UserResolver.fullName(user)).toBe("");
     });
 
     it("should handle user with all properties", () => {
@@ -122,20 +248,23 @@ describe("User Resolver", () => {
         id: "user123",
         _id: "mongo_id",
         familyId: mockFamily,
-        name: "John Doe",
-        email: "john@example.com"
+        firstName: "John",
+        middleName: "Michael",
+        lastName: "Doe",
+        email: "john@example.com",
       };
-      
+
       expect(UserResolver.id(user)).toBe("user123");
       expect(UserResolver.familyId(user)).toBe("family123");
+      expect(UserResolver.fullName(user)).toBe("John Michael Doe");
     });
 
     it("should handle user with mixed data types", () => {
       const user = {
         id: "user123",
-        familyId: "string_family_id"
+        familyId: "string_family_id",
       };
-      
+
       expect(UserResolver.id(user)).toBe("user123");
       expect(UserResolver.familyId(user)).toBe("string_family_id");
     });
@@ -144,7 +273,7 @@ describe("User Resolver", () => {
       const testCases = [
         { user: { id: "id1", _id: "id2" }, expected: "id1" },
         { user: { id: "test", _id: "id2" }, expected: "test" },
-        { user: { id: 123, _id: "id2" }, expected: 123 }
+        { user: { id: 123, _id: "id2" }, expected: 123 },
       ];
 
       testCases.forEach(({ user, expected }) => {
@@ -158,7 +287,7 @@ describe("User Resolver", () => {
         { user: { id: "", _id: "id2" }, expected: "id2" },
         { user: { id: 0, _id: "id2" }, expected: "id2" },
         { user: { id: false, _id: "id2" }, expected: "id2" },
-        { user: { id: undefined, _id: "id2" }, expected: "id2" }
+        { user: { id: undefined, _id: "id2" }, expected: "id2" },
       ];
 
       testCases.forEach(({ user, expected }) => {

@@ -70,6 +70,35 @@ describe("verifyEmail resolver", () => {
   });
 
   describe("token validation errors", () => {
+    it("should throw error when decodedToken is null", async () => {
+      const token = "invalid-token";
+
+      verifyVerificationToken.mockReturnValue(null);
+
+      await expect(verifyEmailResolver(null, { token })).rejects.toThrow(
+        "Invalid or expired verification token"
+      );
+
+      expect(verifyVerificationToken).toHaveBeenCalledWith(token);
+      expect(User.findOne).not.toHaveBeenCalled();
+    });
+
+    it("should throw error when decodedToken has no userId", async () => {
+      const token = "invalid-token";
+
+      verifyVerificationToken.mockReturnValue({
+        email: "test@example.com",
+        // Missing userId
+      });
+
+      await expect(verifyEmailResolver(null, { token })).rejects.toThrow(
+        "Invalid or expired verification token"
+      );
+
+      expect(verifyVerificationToken).toHaveBeenCalledWith(token);
+      expect(User.findOne).not.toHaveBeenCalled();
+    });
+
     it("should throw error for invalid token", async () => {
       const token = "invalid-token";
 

@@ -411,4 +411,129 @@ describe("getPurchases resolver", () => {
     const quantities = result.map((p) => p.quantity).sort();
     expect(quantities).toEqual([1, 2, 3]);
   });
+
+  it("should return empty array when user has no family", async () => {
+    const context = global.createMockContext({
+      auth: {
+        isAuthenticated: true,
+        user: {
+          id: "user-id",
+          email: "test@example.com",
+          familyId: null, // User not in a family
+        },
+      },
+    });
+
+    const result = await getPurchases(
+      null,
+      {
+        from: "2024-01-01T00:00:00.000Z",
+        to: "2024-01-31T23:59:59.999Z",
+      },
+      context
+    );
+
+    expect(result).toEqual([]);
+    expect(context.logger.info).toHaveBeenCalledWith(
+      { userId: context.auth.user.id },
+      "User not in family - returning empty purchases"
+    );
+  });
+
+  it("should return empty array when user familyId is undefined", async () => {
+    const context = global.createMockContext({
+      auth: {
+        isAuthenticated: true,
+        user: {
+          id: "user-id",
+          email: "test@example.com",
+          // familyId is undefined
+        },
+      },
+    });
+
+    const result = await getPurchases(
+      null,
+      {
+        from: "2024-01-01T00:00:00.000Z",
+        to: "2024-01-31T23:59:59.999Z",
+      },
+      context
+    );
+
+    expect(result).toEqual([]);
+    expect(context.logger.info).toHaveBeenCalledWith(
+      { userId: context.auth.user.id },
+      "User not in family - returning empty purchases"
+    );
+  });
+
+  it("should return empty array when user familyId is empty string", async () => {
+    const context = global.createMockContext({
+      auth: {
+        isAuthenticated: true,
+        user: {
+          id: "user-id",
+          email: "test@example.com",
+          familyId: "", // Empty string
+        },
+      },
+    });
+
+    const result = await getPurchases(
+      null,
+      {
+        from: "2024-01-01T00:00:00.000Z",
+        to: "2024-01-31T23:59:59.999Z",
+      },
+      context
+    );
+
+    expect(result).toEqual([]);
+    expect(context.logger.info).toHaveBeenCalledWith(
+      { userId: context.auth.user.id },
+      "User not in family - returning empty purchases"
+    );
+  });
+
+  it("should only return purchases from user's family", async () => {
+    const itemId = global.createMockId();
+    const context = global.createMockContext();
+    const otherFamilyId = global.createMockId();
+    const otherUserId = global.createMockId();
+
+    await Purchase.create([
+      {
+        itemId,
+        quantity: 1,
+        unit: "kg",
+        price: 10,
+        date: new Date("2024-01-15T12:00:00.000Z"),
+        familyId: context.auth.user.familyId, // User's family
+        createdByUserId: context.auth.user.id,
+      },
+      {
+        itemId,
+        quantity: 2,
+        unit: "kg",
+        price: 20,
+        date: new Date("2024-01-16T12:00:00.000Z"),
+        familyId: otherFamilyId, // Different family
+        createdByUserId: otherUserId,
+      },
+    ]);
+
+    const result = await getPurchases(
+      null,
+      {
+        from: "2024-01-01T00:00:00.000Z",
+        to: "2024-01-31T23:59:59.999Z",
+      },
+      context
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].quantity).toBe(1);
+    expect(result[0].familyId.toString()).toBe(context.auth.user.familyId);
+  });
 });

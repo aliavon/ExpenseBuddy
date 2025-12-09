@@ -167,6 +167,82 @@ describe("requestPasswordReset resolver", () => {
 
       expect(result).toBe(true); // Should not fail even if email times out
     });
+
+    it("should log reset link in development when email fails", async () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = "development";
+      const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+      const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
+
+      const email = "john@example.com";
+      const mockUser = {
+        _id: "user-id",
+        email,
+        firstName: "John",
+        isActive: true,
+      };
+      const resetToken = "test-reset-token";
+
+      User.findOne.mockResolvedValue(mockUser);
+      generatePasswordResetToken.mockReturnValue(resetToken);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
+      sendPasswordResetEmail.mockRejectedValue(new Error("Email service down"));
+
+      const result = await requestPasswordResetResolver(null, { email });
+
+      expect(result).toBe(true);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        "Failed to send password reset email:",
+        "Email service down"
+      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining("PASSWORD RESET LINK")
+      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining(resetToken)
+      );
+
+      consoleLogSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it("should not log reset link in production when email fails", async () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = "production";
+      const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+      const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
+
+      const email = "john@example.com";
+      const mockUser = {
+        _id: "user-id",
+        email,
+        firstName: "John",
+        isActive: true,
+      };
+      const resetToken = "test-reset-token";
+
+      User.findOne.mockResolvedValue(mockUser);
+      generatePasswordResetToken.mockReturnValue(resetToken);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
+      sendPasswordResetEmail.mockRejectedValue(new Error("Email service down"));
+
+      const result = await requestPasswordResetResolver(null, { email });
+
+      expect(result).toBe(true);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        "Failed to send password reset email:",
+        "Email service down"
+      );
+      // Should NOT log reset link in production
+      expect(consoleLogSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining("PASSWORD RESET LINK")
+      );
+
+      consoleLogSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+      process.env.NODE_ENV = originalEnv;
+    });
   });
 
   describe("database errors", () => {
@@ -313,6 +389,32 @@ describe("requestPasswordReset resolver", () => {
       // Validation is tested separately in authSchemas.test.js
       // Integration with validation wrappers is tested in existing tests
       expect(true).toBe(true);
+    });
+  });
+
+  describe("error handling - GraphQLError re-throw", () => {
+    it("should re-throw GraphQLError without wrapping", async () => {
+      const { GraphQLError } = require("graphql");
+      const email = "john@example.com";
+
+      // Mock User.findOne to throw a GraphQLError
+      User.findOne.mockRejectedValue(
+        new GraphQLError("Custom GraphQL error", {
+          extensions: { code: "CUSTOM_ERROR" },
+        })
+      );
+
+      await expect(
+        requestPasswordResetResolver(null, { email })
+      ).rejects.toThrow("Custom GraphQL error");
+
+      // Verify it's still a GraphQLError (not wrapped)
+      try {
+        await requestPasswordResetResolver(null, { email });
+      } catch (error) {
+        expect(error).toBeInstanceOf(GraphQLError);
+        expect(error.extensions.code).toBe("CUSTOM_ERROR");
+      }
     });
   });
 });

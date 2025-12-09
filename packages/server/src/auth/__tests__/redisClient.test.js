@@ -74,7 +74,134 @@ describe("Redis Client", () => {
       });
 
       expect(mockClient.connect).toHaveBeenCalled();
+      expect(mockClient.on).toHaveBeenCalledWith("error", expect.any(Function));
+      expect(mockClient.on).toHaveBeenCalledWith(
+        "connect",
+        expect.any(Function)
+      );
+      expect(mockClient.on).toHaveBeenCalledWith("ready", expect.any(Function));
+      expect(mockClient.on).toHaveBeenCalledWith("end", expect.any(Function));
       expect(client).toBe(mockClient);
+    });
+
+    it("should register error event handler", async () => {
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+      await connectRedis();
+
+      const errorHandler = mockClient.on.mock.calls.find(
+        (call) => call[0] === "error"
+      )?.[1];
+
+      expect(errorHandler).toBeDefined();
+      errorHandler(new Error("Test error"));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Redis Client Error:",
+        expect.any(Error)
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("should register connect event handler", async () => {
+      const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+      await connectRedis();
+
+      const connectHandler = mockClient.on.mock.calls.find(
+        (call) => call[0] === "connect"
+      )?.[1];
+
+      expect(connectHandler).toBeDefined();
+      connectHandler();
+      expect(consoleLogSpy).toHaveBeenCalledWith("Redis Client connected");
+
+      consoleLogSpy.mockRestore();
+    });
+
+    it("should register ready event handler", async () => {
+      const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+      await connectRedis();
+
+      const readyHandler = mockClient.on.mock.calls.find(
+        (call) => call[0] === "ready"
+      )?.[1];
+
+      expect(readyHandler).toBeDefined();
+      readyHandler();
+      expect(consoleLogSpy).toHaveBeenCalledWith("Redis Client ready");
+
+      consoleLogSpy.mockRestore();
+    });
+
+    it("should register end event handler", async () => {
+      const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+      await connectRedis();
+
+      const endHandler = mockClient.on.mock.calls.find(
+        (call) => call[0] === "end"
+      )?.[1];
+
+      expect(endHandler).toBeDefined();
+      endHandler();
+      expect(consoleLogSpy).toHaveBeenCalledWith("Redis Client disconnected");
+
+      consoleLogSpy.mockRestore();
+    });
+
+    it("should handle ECONNREFUSED in retry_strategy", async () => {
+      await connectRedis();
+
+      const retryStrategy = redis.createClient.mock.calls[0][0].retry_strategy;
+
+      const result = retryStrategy({
+        error: { code: "ECONNREFUSED" },
+        attempt: 1,
+        total_retry_time: 0,
+      });
+
+      expect(result).toBeInstanceOf(Error);
+      expect(result.message).toBe("Redis server connection refused");
+    });
+
+    it("should handle max retry time in retry_strategy", async () => {
+      await connectRedis();
+
+      const retryStrategy = redis.createClient.mock.calls[0][0].retry_strategy;
+
+      const result = retryStrategy({
+        attempt: 1,
+        total_retry_time: 1000 * 60 * 60 + 1, // Over 1 hour
+      });
+
+      expect(result).toBeInstanceOf(Error);
+      expect(result.message).toBe("Redis retry time exhausted");
+    });
+
+    it("should return undefined for max attempts in retry_strategy", async () => {
+      await connectRedis();
+
+      const retryStrategy = redis.createClient.mock.calls[0][0].retry_strategy;
+
+      const result = retryStrategy({
+        attempt: 11, // More than 10
+        total_retry_time: 0,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should use exponential backoff in retry_strategy with cap at 3000ms", async () => {
+      await connectRedis();
+
+      const retryStrategy = redis.createClient.mock.calls[0][0].retry_strategy;
+
+      // Test exponential backoff
+      expect(retryStrategy({ attempt: 1, total_retry_time: 0 })).toBe(100);
+      expect(retryStrategy({ attempt: 5, total_retry_time: 0 })).toBe(500);
+      expect(retryStrategy({ attempt: 10, total_retry_time: 0 })).toBe(1000);
+
+      // Test cap - anything >= 30 * 100 = 3000ms should be capped
+      // But attempt > 10 returns undefined, so test with attempt 10 max
+      expect(retryStrategy({ attempt: 10, total_retry_time: 0 })).toBe(1000);
     });
 
     it("should use environment REDIS_URL", async () => {

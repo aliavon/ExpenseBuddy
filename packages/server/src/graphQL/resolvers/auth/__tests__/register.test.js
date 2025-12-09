@@ -206,6 +206,150 @@ describe("register resolver", () => {
     });
   });
 
+  describe("successful registration with invitation token", () => {
+    it("should register user and create new family with invitation token", async () => {
+      const input = {
+        firstName: "Alice",
+        lastName: "Johnson",
+        email: "alice@example.com",
+        password: "password123",
+        invitationToken: "invitation-jwt-token",
+        familyName: "Johnson Family",
+      };
+
+      const mockCurrency = { _id: "currency-id", code: "USD" };
+      const mockFamily = {
+        _id: "family-id",
+        name: "Johnson Family",
+        ownerId: null,
+      };
+      const mockUser = {
+        _id: "user-id",
+        firstName: "Alice",
+        lastName: "Johnson",
+        email: "alice@example.com",
+        familyId: "family-id",
+        roleInFamily: "OWNER",
+      };
+
+      User.findOne.mockResolvedValue(null);
+      Currency.findOne.mockResolvedValue(mockCurrency);
+      Family.create.mockResolvedValue(mockFamily);
+      User.create.mockResolvedValue(mockUser);
+      Family.findByIdAndUpdate.mockResolvedValue(mockFamily);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
+
+      const result = await register(null, { input }, mockContext);
+
+      expect(User.findOne).toHaveBeenCalledWith({ email: "alice@example.com" });
+      expect(bcrypt.hash).toHaveBeenCalledWith("password123", 12);
+      expect(Currency.findOne).toHaveBeenCalledWith({ code: "USD" });
+
+      expect(Family.create).toHaveBeenCalledWith({
+        name: "Johnson Family",
+        description: "",
+        ownerId: null,
+        currency: "currency-id",
+        timezone: "UTC",
+        isActive: true,
+      });
+
+      expect(User.create).toHaveBeenCalledWith({
+        firstName: "Alice",
+        lastName: "Johnson",
+        middleName: "",
+        email: "alice@example.com",
+        password: "hashedPassword",
+        familyId: "family-id",
+        roleInFamily: "OWNER",
+        isEmailVerified: false,
+        isVerified: false,
+        isActive: true,
+      });
+
+      expect(Family.findByIdAndUpdate).toHaveBeenCalledWith("family-id", {
+        ownerId: "user-id",
+      });
+
+      expect(result).toEqual({
+        success: true,
+        message:
+          "Registration successful! Please check your email to activate your account.",
+      });
+    });
+
+    it("should register with invitation token without familyName (use default)", async () => {
+      const input = {
+        firstName: "Bob",
+        lastName: "Wilson",
+        email: "bob@example.com",
+        password: "password123",
+        invitationToken: "invitation-jwt-token",
+        // No familyName provided
+      };
+
+      const mockCurrency = { _id: "currency-id", code: "USD" };
+      const mockFamily = {
+        _id: "family-id",
+        name: "Bob's Family",
+        ownerId: null,
+      };
+      const mockUser = {
+        _id: "user-id",
+        firstName: "Bob",
+        lastName: "Wilson",
+        email: "bob@example.com",
+        familyId: "family-id",
+        roleInFamily: "OWNER",
+      };
+
+      User.findOne.mockResolvedValue(null);
+      Currency.findOne.mockResolvedValue(mockCurrency);
+      Family.create.mockResolvedValue(mockFamily);
+      User.create.mockResolvedValue(mockUser);
+      Family.findByIdAndUpdate.mockResolvedValue(mockFamily);
+      User.findByIdAndUpdate.mockResolvedValue(mockUser);
+
+      const result = await register(null, { input }, mockContext);
+
+      expect(Family.create).toHaveBeenCalledWith({
+        name: "Bob's Family",
+        description: "",
+        ownerId: null,
+        currency: "currency-id",
+        timezone: "UTC",
+        isActive: true,
+      });
+
+      expect(result).toEqual({
+        success: true,
+        message:
+          "Registration successful! Please check your email to activate your account.",
+      });
+    });
+
+    it("should throw error if default currency not found with invitation token", async () => {
+      const input = {
+        firstName: "Carol",
+        lastName: "Davis",
+        email: "carol@example.com",
+        password: "password123",
+        invitationToken: "invitation-jwt-token",
+        familyName: "Davis Family",
+      };
+
+      User.findOne.mockResolvedValue(null);
+      Currency.findOne.mockResolvedValue(null);
+
+      await expect(register(null, { input }, mockContext)).rejects.toThrow(
+        "Default currency not found"
+      );
+
+      expect(Family.create).not.toHaveBeenCalled();
+      expect(User.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe("error scenarios", () => {
     it("should throw error if user already exists", async () => {
       const input = {

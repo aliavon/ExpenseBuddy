@@ -571,6 +571,24 @@ describe("Email Service", () => {
         )
       ).rejects.toThrow("Failed to send join response email: Send failed");
     });
+
+    it("should handle response without message", async () => {
+      mockTransporter.sendMail.mockResolvedValue({ messageId: "test-id" });
+
+      const result = await sendFamilyJoinResponseEmail(
+        "user@example.com",
+        "Smith Family",
+        false,
+        null, // No response message
+        "Alice Smith"
+      );
+
+      expect(result).toEqual({ messageId: "test-id" });
+      expect(mockTransporter.sendMail).toHaveBeenCalled();
+      const emailContent = mockTransporter.sendMail.mock.calls[0][0].html;
+      // Should not include "Message from Family Owner" section
+      expect(emailContent).not.toContain("Message from Family Owner");
+    });
   });
 
   describe("Email Change Request Email", () => {

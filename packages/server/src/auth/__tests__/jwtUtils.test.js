@@ -386,7 +386,20 @@ describe("JWT Utils", () => {
       spy.mockRestore();
     });
 
-    it("should handle decodeToken error in getTokenExpiry", () => {
+    it("should handle runtime error in isTokenExpired", () => {
+      const dateSpy = jest.spyOn(Date, "now").mockImplementation(() => {
+        throw new Error("Date.now failed");
+      });
+
+      const result = isTokenExpired(
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjk5OTk5OTk5OTl9.signature"
+      );
+      expect(result).toBe(true);
+
+      dateSpy.mockRestore();
+    });
+
+    it("should handle decodeToken error in getTokenExpiry and reach catch block", () => {
       const jwtUtils = require("../jwtUtils");
       const spy = jest.spyOn(jwtUtils, "decodeToken").mockImplementation(() => {
         throw new Error("Decode failed");
@@ -398,16 +411,20 @@ describe("JWT Utils", () => {
       spy.mockRestore();
     });
 
-    it("should handle decodeToken error in getTokenTTL", () => {
+    it("should handle error in getTokenTTL and reach catch block", () => {
       const jwtUtils = require("../jwtUtils");
-      const spy = jest.spyOn(jwtUtils, "decodeToken").mockImplementation(() => {
-        throw new Error("Decode failed");
-      });
+
+      // Mock getTokenExpiry to throw error
+      const expirySpy = jest
+        .spyOn(jwtUtils, "getTokenExpiry")
+        .mockImplementation(() => {
+          throw new Error("Expiry check failed");
+        });
 
       const result = jwtUtils.getTokenTTL("some-token");
       expect(result).toBe(0);
 
-      spy.mockRestore();
+      expirySpy.mockRestore();
     });
   });
 });

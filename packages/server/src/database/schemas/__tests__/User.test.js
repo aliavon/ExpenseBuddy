@@ -203,6 +203,26 @@ describe("User Schema", () => {
     expect(savedUser.password).toMatch(/^\$2[aby]\$\d+\$/);
   });
 
+  it("should handle bcrypt hash error in pre-save hook", async () => {
+    const bcrypt = require("bcryptjs");
+    const originalHash = bcrypt.hash;
+
+    // Mock bcrypt.hash to throw an error
+    bcrypt.hash = jest.fn().mockRejectedValue(new Error("Bcrypt hash failed"));
+
+    const user = new User({
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe.error@example.com",
+      password: "securePassword123",
+    });
+
+    await expect(user.save()).rejects.toThrow("Bcrypt hash failed");
+
+    // Restore original bcrypt.hash
+    bcrypt.hash = originalHash;
+  });
+
   it("should compare password correctly", async () => {
     const plainPassword = "securePassword123";
     const user = await User.create({

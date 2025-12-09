@@ -29,6 +29,64 @@ describe("Family type resolver", () => {
     User.find.mockReturnValue(mockUserQuery);
   });
 
+  describe("id resolver", () => {
+    it("should return id when available", () => {
+      const family = {
+        id: "family-id",
+        _id: "mongo-id",
+      };
+
+      const result = FamilyResolver.id(family);
+      expect(result).toBe("family-id");
+    });
+
+    it("should return _id when id is not available", () => {
+      const family = {
+        _id: "mongo-id",
+      };
+
+      const result = FamilyResolver.id(family);
+      expect(result).toBe("mongo-id");
+    });
+
+    it("should return undefined when neither id nor _id are available", () => {
+      const family = {};
+
+      const result = FamilyResolver.id(family);
+      expect(result).toBeUndefined();
+    });
+
+    it("should prioritize id over _id", () => {
+      const family = {
+        id: "graphql-id",
+        _id: "mongodb-id",
+      };
+
+      const result = FamilyResolver.id(family);
+      expect(result).toBe("graphql-id");
+    });
+
+    it("should return _id when id is null", () => {
+      const family = {
+        id: null,
+        _id: "mongodb-id",
+      };
+
+      const result = FamilyResolver.id(family);
+      expect(result).toBe("mongodb-id");
+    });
+
+    it("should return _id when id is empty string", () => {
+      const family = {
+        id: "",
+        _id: "mongodb-id",
+      };
+
+      const result = FamilyResolver.id(family);
+      expect(result).toBe("mongodb-id");
+    });
+  });
+
   describe("owner resolver", () => {
     it("should load owner using userLoader", async () => {
       const family = {
@@ -193,6 +251,26 @@ describe("Family type resolver", () => {
 
       expect(User.find).toHaveBeenCalledWith({
         familyId: "empty-family-id",
+        isActive: true,
+      });
+      expect(result).toEqual([]);
+    });
+
+    it("should handle family._id as ObjectId with toString method", async () => {
+      const family = {
+        _id: {
+          toString: () => "object-id-family",
+        },
+        name: "ObjectId Family",
+      };
+
+      mockUserQuery.sort.mockResolvedValue([]);
+      User.find.mockReturnValue(mockUserQuery);
+
+      const result = await FamilyResolver.members(family);
+
+      expect(User.find).toHaveBeenCalledWith({
+        familyId: "object-id-family",
         isActive: true,
       });
       expect(result).toEqual([]);

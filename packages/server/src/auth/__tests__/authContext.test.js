@@ -78,6 +78,63 @@ describe("Auth Context", () => {
       expect(result.auth.family).toBeNull();
     });
 
+    it("should handle missing request.headers gracefully", async () => {
+      const contextWithoutHeaders = {
+        request: {}, // No headers property
+      };
+
+      const result = await enhanceContextWithAuth(contextWithoutHeaders);
+
+      expect(result.auth.isAuthenticated).toBe(false);
+      expect(result.auth.user).toBeNull();
+      expect(result.auth.family).toBeNull();
+    });
+
+    it("should handle missing request gracefully", async () => {
+      const contextWithoutRequest = {}; // No request at all
+
+      const result = await enhanceContextWithAuth(contextWithoutRequest);
+
+      expect(result.auth.isAuthenticated).toBe(false);
+      expect(result.auth.user).toBeNull();
+      expect(result.auth.family).toBeNull();
+    });
+
+    it("should handle Headers object with uppercase Authorization", async () => {
+      const token = "valid-jwt-token";
+      const headersObject = {
+        get: jest.fn((key) => {
+          if (key === "authorization") return null;
+          if (key === "Authorization") return `Bearer ${token}`;
+          return null;
+        }),
+      };
+
+      const contextWithHeadersObject = {
+        request: {
+          headers: headersObject,
+        },
+      };
+
+      extractTokenFromHeader.mockReturnValue(token);
+      isTokenBlacklisted.mockResolvedValue(false);
+      verifyAccessToken.mockReturnValue({ userId: mockUserId });
+
+      User.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockUser),
+      });
+
+      Family.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockFamily),
+      });
+
+      const result = await enhanceContextWithAuth(contextWithHeadersObject);
+
+      expect(result.auth.isAuthenticated).toBe(true);
+      expect(headersObject.get).toHaveBeenCalledWith("authorization");
+      expect(headersObject.get).toHaveBeenCalledWith("Authorization");
+    });
+
     it("should authenticate valid token successfully", async () => {
       const token = "valid-jwt-token";
       mockContext.request.headers.authorization = `Bearer ${token}`;
