@@ -461,28 +461,65 @@ describe('authLink', () => {
     });
   });
 
+  describe('errorHandlerFn - Skip Operations', () => {
+    it('should skip error handling for auth operations', () => {
+      const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+      
+      // Test Login
+      errorHandlerFn({ 
+        graphQLErrors: [{ message: 'Some error', extensions: { code: 'SOME_ERROR' } }],
+        operation: { operationName: 'Login' }
+      });
+      expect(consoleLogSpy).toHaveBeenCalledWith('Skipping global error handler for Login operation');
+      
+      // Test Register
+      errorHandlerFn({ 
+        graphQLErrors: [{ message: 'Some error', extensions: { code: 'SOME_ERROR' } }],
+        operation: { operationName: 'Register' }
+      });
+      expect(consoleLogSpy).toHaveBeenCalledWith('Skipping global error handler for Register operation');
+      
+      // Test Logout
+      errorHandlerFn({ 
+        graphQLErrors: [{ message: 'Some error', extensions: { code: 'SOME_ERROR' } }],
+        operation: { operationName: 'Logout' }
+      });
+      expect(consoleLogSpy).toHaveBeenCalledWith('Skipping global error handler for Logout operation');
+      
+      // Test Me
+      errorHandlerFn({ 
+        graphQLErrors: [{ message: 'Some error', extensions: { code: 'SOME_ERROR' } }],
+        operation: { operationName: 'Me' }
+      });
+      expect(consoleLogSpy).toHaveBeenCalledWith('Skipping global error handler for Me operation');
+      
+      consoleLogSpy.mockRestore();
+    });
+  });
+
   describe('errorHandlerFn - Network Errors', () => {
     it('should handle all network error types', () => {
       const mockLogout = jest.fn();
       setGlobalLogout(mockLogout);
+      const mockOperation = { operationName: 'TestOperation' };
       
       // 401 network error
-      errorHandlerFn({ networkError: { statusCode: 401 } });
+      errorHandlerFn({ networkError: { statusCode: 401 }, operation: mockOperation });
       expect(console.warn).toHaveBeenCalledWith('Network authentication error (401)');
       expect(toaster.negative).toHaveBeenCalledWith('Session expired. Please log in again.', { autoHideDuration: 6000 });
       expect(mockLogout).toHaveBeenCalled();
       
       // 403 network error
-      errorHandlerFn({ networkError: { statusCode: 403 } });
+      errorHandlerFn({ networkError: { statusCode: 403 }, operation: mockOperation });
       expect(console.warn).toHaveBeenCalledWith('Network authorization error (403)');
       
       // 500+ server errors
-      errorHandlerFn({ networkError: { statusCode: 502 } });
+      errorHandlerFn({ networkError: { statusCode: 502 }, operation: mockOperation });
       expect(console.error).toHaveBeenCalledWith('Server error:', { statusCode: 502 });
       expect(toaster.negative).toHaveBeenCalledWith('Server error (502). Please try again later.', { autoHideDuration: 6000 });
       
       // NetworkError
-      errorHandlerFn({ networkError: { name: 'NetworkError' } });
+      errorHandlerFn({ networkError: { name: 'NetworkError' }, operation: mockOperation });
       expect(console.error).toHaveBeenCalledWith('Network connectivity error');
       expect(toaster.warning).toHaveBeenCalledWith(
         'Network connection lost. Please check your internet connection.',
@@ -490,15 +527,16 @@ describe('authLink', () => {
       );
       
       // Generic network error
-      errorHandlerFn({ networkError: { statusCode: 400 } });
+      errorHandlerFn({ networkError: { statusCode: 400 }, operation: mockOperation });
       expect(console.error).toHaveBeenCalledWith('Unhandled network error:', { statusCode: 400 });
       expect(toaster.negative).toHaveBeenCalledWith('Connection error. Please try again.', { autoHideDuration: 4000 });
     });
 
     it('should handle offline status and no errors cases', () => {
+      const mockOperation = { operationName: 'TestOperation' };
       // Test with navigator.onLine = false
       Object.defineProperty(global.navigator, 'onLine', { value: false, configurable: true });
-      errorHandlerFn({ networkError: { statusCode: 400 } });
+      errorHandlerFn({ networkError: { statusCode: 400 }, operation: mockOperation });
       expect(console.error).toHaveBeenCalledWith('Network connectivity error');
       
       // Reset navigator.onLine

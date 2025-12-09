@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
 import { gql } from '@apollo/client';
 import { toaster } from 'baseui/toast';
@@ -437,7 +437,8 @@ describe('AuthContext', () => {
       );
     };
 
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
 
     render(
       <MockedProvider mocks={[LOGIN_ERROR_MOCK]} addTypename={false}>
@@ -448,14 +449,21 @@ describe('AuthContext', () => {
     );
 
     const loginBtn = screen.getByTestId('login-error-btn');
-    loginBtn.click();
+    
+    await act(async () => {
+      loginBtn.click();
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('login-called')).toBeInTheDocument();
-      expect(consoleSpy).toHaveBeenCalledWith('Login failed:', expect.any(Error));
     });
 
-    consoleSpy.mockRestore();
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Login error:', expect.any(Error));
+    });
+
+    consoleErrorSpy.mockRestore();
+    consoleLogSpy.mockRestore();
   });
 
   it('should handle successful logout', async () => {
@@ -608,7 +616,7 @@ describe('AuthContext', () => {
           }
         }
       },
-      error: new Error('Invalid credentials')
+      error: new Error('Invalid email or password')
     };
 
     const TestLoginInvalidCredsComponent = () => {
@@ -625,6 +633,8 @@ describe('AuthContext', () => {
       return <button testid="login-invalid-creds-btn" onClick={handleLogin}>Login</button>;
     };
 
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
     render(
       <MockedProvider mocks={[LOGIN_INVALID_CREDS_MOCK]} addTypename={false}>
         <AuthProvider>
@@ -634,11 +644,16 @@ describe('AuthContext', () => {
     );
 
     const loginBtn = screen.getByTestId('login-invalid-creds-btn');
-    loginBtn.click();
+    
+    await act(async () => {
+      loginBtn.click();
+    });
 
     await waitFor(() => {
       expect(mockToaster.negative).toHaveBeenCalledWith('Invalid email or password');
     });
+
+    consoleLogSpy.mockRestore();
   });
 
   it('should show email verification toaster for unverified email', async () => {

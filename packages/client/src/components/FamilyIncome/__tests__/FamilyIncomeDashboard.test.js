@@ -192,6 +192,7 @@ describe('FamilyIncomeDashboard', () => {
     await waitFor(() => {
       expect(screen.getByText('Total Pages: 5')).toBeInTheDocument();
     });
+
   });
 
   it('handles error when filterAndSortMockData throws inside setTimeout callback', async () => {
@@ -228,7 +229,6 @@ describe('FamilyIncomeDashboard', () => {
     global.setTimeout = jest.fn(() => {
       throw new Error('setTimeout setup failed');
     });
-
     // This should immediately trigger the outer try-catch without waiting
     render(<FamilyIncomeDashboard />);
     
