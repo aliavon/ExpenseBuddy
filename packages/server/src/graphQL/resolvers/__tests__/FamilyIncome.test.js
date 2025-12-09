@@ -1,6 +1,4 @@
 const FamilyIncomeResolvers = require("../FamilyIncome");
-const { GraphQLError } = require("graphql");
-const ERROR_CODES = require("../../../constants/errorCodes");
 
 describe("FamilyIncome resolvers", () => {
   let mockContext;
@@ -39,63 +37,49 @@ describe("FamilyIncome resolvers", () => {
       );
     });
 
-    it("should handle missing income type", async () => {
-      mockContext.loaders.incomeTypeLoader.load.mockResolvedValue(null);
+    it("should return null when typeId is not set", async () => {
+      const parentWithoutType = { ...mockParent, typeId: null };
 
-      await expect(
-        FamilyIncomeResolvers.type(mockParent, {}, mockContext)
-      ).rejects.toThrow(
-        "Failed to retrieve IncomeType. Please try again later."
+      const result = await FamilyIncomeResolvers.type(
+        parentWithoutType,
+        {},
+        mockContext
       );
 
+      expect(result).toBeNull();
+      expect(mockContext.loaders.incomeTypeLoader.load).not.toHaveBeenCalled();
+    });
+
+    it("should return null when income type not found", async () => {
+      mockContext.loaders.incomeTypeLoader.load.mockResolvedValue(null);
+
+      const result = await FamilyIncomeResolvers.type(
+        mockParent,
+        {},
+        mockContext
+      );
+
+      expect(result).toBeNull();
       expect(mockContext.logger.error).toHaveBeenCalledWith(
         { parentId: mockParent.typeId },
         "IncomeType not found"
       );
     });
 
-    it("should handle loader errors", async () => {
+    it("should return null on loader errors", async () => {
       const loaderError = new Error("Database connection failed");
       mockContext.loaders.incomeTypeLoader.load.mockRejectedValue(loaderError);
 
-      await expect(
-        FamilyIncomeResolvers.type(mockParent, {}, mockContext)
-      ).rejects.toThrow(
-        new GraphQLError(
-          "Failed to retrieve IncomeType. Please try again later.",
-          {
-            extensions: {
-              code: ERROR_CODES.GET_INCOME_TYPE_ERROR,
-              detailedMessage: loaderError.message,
-            },
-          }
-        )
+      const result = await FamilyIncomeResolvers.type(
+        mockParent,
+        {},
+        mockContext
       );
 
+      expect(result).toBeNull();
       expect(mockContext.logger.error).toHaveBeenCalledWith(
         { err: loaderError, parentId: mockParent.typeId },
         "Error retrieving IncomeType"
-      );
-    });
-
-    it("should preserve original error code when available", async () => {
-      const loaderError = new GraphQLError("Custom error", {
-        extensions: { code: "CUSTOM_ERROR_CODE" },
-      });
-      mockContext.loaders.incomeTypeLoader.load.mockRejectedValue(loaderError);
-
-      await expect(
-        FamilyIncomeResolvers.type(mockParent, {}, mockContext)
-      ).rejects.toThrow(
-        new GraphQLError(
-          "Failed to retrieve IncomeType. Please try again later.",
-          {
-            extensions: {
-              code: "CUSTOM_ERROR_CODE",
-              detailedMessage: loaderError.message,
-            },
-          }
-        )
       );
     });
   });
@@ -122,55 +106,49 @@ describe("FamilyIncome resolvers", () => {
       );
     });
 
-    it("should handle missing user", async () => {
+    it("should return null when contributorId is not set", async () => {
+      const parentWithoutContributor = { ...mockParent, contributorId: null };
+
+      const result = await FamilyIncomeResolvers.contributor(
+        parentWithoutContributor,
+        {},
+        mockContext
+      );
+
+      expect(result).toBeNull();
+      expect(mockContext.loaders.userLoader.load).not.toHaveBeenCalled();
+    });
+
+    it("should return null when user not found", async () => {
       mockContext.loaders.userLoader.load.mockResolvedValue(null);
 
-      await expect(
-        FamilyIncomeResolvers.contributor(mockParent, {}, mockContext)
-      ).rejects.toThrow("Failed to retrieve user. Please try again later.");
+      const result = await FamilyIncomeResolvers.contributor(
+        mockParent,
+        {},
+        mockContext
+      );
 
+      expect(result).toBeNull();
       expect(mockContext.logger.error).toHaveBeenCalledWith(
         { parentId: mockParent.contributorId },
         "User not found"
       );
     });
 
-    it("should handle loader errors", async () => {
+    it("should return null on loader errors", async () => {
       const loaderError = new Error("Database connection failed");
       mockContext.loaders.userLoader.load.mockRejectedValue(loaderError);
 
-      await expect(
-        FamilyIncomeResolvers.contributor(mockParent, {}, mockContext)
-      ).rejects.toThrow(
-        new GraphQLError("Failed to retrieve user. Please try again later.", {
-          extensions: {
-            code: ERROR_CODES.GET_USER_ERROR,
-            detailedMessage: loaderError.message,
-          },
-        })
+      const result = await FamilyIncomeResolvers.contributor(
+        mockParent,
+        {},
+        mockContext
       );
 
+      expect(result).toBeNull();
       expect(mockContext.logger.error).toHaveBeenCalledWith(
         { err: loaderError, parentId: mockParent.contributorId },
         "Error retrieving User"
-      );
-    });
-
-    it("should preserve original error code when available", async () => {
-      const loaderError = new GraphQLError("Custom error", {
-        extensions: { code: "CUSTOM_ERROR_CODE" },
-      });
-      mockContext.loaders.userLoader.load.mockRejectedValue(loaderError);
-
-      await expect(
-        FamilyIncomeResolvers.contributor(mockParent, {}, mockContext)
-      ).rejects.toThrow(
-        new GraphQLError("Failed to retrieve user. Please try again later.", {
-          extensions: {
-            code: "CUSTOM_ERROR_CODE",
-            detailedMessage: loaderError.message,
-          },
-        })
       );
     });
   });
@@ -198,62 +176,108 @@ describe("FamilyIncome resolvers", () => {
       );
     });
 
-    it("should handle missing currency", async () => {
+    it("should return null when currencyId is not set", async () => {
+      const parentWithoutCurrency = { ...mockParent, currencyId: null };
+
+      const result = await FamilyIncomeResolvers.currency(
+        parentWithoutCurrency,
+        {},
+        mockContext
+      );
+
+      expect(result).toBeNull();
+      expect(mockContext.loaders.currencyLoader.load).not.toHaveBeenCalled();
+    });
+
+    it("should return null when currency not found", async () => {
       mockContext.loaders.currencyLoader.load.mockResolvedValue(null);
 
-      await expect(
-        FamilyIncomeResolvers.currency(mockParent, {}, mockContext)
-      ).rejects.toThrow("Failed to retrieve Currency. Please try again later.");
+      const result = await FamilyIncomeResolvers.currency(
+        mockParent,
+        {},
+        mockContext
+      );
 
+      expect(result).toBeNull();
       expect(mockContext.logger.error).toHaveBeenCalledWith(
         { parentId: mockParent.currencyId },
         "Currency not found"
       );
     });
 
-    it("should handle loader errors", async () => {
+    it("should return null on loader errors", async () => {
       const loaderError = new Error("Database connection failed");
       mockContext.loaders.currencyLoader.load.mockRejectedValue(loaderError);
 
-      await expect(
-        FamilyIncomeResolvers.currency(mockParent, {}, mockContext)
-      ).rejects.toThrow(
-        new GraphQLError(
-          "Failed to retrieve Currency. Please try again later.",
-          {
-            extensions: {
-              code: ERROR_CODES.GET_CURRENCY_ERROR,
-              detailedMessage: loaderError.message,
-            },
-          }
-        )
+      const result = await FamilyIncomeResolvers.currency(
+        mockParent,
+        {},
+        mockContext
       );
 
+      expect(result).toBeNull();
       expect(mockContext.logger.error).toHaveBeenCalledWith(
         { err: loaderError, parentId: mockParent.currencyId },
         "Error retrieving Currency"
       );
     });
+  });
 
-    it("should preserve original error code when available", async () => {
-      const loaderError = new GraphQLError("Custom error", {
-        extensions: { code: "CUSTOM_ERROR_CODE" },
-      });
-      mockContext.loaders.currencyLoader.load.mockRejectedValue(loaderError);
+  describe("date resolver", () => {
+    it("should convert Date object to ISO string", async () => {
+      const date = new Date("2024-01-15T10:30:00.000Z");
+      const parent = { ...mockParent, date };
 
-      await expect(
-        FamilyIncomeResolvers.currency(mockParent, {}, mockContext)
-      ).rejects.toThrow(
-        new GraphQLError(
-          "Failed to retrieve Currency. Please try again later.",
-          {
-            extensions: {
-              code: "CUSTOM_ERROR_CODE",
-              detailedMessage: loaderError.message,
-            },
-          }
-        )
-      );
+      const result = FamilyIncomeResolvers.date(parent);
+
+      expect(result).toBe("2024-01-15T10:30:00.000Z");
+    });
+
+    it("should convert timestamp number to ISO string", async () => {
+      const timestamp = new Date("2024-01-15T10:30:00.000Z").getTime();
+      const parent = { ...mockParent, date: timestamp };
+
+      const result = FamilyIncomeResolvers.date(parent);
+
+      expect(result).toBe("2024-01-15T10:30:00.000Z");
+    });
+
+    it("should convert timestamp string to ISO string", async () => {
+      const timestamp = new Date("2024-01-15T10:30:00.000Z")
+        .getTime()
+        .toString();
+      const parent = { ...mockParent, date: timestamp };
+
+      const result = FamilyIncomeResolvers.date(parent);
+
+      expect(result).toBe("2024-01-15T10:30:00.000Z");
+    });
+
+    it("should return ISO string as is", async () => {
+      const isoString = "2024-01-15T10:30:00.000Z";
+      const parent = { ...mockParent, date: isoString };
+
+      const result = FamilyIncomeResolvers.date(parent);
+
+      expect(result).toBe(isoString);
+    });
+  });
+
+  describe("id resolver", () => {
+    it("should return id when available", () => {
+      const parent = { id: "test-id", _id: "mongodb-id" };
+
+      const result = FamilyIncomeResolvers.id(parent);
+
+      expect(result).toBe("test-id");
+    });
+
+    it("should return _id when id is not available", () => {
+      const parent = { _id: "mongodb-id" };
+
+      const result = FamilyIncomeResolvers.id(parent);
+
+      expect(result).toBe("mongodb-id");
     });
   });
 });

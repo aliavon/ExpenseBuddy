@@ -295,28 +295,9 @@ describe("createFamilyIncomes mutation", () => {
     FamilyIncome.insertMany = originalInsertMany;
   });
 
-  it("should handle validation errors for missing required fields", async () => {
+  it("should handle validation error for missing amount", async () => {
     const context = global.createMockContext();
 
-    // Test missing contributorId
-    await expect(
-      createFamilyIncomes(
-        null,
-        {
-          familyIncomes: [
-            {
-              currencyId: global.createMockId(),
-              typeId: global.createMockId(),
-              amount: 1000,
-              date: new Date(),
-            },
-          ],
-        },
-        context
-      )
-    ).rejects.toThrow();
-
-    // Test missing amount
     await expect(
       createFamilyIncomes(
         null,
