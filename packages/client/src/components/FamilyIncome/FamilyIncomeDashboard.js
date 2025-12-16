@@ -17,7 +17,7 @@ import IncomeByContributorChart from './charts/IncomeByContributorChart';
 import { GET_FAMILY_INCOME_RECORDS_QUERY } from '../../gql/income';
 
 // Helper to get default date range (start of year to today)
-const getDefaultDateRange = () => {
+export const getDefaultDateRange = () => {
   const startDate = new Date();
   startDate.setDate(1);
   startDate.setMonth(0);

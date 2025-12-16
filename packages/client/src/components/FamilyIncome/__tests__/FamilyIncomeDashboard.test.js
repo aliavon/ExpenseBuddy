@@ -1,14 +1,15 @@
 import React from 'react';
-import {render, screen, waitFor} from '@testing-library/react';
-import FamilyIncomeDashboard from '../FamilyIncomeDashboard';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MockedProvider } from '@apollo/client/testing';
+import FamilyIncomeDashboard, { getDefaultDateRange } from '../FamilyIncomeDashboard';
+import { GET_FAMILY_INCOME_RECORDS_QUERY } from '../../../gql/income';
 
-// Mock the child components
 jest.mock('../FamilyIncomeFilters', () => {
-  return function MockFamilyIncomeFilters({onFilterChange}) {
+  return function MockFamilyIncomeFilters({ onFilterChange, initialFilters }) {
     return (
-      <div data-testid="family-income-filters">
-        <button onClick={() => onFilterChange({type: 'income'})}>
-          Apply Filter
+      <div data-testid="mock-filters">
+        <button onClick={() => onFilterChange({ dateFrom: '2020-01-01', dateTo: '2020-12-31' })}>
+          Apply Filters
         </button>
       </div>
     );
@@ -16,227 +17,311 @@ jest.mock('../FamilyIncomeFilters', () => {
 });
 
 jest.mock('../FamilyIncomeTable', () => {
-  return function MockFamilyIncomeTable({
-    data,
-    totalPages,
-    currentPage,
-    onSortChange,
-    onPageChange,
-  }) {
+  return function MockFamilyIncomeTable({ data, onEdit, onDelete }) {
     return (
-      <div data-testid="family-income-table">
-        <div>Total Pages: {totalPages}</div>
-        <div>Current Page: {currentPage}</div>
-        <div>Records: {data?.length || 0}</div>
-        <button onClick={() => onSortChange({sortBy: 'amount', sortOrder: 'asc'})}>
-          Sort by Amount
-        </button>
-        <button onClick={() => onPageChange(2)}>Next Page</button>
+      <div data-testid="mock-table">
+        <div>Records: {data.length}</div>
+        <button onClick={() => onEdit({ id: '1' })}>Edit</button>
+        <button onClick={() => onDelete({ id: '1' })}>Delete</button>
       </div>
     );
   };
 });
 
-// Mock the mock data module
-jest.mock('../mockData', () => ({
-  ...jest.requireActual('../mockData'),
-  filterAndSortMockData: jest.fn(() => ({
-    getFamilyIncomeRecords: {
-      items: [
-        {
-          id: '1',
-          date: '2023-01-01',
-          amount: 1000,
-          note: 'Test income',
-          periodicity: 'monthly',
-          type: {id: '1', name: 'Salary'},
-          contributor: {id: '1', fullName: 'John Doe'},
-          currency: {id: '1', code: 'USD', name: 'US Dollar'},
-        },
-      ],
-      pagination: {
-        currentPage: 1,
-        nextPage: 2,
-        totalPages: 5,
-        totalCount: 50,
-      },
-    },
-  })),
-}));
+jest.mock('../AddIncomeModal', () => {
+  return function MockAddIncomeModal({ isOpen, onClose, refetch }) {
+    return isOpen ? (
+      <div data-testid="mock-add-modal">
+        <button onClick={onClose}>Close Add</button>
+        <button onClick={refetch}>Refetch</button>
+      </div>
+    ) : null;
+  };
+});
 
-// Mock MUI components
-jest.mock('@mui/material', () => ({
-  Box: ({children, ...props}) => <div data-testid="mui-box" {...props}>{children}</div>,
-  Paper: ({children, ...props}) => <div data-testid="mui-paper" {...props}>{children}</div>,
-}));
+jest.mock('../EditIncomeModal', () => {
+  return function MockEditIncomeModal({ income, isOpen, onClose, refetch }) {
+    return isOpen ? (
+      <div data-testid="mock-edit-modal">
+        <div>Editing: {income?.id}</div>
+        <button onClick={onClose}>Close Edit</button>
+        <button onClick={refetch}>Refetch</button>
+      </div>
+    ) : null;
+  };
+});
+
+jest.mock('../DeleteIncomeDialog', () => {
+  return function MockDeleteIncomeDialog({ income, isOpen, onClose, refetch }) {
+    return isOpen ? (
+      <div data-testid="mock-delete-dialog">
+        <div>Deleting: {income?.id}</div>
+        <button onClick={onClose}>Close Delete</button>
+        <button onClick={refetch}>Refetch</button>
+      </div>
+    ) : null;
+  };
+});
+
+jest.mock('../charts/IncomeStatisticsCards', () => {
+  return function MockIncomeStatisticsCards({ dateFrom, dateTo }) {
+    return (
+      <div data-testid="mock-statistics">
+        Statistics: {dateFrom} - {dateTo}
+      </div>
+    );
+  };
+});
+
+jest.mock('../charts/IncomeByTypeChart', () => {
+  return function MockIncomeByTypeChart({ dateFrom, dateTo }) {
+    return (
+      <div data-testid="mock-type-chart">
+        Type Chart: {dateFrom} - {dateTo}
+      </div>
+    );
+  };
+});
+
+jest.mock('../charts/IncomeByContributorChart', () => {
+  return function MockIncomeByContributorChart({ dateFrom, dateTo }) {
+    return (
+      <div data-testid="mock-contributor-chart">
+        Contributor Chart: {dateFrom} - {dateTo}
+      </div>
+    );
+  };
+});
+
+const mockIncomeData = {
+  getFamilyIncomeRecords: {
+    items: [
+      {
+        id: '1',
+        date: '2020-01-15',
+        amount: 5000,
+        note: 'Salary',
+        periodicity: 'ONE_TIME',
+        type: { id: 't1', name: 'Salary', description: 'Monthly salary' },
+        contributor: { id: 'u1', fullName: 'John Doe' },
+        currency: { id: 'c1', code: 'USD', name: 'US Dollar', symbol: '$' },
+      },
+      {
+        id: '2',
+        date: '2020-02-15',
+        amount: 3000,
+        note: 'Bonus',
+        periodicity: 'ONE_TIME',
+        type: { id: 't2', name: 'Bonus', description: 'Annual bonus' },
+        contributor: { id: 'u1', fullName: 'John Doe' },
+        currency: { id: 'c1', code: 'USD', name: 'US Dollar', symbol: '$' },
+      },
+    ],
+    pagination: {
+      currentPage: 1,
+      nextPage: null,
+      totalPages: 1,
+      totalCount: 2,
+    },
+  },
+};
 
 describe('FamilyIncomeDashboard', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeAll(() => {
     jest.useFakeTimers();
+    jest.setSystemTime(new Date(2020, 3, 1));
   });
 
-  afterEach(() => {
+  afterAll(() => {
     jest.useRealTimers();
   });
 
-  it('renders loading state initially', () => {
-    render(<FamilyIncomeDashboard />);
-    
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('renders dashboard with filters and table after loading', async () => {
-    render(<FamilyIncomeDashboard />);
-    
-    // Fast-forward time to complete the mock data loading
-    jest.advanceTimersByTime(300);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Apply Filter')).toBeInTheDocument();
-      expect(screen.getByText('Total Pages: 5')).toBeInTheDocument();
-    });
-  });
-
-  it('displays correct pagination data', async () => {
-    render(<FamilyIncomeDashboard />);
-    
-    jest.advanceTimersByTime(300);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Total Pages: 5')).toBeInTheDocument();
-      expect(screen.getByText('Current Page: 1')).toBeInTheDocument();
-      expect(screen.getByText('Records: 1')).toBeInTheDocument();
+  describe('getDefaultDateRange', () => {
+    it('returns start of year and today', () => {
+      const [dateFrom, dateTo] = getDefaultDateRange();
+      
+      expect(dateFrom.getMonth()).toBe(0);
+      expect(dateFrom.getDate()).toBe(1);
+      expect(dateFrom.getHours()).toBe(0);
+      expect(dateFrom.getMinutes()).toBe(0);
+      expect(dateFrom.getSeconds()).toBe(0);
+      expect(dateFrom.getMilliseconds()).toBe(0);
+      
+      expect(dateTo).toBeInstanceOf(Date);
     });
   });
 
-  it('handles filter changes correctly', async () => {
-    render(<FamilyIncomeDashboard />);
-    
-    jest.advanceTimersByTime(300);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Apply Filter')).toBeInTheDocument();
-    });
+  describe('Loading State', () => {
+    it('shows spinner when loading', () => {
+      const mocks = [];
 
-    // Simulate filter change
-    const filterButton = screen.getByText('Apply Filter');
-    filterButton.click();
+      render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+          <FamilyIncomeDashboard />
+        </MockedProvider>
+      );
 
-    // Just verify the component still renders properly after filter change
-    await waitFor(() => {
-      expect(screen.getByText('Total Pages: 5')).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
   });
 
-  it('handles sort changes correctly', async () => {
-    render(<FamilyIncomeDashboard />);
-    
-    jest.advanceTimersByTime(300);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Sort by Amount')).toBeInTheDocument();
-    });
+  describe('Error State', () => {
+    it('shows error notification on query error', async () => {
+      const [dateFrom, dateTo] = getDefaultDateRange();
+      const mocks = [
+        {
+          request: {
+            query: GET_FAMILY_INCOME_RECORDS_QUERY,
+            variables: {
+              filters: {
+                dateFrom: dateFrom.toISOString(),
+                dateTo: dateTo.toISOString(),
+              },
+              pagination: { page: 1, limit: 1000 },
+              sort: { sortBy: 'date', sortOrder: 'desc' },
+            },
+          },
+          error: new Error('Network error'),
+        },
+      ];
 
-    // Simulate sort change
-    const sortButton = screen.getByText('Sort by Amount');
-    sortButton.click();
+      render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+          <FamilyIncomeDashboard />
+        </MockedProvider>
+      );
 
-    // Just verify the component still renders properly after sort change
-    await waitFor(() => {
-      expect(screen.getByText('Total Pages: 5')).toBeInTheDocument();
-    });
-  });
-
-  it('handles page changes correctly', async () => {
-    render(<FamilyIncomeDashboard />);
-    
-    jest.advanceTimersByTime(300);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Next Page')).toBeInTheDocument();
-    });
-
-    // Simulate page change
-    const nextPageButton = screen.getByText('Next Page');
-    nextPageButton.click();
-
-    // Just verify the component still renders properly after page change
-    await waitFor(() => {
-      expect(screen.getByText('Total Pages: 5')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/Failed to load income records/)).toBeInTheDocument();
+      });
     });
   });
 
-  it('resets pagination to page 1 when filters change', async () => {
-    render(<FamilyIncomeDashboard />);
-    
-    jest.advanceTimersByTime(300);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Next Page')).toBeInTheDocument();
+  describe('Component Rendering', () => {
+    it('handles empty data', async () => {
+      const [dateFrom, dateTo] = getDefaultDateRange();
+      const emptyMocks = [
+        {
+          request: {
+            query: GET_FAMILY_INCOME_RECORDS_QUERY,
+            variables: {
+              filters: {
+                dateFrom: dateFrom.toISOString(),
+                dateTo: dateTo.toISOString(),
+              },
+              pagination: { page: 1, limit: 1000 },
+              sort: { sortBy: 'date', sortOrder: 'desc' },
+            },
+          },
+          result: {
+            data: {
+              getFamilyIncomeRecords: {
+                items: [],
+                pagination: {
+                  currentPage: 1,
+                  nextPage: null,
+                  totalPages: 0,
+                  totalCount: 0,
+                },
+              },
+            },
+          },
+        },
+      ];
+
+      render(
+        <MockedProvider mocks={emptyMocks} addTypename={false}>
+          <FamilyIncomeDashboard />
+        </MockedProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Records: 0')).toBeInTheDocument();
+      });
     });
 
-    // First change page to 2
-    const nextPageButton = screen.getByText('Next Page');
-    nextPageButton.click();
-    
-    jest.advanceTimersByTime(300);
+    it('handles null items', async () => {
+      const [dateFrom, dateTo] = getDefaultDateRange();
+      const nullItemsMocks = [
+        {
+          request: {
+            query: GET_FAMILY_INCOME_RECORDS_QUERY,
+            variables: {
+              filters: {
+                dateFrom: dateFrom.toISOString(),
+                dateTo: dateTo.toISOString(),
+              },
+              pagination: { page: 1, limit: 1000 },
+              sort: { sortBy: 'date', sortOrder: 'desc' },
+            },
+          },
+          result: {
+            data: {
+              getFamilyIncomeRecords: {
+                items: null,
+                pagination: {
+                  currentPage: 1,
+                  nextPage: null,
+                  totalPages: 0,
+                  totalCount: 0,
+                },
+              },
+            },
+          },
+        },
+      ];
 
-    // Then apply a filter
-    const filterButton = screen.getByText('Apply Filter');
-    filterButton.click();
+      render(
+        <MockedProvider mocks={nullItemsMocks} addTypename={false}>
+          <FamilyIncomeDashboard />
+        </MockedProvider>
+      );
 
-    jest.advanceTimersByTime(300);
-
-    // Just verify the component still renders properly
-    await waitFor(() => {
-      expect(screen.getByText('Total Pages: 5')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Records: 0')).toBeInTheDocument();
+      });
     });
-
   });
 
-  it('handles error when filterAndSortMockData throws inside setTimeout callback', async () => {
-    // Mock filterAndSortMockData to throw an error
-    const mockData = require('../mockData');
-    const originalMockFn = mockData.filterAndSortMockData;
-    
-    mockData.filterAndSortMockData.mockImplementationOnce(() => {
-      throw new Error('Data processing failed');
-    });
+  describe('Tabs', () => {
+    it('renders tabs', async () => {
+      const [dateFrom, dateTo] = getDefaultDateRange();
+      const mocks = [
+        {
+          request: {
+            query: GET_FAMILY_INCOME_RECORDS_QUERY,
+            variables: {
+              filters: {
+                dateFrom: dateFrom.toISOString(),
+                dateTo: dateTo.toISOString(),
+              },
+              pagination: { page: 1, limit: 1000 },
+              sort: { sortBy: 'date', sortOrder: 'desc' },
+            },
+          },
+          result: {
+            data: mockIncomeData,
+          },
+        },
+      ];
 
-    render(<FamilyIncomeDashboard />);
-    
-    // Initially loading
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-    
-    // Fast-forward time to trigger error inside setTimeout
-    jest.advanceTimersByTime(300);
-    
-    await waitFor(() => {
-      // Text is split across elements, so use more flexible matcher
-      expect(screen.getByText(/Error:/)).toBeInTheDocument();
-      expect(screen.getByText(/Data processing failed/)).toBeInTheDocument();
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+      render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+          <FamilyIncomeDashboard />
+        </MockedProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Records: 2')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Records')).toBeInTheDocument();
+      expect(screen.getByText('Analytics')).toBeInTheDocument();
     });
-    
-    // Restore original function
-    mockData.filterAndSortMockData = originalMockFn;
   });
 
-  it('handles setTimeout setup errors (outer try-catch)', () => {
-    // Mock setTimeout to throw error during setup - this covers lines 77-78
-    const originalSetTimeout = global.setTimeout;
-    global.setTimeout = jest.fn(() => {
-      throw new Error('setTimeout setup failed');
-    });
-    // This should immediately trigger the outer try-catch without waiting
-    render(<FamilyIncomeDashboard />);
-    
-    // No async wait needed - error happens immediately during render
-    expect(screen.getByText(/Error:/)).toBeInTheDocument();
-    expect(screen.getByText(/setTimeout setup failed/)).toBeInTheDocument();
-    
-    // Restore original setTimeout
-    global.setTimeout = originalSetTimeout;
-  });
-}); 
+});
