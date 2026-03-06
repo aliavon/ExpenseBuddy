@@ -44,6 +44,27 @@ class GoogleDriveManager {
     console.log("File uploaded successfully! File ID:", response.data.id);
     return response.data.id;
   }
+
+  async listBackups(drive, folderId) {
+    const response = await drive.files.list({
+      q: `'${folderId}' in parents and trashed = false`,
+      fields: 'files(id, name, createdTime, size)',
+      orderBy: 'createdTime desc'
+    });
+    return response.data.files || [];
+  }
+
+  async downloadFile(drive, fileId, outputPath) {
+    const file = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+    const writeStream = fs.createWriteStream(outputPath);
+    
+    return new Promise((resolve, reject) => {
+      file.data
+        .on('end', () => resolve(outputPath))
+        .on('error', reject)
+        .pipe(writeStream);
+    });
+  }
 }
 
 module.exports = GoogleDriveManager; 
